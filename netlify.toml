@@ -1,0 +1,9 @@
+# Configuración de Netlify para el catálogo de Lobo de Lujo
+[build]
+  publish = "."
+
+# Que los cambios hechos en el panel se vean al tiro (sin caché vieja)
+[[headers]]
+  for = "/datos/*"
+  [headers.values]
+    Cache-Control = "no-cache"

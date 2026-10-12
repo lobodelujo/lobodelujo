@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lobo de Lujo · Moda urbana con envíos a todo Chile</title>
+  <meta name="description" content="Gorras, lentes, shorts, calcetines y accesorios de estilo urbano. Desde Antofagasta con envíos a todo Chile.">
+  <meta property="og:title" content="Lobo de Lujo 🐺">
+  <meta property="og:description" content="Moda urbana con envíos a todo Chile. Pide por WhatsApp.">
+  <meta name="theme-color" content="#0b0b0c">
+  <link rel="icon" type="image/png" href="img/logo-lobo-128.png">
+  <link rel="apple-touch-icon" href="img/logo-lobo-256.png">
+  <meta property="og:image" content="img/logo-lobo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="estilos.css">
+</head>
+<body>
+
+  <header class="barra">
+    <a href="#" class="logo" aria-label="Lobo de Lujo, inicio">
+      <img src="img/logo-lobo-128.png" alt="" width="34" height="39">
+      <span>LOBO DE LUJO</span>
+    </a>
+    <button class="btn-bolsa" id="abrir-bolsa" aria-label="Ver mi bolsa">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+      <span class="contador-bolsa" id="contador-bolsa" hidden>0</span>
+    </button>
+  </header>
+
+  <div class="aviso">📦 <span id="aviso-envio"></span></div>
+
+  <section class="hero">
+    <img class="hero-logo" src="img/logo-lobo-256.png" alt="Logo Lobo de Lujo" width="96" height="110">
+    <p class="hero-sub">Moda urbana · Antofagasta</p>
+    <h1 class="hero-titulo">
+      <span class="hero-grande" id="hero-frase">Presencia</span>
+      <span class="hero-abajo" id="hero-abajo">primero que todo</span>
+    </h1>
+    <p class="hero-txt">Elige, agrégalo a tu bolsa y envíanos el pedido por WhatsApp. Así de simple.</p>
+    <a href="#catalogo" class="btn btn-oro">Ver catálogo</a>
+  </section>
+
+  <main id="catalogo" class="catalogo">
+    <div class="herramientas">
+      <input type="search" id="buscar" placeholder="Buscar producto…" aria-label="Buscar producto">
+      <div class="filtros" id="filtros" role="tablist"></div>
+      <div class="filtros filtros-tallas" id="filtro-tallas" aria-label="Filtrar por talla" hidden></div>
+    </div>
+    <div class="grilla" id="grilla"></div>
+    <p class="vacio" id="sin-resultados" hidden>No encontramos productos con esa búsqueda 🐺</p>
+  </main>
+
+  <section class="pasos">
+    <h2>¿Cómo comprar?</h2>
+    <ol>
+      <li><b>1</b><span>Elige tus productos y agrégalos a la bolsa</span></li>
+      <li><b>2</b><span>Envía el pedido por WhatsApp con un clic</span></li>
+      <li><b>3</b><span>Te confirmamos stock, envío y forma de pago</span></li>
+      <li><b>4</b><span>Te llega a cualquier parte de Chile 📦</span></li>
+    </ol>
+  </section>
+
+  <footer class="pie">
+    <img class="pie-img" src="img/logo-lobo-128.png" alt="" width="48" height="55">
+    <p class="pie-logo">LOBO DE LUJO</p>
+    <p id="pie-envio"></p>
+    <p><a id="link-ig" href="#" target="_blank" rel="noopener">Instagram</a> · <a id="link-wa" href="#" target="_blank" rel="noopener">WhatsApp</a></p>
+    <p class="pie-copy">© <span id="anio"></span> Lobo de Lujo</p>
+  </footer>
+
+  <a class="wa-flotante" id="wa-flotante" href="#" target="_blank" rel="noopener" aria-label="Escríbenos por WhatsApp">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.3.5-.4.4c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.1.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.3z"/></svg>
+  </a>
+
+  <!-- Ficha de producto -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal-fondo" data-cerrar></div>
+    <div class="modal-caja" role="dialog" aria-modal="true" aria-labelledby="m-nombre">
+      <button class="cerrar" data-cerrar aria-label="Cerrar">×</button>
+      <div class="galeria">
+        <div class="galeria-principal" id="g-principal">
+          <img id="g-img" alt="">
+          <button class="flecha izq" id="g-ant" aria-label="Foto anterior">‹</button>
+          <button class="flecha der" id="g-sig" aria-label="Foto siguiente">›</button>
+          <span class="g-contador" id="g-contador"></span>
+        </div>
+        <div class="miniaturas" id="g-minis"></div>
+      </div>
+      <div class="detalle" id="detalle"></div>
+    </div>
+  </div>
+
+  <!-- Bolsa -->
+  <div class="bolsa-fondo" id="bolsa-fondo" hidden></div>
+  <aside class="bolsa" id="bolsa" aria-label="Mi bolsa" hidden>
+    <div class="bolsa-cab">
+      <h2>Mi bolsa 🐺</h2>
+      <button class="cerrar" id="cerrar-bolsa" aria-label="Cerrar bolsa">×</button>
+    </div>
+    <div class="bolsa-items" id="bolsa-items"></div>
+    <div class="bolsa-pie">
+      <div class="bolsa-total"><span>Total</span><strong id="bolsa-total">$0</strong></div>
+      <p class="bolsa-nota">El envío se cotiza por WhatsApp según tu ciudad.</p>
+      <button class="btn btn-wa" id="enviar-pedido">Enviar pedido por WhatsApp</button>
+    </div>
+  </aside>
+
+  <!-- Elegir número de WhatsApp (solo aparece si hay más de uno) -->
+  <div class="elegir-wa" id="elegir-wa" hidden>
+    <div class="modal-fondo" data-cerrar-wa></div>
+    <div class="elegir-caja" role="dialog" aria-modal="true" aria-labelledby="elegir-titulo">
+      <h3 id="elegir-titulo">¿A quién le escribes? 💬</h3>
+      <div id="wa-opciones" class="wa-opciones"></div>
+      <button class="compartir" data-cerrar-wa>Cancelar</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <script src="cargar.js"></script>
+</body>
+</html>

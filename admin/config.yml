@@ -1,0 +1,83 @@
+# Panel de administración de Lobo de Lujo (Decap CMS)
+# Lo único que hay que cambiar al configurar: la línea "repo" (tu-usuario/nombre-del-repositorio)
+
+backend:
+  name: github
+  repo: lobodelujo/lobodelujo
+  branch: main
+  base_url: https://api.netlify.com
+  commit_messages:
+    update: "Actualizar {{collection}}: {{slug}}"
+    uploadMedia: "Subir foto {{path}}"
+    deleteMedia: "Borrar foto {{path}}"
+
+locale: es
+logo_url: /img/logo-lobo-256.png
+media_folder: img/productos
+public_folder: img/productos
+
+collections:
+  - name: catalogo
+    label: Catálogo
+    editor:
+      preview: false
+    files:
+      - name: productos
+        label: "🛍️ Productos"
+        file: datos/productos.json
+        fields:
+          - name: productos
+            label: Productos
+            label_singular: producto
+            widget: list
+            add_to_top: true
+            collapsed: true
+            summary: "{{fields.nombre}} · ${{fields.precio}} · {{fields.categoria}}"
+            fields:
+              - { name: nombre, label: "Nombre del producto", widget: string }
+              - name: categoria
+                label: Categoría
+                widget: select
+                # Si agregas una categoría aquí, agrégala también en "Datos de la tienda"
+                options: [Poleras, Polerones, Pantalones, Shorts, Gorras, Lentes, Accesorios]
+              - { name: precio, label: "Precio (sin puntos ni $)", widget: number, value_type: int, min: 0 }
+              - { name: precioAntes, label: "Precio anterior tachado (solo si está en oferta)", widget: number, value_type: int, min: 0, required: false }
+              - name: etiqueta
+                label: Etiqueta
+                widget: select
+                required: false
+                options: [Nuevo, Oferta, "Últimas unidades"]
+              - { name: disponible, label: "¿Hay stock? (apágalo para mostrar AGOTADO)", widget: boolean, default: true }
+              - { name: descripcion, label: "Descripción corta", widget: text, required: false }
+              - name: tallas
+                label: Tallas disponibles
+                widget: select
+                multiple: true
+                required: false
+                options: [XS, S, M, L, XL, XXL, "36", "38", "40", "42", "44", "46", "38-41", "42-45", "Única"]
+              - { name: colores, label: "Colores (separados por coma, ej: Negro, Blanco)", widget: list, required: false }
+              - name: fotos
+                label: Fotos (la primera es la portada)
+                label_singular: foto
+                widget: list
+                min: 1
+                field: { name: foto, label: Foto, widget: image, choose_url: false }
+
+      - name: tienda
+        label: "⚙️ Datos de la tienda"
+        file: datos/tienda.json
+        fields:
+          - { name: nombre, label: "Nombre de la tienda", widget: string }
+          - name: whatsapp
+            label: Números de WhatsApp
+            label_singular: número
+            widget: list
+            summary: "{{fields.nombre}} · {{fields.numero}}"
+            fields:
+              - { name: nombre, label: "Nombre que ve el cliente (ej: Ventas)", widget: string }
+              - { name: numero, label: "Número con 56, sin + ni espacios (ej: 56912345678)", widget: string, pattern: ['^56\d{9}$', "Debe ser 56 + 9 dígitos, sin espacios"] }
+          - { name: instagram, label: "Link de Instagram", widget: string }
+          - { name: frase, label: "Palabra grande de la portada", widget: string }
+          - { name: fraseAbajo, label: "Línea pequeña debajo", widget: string, required: false }
+          - { name: envio, label: "Texto de la barra amarilla", widget: string }
+          - { name: categorias, label: "Orden de las categorías (separadas por coma)", widget: list }

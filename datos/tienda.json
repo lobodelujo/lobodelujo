@@ -1,0 +1,12 @@
+{
+  "nombre": "Lobo de Lujo",
+  "whatsapp": [
+    { "nombre": "Ventas 1", "numero": "56937461895" },
+    { "nombre": "Ventas 2", "numero": "56974967072" }
+  ],
+  "instagram": "https://www.instagram.com/lobo_de_lujo_/",
+  "frase": "Presencia",
+  "fraseAbajo": "primero que todo",
+  "envio": "Envíos a todo Chile desde Antofagasta",
+  "categorias": ["Poleras", "Polerones", "Pantalones", "Shorts", "Gorras", "Lentes", "Accesorios"]
+}
