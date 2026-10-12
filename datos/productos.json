@@ -1,15 +1,28 @@
 {
   "productos": [
     {
-      "nombre": "Polera Oversize Negra",
-      "categoria": "Poleras",
       "precio": 15990,
-      "etiqueta": "Nuevo",
-      "disponible": true,
+      "nombre": "Polera Oversize Negra",
       "descripcion": "Corte oversize, algodón grueso y caída perfecta.",
-      "tallas": ["S", "M", "L", "XL"],
-      "colores": ["Negro", "Blanco"],
-      "fotos": ["img/productos/polera-oversize-1.jpg", "img/productos/polera-oversize-2.jpg", "img/productos/polera-oversize-3.jpg", "img/productos/polera-oversize-4.jpg"]
+      "fotos": [
+        "img/productos/polera-oversize-1.jpg",
+        "img/productos/polera-oversize-2.jpg",
+        "img/productos/polera-oversize-3.jpg",
+        "img/productos/polera-oversize-4.jpg"
+      ],
+      "colores": [
+        "Negro",
+        "Blanco"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "etiqueta": "Nuevo",
+      "tallas": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ]
     },
     {
       "nombre": "Polerón Canguro Básico",
@@ -17,9 +30,22 @@
       "precio": 29990,
       "disponible": true,
       "descripcion": "Polerón con capucha y bolsillo canguro. Interior afelpado.",
-      "tallas": ["S", "M", "L", "XL"],
-      "colores": ["Negro", "Gris"],
-      "fotos": ["img/productos/poleron-canguro-1.jpg", "img/productos/poleron-canguro-2.jpg", "img/productos/poleron-canguro-3.jpg", "img/productos/poleron-canguro-4.jpg"]
+      "tallas": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "colores": [
+        "Negro",
+        "Gris"
+      ],
+      "fotos": [
+        "img/productos/poleron-canguro-1.jpg",
+        "img/productos/poleron-canguro-2.jpg",
+        "img/productos/poleron-canguro-3.jpg",
+        "img/productos/poleron-canguro-4.jpg"
+      ]
     },
     {
       "nombre": "Pantalón Cargo Urbano",
@@ -27,32 +53,62 @@
       "precio": 32990,
       "disponible": true,
       "descripcion": "Pantalón cargo de corte recto con bolsillos laterales.",
-      "tallas": ["38", "40", "42", "44"],
-      "colores": ["Negro", "Verde oliva"],
-      "fotos": ["img/productos/pantalon-cargo-1.jpg", "img/productos/pantalon-cargo-2.jpg", "img/productos/pantalon-cargo-3.jpg", "img/productos/pantalon-cargo-4.jpg"]
+      "tallas": [
+        "38",
+        "40",
+        "42",
+        "44"
+      ],
+      "colores": [
+        "Negro",
+        "Verde oliva"
+      ],
+      "fotos": [
+        "img/productos/pantalon-cargo-1.jpg",
+        "img/productos/pantalon-cargo-2.jpg",
+        "img/productos/pantalon-cargo-3.jpg",
+        "img/productos/pantalon-cargo-4.jpg"
+      ]
     },
     {
+      "precio": 13990,
       "nombre": "Gorra Negra Clásica",
-      "categoria": "Gorras",
-      "precio": 14990,
-      "etiqueta": "Nuevo",
-      "disponible": true,
       "descripcion": "La gorra que combina con todo tu clóset. Visera curva y ajuste trasero.",
-      "tallas": ["Única"],
-      "colores": ["Negro"],
-      "fotos": ["img/productos/gorra-negra-1.jpg", "img/productos/gorra-negra-2.jpg", "img/productos/gorra-negra-3.jpg", "img/productos/gorra-negra-4.jpg"]
+      "fotos": [
+        "img/productos/gorra-negra-1.jpg",
+        "img/productos/gorra-negra-2.jpg",
+        "img/productos/gorra-negra-3.jpg",
+        "img/productos/gorra-negra-4.jpg"
+      ],
+      "colores": [
+        "Negro"
+      ],
+      "categoria": "Gorras",
+      "disponible": true,
+      "etiqueta": "Nuevo",
+      "tallas": [
+        "Única"
+      ]
     },
     {
-      "nombre": "Lentes Rectangulares Dark",
-      "categoria": "Lentes",
       "precio": 19990,
-      "precioAntes": 24990,
-      "etiqueta": "Oferta",
-      "disponible": true,
+      "nombre": "Lentes Rectangulares Dark",
       "descripcion": "Marco rectangular y cristal oscuro. Ideales para cara redonda u ovalada.",
-      "tallas": [],
-      "colores": ["Negro", "Carey"],
-      "fotos": ["img/productos/lentes-rect-1.jpg", "img/productos/lentes-rect-2.jpg", "img/productos/lentes-rect-3.jpg", "img/productos/lentes-rect-4.jpg"]
+      "precioAntes": 24990,
+      "fotos": [
+        "img/productos/lentes-rect-1.jpg",
+        "img/productos/lentes-rect-2.jpg",
+        "img/productos/lentes-rect-3.jpg",
+        "img/productos/lentes-rect-4.jpg"
+      ],
+      "colores": [
+        "Negro",
+        "Carey"
+      ],
+      "categoria": "Lentes",
+      "disponible": true,
+      "etiqueta": "Oferta",
+      "tallas": []
     },
     {
       "nombre": "Short Cargo Urbano",
@@ -60,20 +116,42 @@
       "precio": 24990,
       "disponible": true,
       "descripcion": "Short cargo con bolsillos laterales y cordón ajustable.",
-      "tallas": ["S", "M", "L", "XL"],
-      "colores": ["Negro", "Beige"],
-      "fotos": ["img/productos/short-cargo-1.jpg", "img/productos/short-cargo-2.jpg", "img/productos/short-cargo-3.jpg", "img/productos/short-cargo-4.jpg", "img/productos/short-cargo-5.jpg"]
+      "tallas": [
+        "S",
+        "M",
+        "L",
+        "XL"
+      ],
+      "colores": [
+        "Negro",
+        "Beige"
+      ],
+      "fotos": [
+        "img/productos/short-cargo-1.jpg",
+        "img/productos/short-cargo-2.jpg",
+        "img/productos/short-cargo-3.jpg",
+        "img/productos/short-cargo-4.jpg",
+        "img/productos/short-cargo-5.jpg"
+      ]
     },
     {
-      "nombre": "Pack 3 Calcetines Lobo",
-      "categoria": "Accesorios",
       "precio": 9990,
-      "etiqueta": "Últimas unidades",
-      "disponible": true,
+      "nombre": "Pack 3 Calcetines Lobo",
       "descripcion": "Pack de 3 pares de caña alta. Blanco, negro y gris.",
-      "tallas": ["38-41", "42-45"],
+      "fotos": [
+        "img/productos/calcetines-1.jpg",
+        "img/productos/calcetines-2.jpg",
+        "img/productos/calcetines-3.jpg",
+        "img/productos/calcetines-4.jpg"
+      ],
       "colores": [],
-      "fotos": ["img/productos/calcetines-1.jpg", "img/productos/calcetines-2.jpg", "img/productos/calcetines-3.jpg", "img/productos/calcetines-4.jpg"]
+      "categoria": "Accesorios",
+      "disponible": true,
+      "etiqueta": "Últimas unidades",
+      "tallas": [
+        "38-41",
+        "42-45"
+      ]
     },
     {
       "nombre": "Cadena de Acero",
@@ -82,8 +160,16 @@
       "disponible": false,
       "descripcion": "Cadena de acero inoxidable de 50 cm. No se oxida.",
       "tallas": [],
-      "colores": ["Plateado", "Dorado"],
-      "fotos": ["img/productos/cadena-1.jpg", "img/productos/cadena-2.jpg", "img/productos/cadena-3.jpg", "img/productos/cadena-4.jpg"]
+      "colores": [
+        "Plateado",
+        "Dorado"
+      ],
+      "fotos": [
+        "img/productos/cadena-1.jpg",
+        "img/productos/cadena-2.jpg",
+        "img/productos/cadena-3.jpg",
+        "img/productos/cadena-4.jpg"
+      ]
     }
   ]
 }
