@@ -80,4 +80,14 @@ collections:
           - { name: frase, label: "Palabra grande de la portada", widget: string }
           - { name: fraseAbajo, label: "Línea pequeña debajo", widget: string, required: false }
           - { name: envio, label: "Texto de la barra amarilla", widget: string }
+          - { name: portadaImagen, label: "📸 Foto grande de portada (horizontal, ideal 1920×1080)", widget: image, required: false, choose_url: false }
+          - { name: portadaImagenMovil, label: "📱 Foto de portada para celular (vertical 1080×1350, opcional)", widget: image, required: false, choose_url: false }
+          - { name: portadaSubtitulo, label: "Portada · texto pequeño amarillo (ej: NUEVA COLECCIÓN)", widget: string, required: false }
+          - { name: portadaTitulo, label: "Portada · texto grande (ej: DROP OCTUBRE)", widget: string, required: false }
+          - { name: portadaBoton, label: "Portada · texto del botón (ej: Ver colección)", widget: string, required: false }
+          - name: portadaCategoria
+            label: "Portada · al tocarla, mostrar esta categoría (opcional)"
+            widget: select
+            required: false
+            options: [Poleras, Polerones, Pantalones, Shorts, Gorras, Lentes, Accesorios]
           - { name: categorias, label: "Orden de las categorías (separadas por coma)", widget: list }
