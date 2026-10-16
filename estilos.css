@@ -101,6 +101,28 @@ img.sin-foto {
 .btn-borde { border: 1.5px solid var(--oro); color: var(--oro); }
 .btn-wa { background: var(--wa); color: #06301a; width: 100%; }
 
+/* ---------- Foto grande de portada ---------- */
+.banner { border-bottom: 1px solid var(--gris); background: var(--carbon); }
+.banner-link { position: relative; display: block; color: var(--texto); text-decoration: none; overflow: hidden; }
+.banner img { display: block; width: 100%; aspect-ratio: 16 / 9; max-height: 88vh; object-fit: cover; transition: transform .8s ease; }
+.banner-link:hover img { transform: scale(1.02); }
+.banner-texto {
+  position: absolute; inset: auto 0 0 0; padding: 80px 32px 34px;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, .78));
+  display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+}
+.banner-sub { color: var(--oro); font-size: 13px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; }
+.banner-titulo { font-family: var(--titulo); font-weight: 400; font-size: clamp(42px, 7vw, 92px); line-height: .95; letter-spacing: 2px; text-transform: uppercase; }
+.banner-btn {
+  margin-top: 10px; padding: 11px 22px; border-radius: 999px;
+  background: var(--oro); color: var(--negro); font-weight: 700; font-size: 14px;
+}
+.banner-sub:empty, .banner-titulo:empty, .banner-btn:empty { display: none; }
+@media (max-width: 700px) {
+  .banner img { aspect-ratio: 4 / 5; max-height: none; }
+  .banner-texto { padding: 70px 18px 24px; }
+}
+
 /* ---------- Catálogo ---------- */
 .catalogo { max-width: 1200px; margin: 0 auto; padding: 32px 16px 56px; }
 .herramientas { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }

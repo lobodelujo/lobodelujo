@@ -52,6 +52,28 @@ $("#link-wa").dataset.wa = `Hola ${TIENDA.nombre} 🐺`;
 $("#wa-flotante").dataset.wa = `Hola ${TIENDA.nombre} 🐺 Vengo de la web y tengo una consulta.`;
 $("#anio").textContent = new Date().getFullYear();
 
+// Foto grande de portada: solo aparece si hay imagen cargada en el panel
+if (TIENDA.portadaImagen) {
+  const img = $("#banner-img");
+  img.src = foto(TIENDA.portadaImagen, 1920);
+  img.alt = TIENDA.portadaTitulo || TIENDA.nombre;
+  img.onerror = () => { $("#banner").hidden = true; };
+  if (TIENDA.portadaImagenMovil) $("#banner-movil").srcset = foto(TIENDA.portadaImagenMovil, 1080);
+  else $("#banner-movil").remove();
+  $("#banner-sub").textContent = TIENDA.portadaSubtitulo || "";
+  $("#banner-titulo").textContent = TIENDA.portadaTitulo || "";
+  $("#banner-btn").textContent = TIENDA.portadaBoton || "";
+  $("#banner").hidden = false;
+  $("#banner-link").addEventListener("click", (e) => {
+    // Si la portada apunta a una categoría, el clic la deja filtrada
+    const cat = TIENDA.portadaCategoria;
+    if (cat && PRODUCTOS.some((p) => p.categoria === cat)) {
+      filtro = cat; filtroTalla = null;
+      pintarFiltros(); pintarTallas(); pintarGrilla();
+    }
+  });
+}
+
 // Cualquier elemento con data-wa="mensaje" abre WhatsApp con ese mensaje
 document.addEventListener("click", (e) => {
   const el = e.target.closest("[data-wa]");

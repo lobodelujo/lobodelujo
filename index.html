@@ -47,6 +47,21 @@
     <a href="#catalogo" class="btn btn-oro">Ver catálogo</a>
   </section>
 
+  <!-- Foto grande de portada (se cambia desde el panel: Datos de la tienda) -->
+  <section class="banner" id="banner" hidden>
+    <a class="banner-link" id="banner-link" href="#catalogo">
+      <picture>
+        <source id="banner-movil" media="(max-width: 700px)">
+        <img id="banner-img" alt="">
+      </picture>
+      <div class="banner-texto">
+        <p class="banner-sub" id="banner-sub"></p>
+        <h2 class="banner-titulo" id="banner-titulo"></h2>
+        <span class="banner-btn" id="banner-btn"></span>
+      </div>
+    </a>
+  </section>
+
   <main id="catalogo" class="catalogo">
     <div class="herramientas">
       <input type="search" id="buscar" placeholder="Buscar producto…" aria-label="Buscar producto">
