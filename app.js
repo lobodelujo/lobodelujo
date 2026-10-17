@@ -143,11 +143,12 @@ function tarjetaChica(p) {
 // Esta categoría no lleva foto grande: se muestra como 6 fotos chicas (3 por fila)
 const CATEGORIA_SEIS = "Accesorios";
 
-// Recién llegados: los productos con etiqueta "Nuevo"; si no hay, los últimos agregados (los primeros del panel)
+// Recién llegados: primero los que tienen etiqueta "Nuevo" y se completa con los últimos agregados
+// (los primeros del panel), para que la fila de 3 siempre se llene y se pueda deslizar
 function recienLlegados() {
   const disponibles = PRODUCTOS.filter((p) => p.disponible);
   const nuevos = disponibles.filter((p) => p.etiqueta === "Nuevo");
-  return (nuevos.length ? nuevos : disponibles).slice(0, 12);
+  return [...nuevos, ...disponibles.filter((p) => p.etiqueta !== "Nuevo")].slice(0, 12);
 }
 
 function pintarEditorial() {

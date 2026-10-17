@@ -118,8 +118,8 @@ Al bajar, cada categoría aparece con **1 foto grande + 2 productos chicos** (co
 
 ## 🆕 Recién llegados
 Al final de todas las categorías aparece **Recién llegados**: una fila de 3 fotos chicas que se desliza hacia la izquierda para ver más.
-- Salen los productos que tienen la etiqueta **Nuevo** (y con stock). Para sacar uno, quítale la etiqueta.
-- Si ningún producto tiene la etiqueta Nuevo, salen los últimos que agregaste.
+- Primero salen los productos con la etiqueta **Nuevo** (y con stock), y después se completa con los últimos que agregaste (hasta 12).
+- **Accesorios** muestra hasta 6: si tienes menos de 3 accesorios, la fila queda con espacios vacíos hasta que agregues más.
 
 ---
 
