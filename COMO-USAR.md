@@ -99,6 +99,28 @@ En la lista, mantén apretado el ícono de arrastrar (≡) de un producto y mué
 **⚙️ Datos de la tienda** → cambia → **Publicar**.
 - Para agregar el **segundo WhatsApp**: en "Números de WhatsApp" toca **Agregar número**.
 
+## 🎬 Cambiar el video de portada
+Es lo primero que se ve al entrar, a pantalla completa. **⚙️ Datos de la tienda** → **🎬 Video de portada**:
+- **Video computador**: MP4 horizontal (1920 × 1080), de 10 a 20 segundos, **máximo 10 MB**.
+- **Video celular**: MP4 vertical (1080 × 1920). Si lo dejas vacío, el celular usa el horizontal recortado al centro.
+- **Imagen mientras carga**: una captura del video (opcional, hace que se vea algo al instante).
+- El video parte **sin sonido** (los celulares no dejan que suene solo). El cliente puede activarlo con el botón 🔈 de la esquina.
+- ⚠️ Los videos del iPhone (.MOV) no se ven en todos los celulares: pásalo por **CapCut** → Exportar en **1080p** y queda en MP4.
+- Para quitar el video: borra el archivo del campo → **Publicar**.
+
+## 📸 Fotos grandes de cada categoría
+Al bajar, cada categoría aparece con **1 foto grande + 2 productos chicos** (como McQueen).
+- **⚙️ Datos de la tienda** → **📸 Foto grande de cada categoría** → **Agregar** → elige la categoría y sube la foto (horizontal 1920 × 1080, y si quieres una vertical 1080 × 1350 para celular) → **Publicar**.
+- Si una categoría no tiene foto grande, se usa la foto del primer producto.
+- Los 2 productos chicos son los primeros de esa categoría según el orden de **🛍️ Productos**. Para cambiar cuáles salen, cambia el orden.
+- El orden de las categorías es el de **Orden de las categorías**. Las categorías sin productos no aparecen.
+- **Accesorios** es distinta: no lleva foto grande, se muestra como **6 fotos chicas (3 por fila)** con los primeros 6 accesorios.
+
+## 🆕 Recién llegados
+Al final de todas las categorías aparece **Recién llegados**: una fila de 3 fotos chicas que se desliza hacia la izquierda para ver más.
+- Salen los productos que tienen la etiqueta **Nuevo** (y con stock). Para sacar uno, quítale la etiqueta.
+- Si ningún producto tiene la etiqueta Nuevo, salen los últimos que agregaste.
+
 ---
 
 ## Consejos para las fotos

@@ -56,7 +56,7 @@ const slug = (s) =>
       });
   } catch (e) {
     console.error(e);
-    document.getElementById("grilla").innerHTML =
+    document.getElementById("editorial").innerHTML =
       `<p class="vacio">No se pudo cargar el catálogo 🐺 Recarga la página.</p>`;
     return;
   }

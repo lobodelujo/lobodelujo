@@ -52,25 +52,28 @@ $("#link-wa").dataset.wa = `Hola ${TIENDA.nombre} 🐺`;
 $("#wa-flotante").dataset.wa = `Hola ${TIENDA.nombre} 🐺 Vengo de la web y tengo una consulta.`;
 $("#anio").textContent = new Date().getFullYear();
 
-// Foto grande de portada: solo aparece si hay imagen cargada en el panel
-if (TIENDA.portadaImagen) {
-  const img = $("#banner-img");
-  img.src = foto(TIENDA.portadaImagen, 1920);
-  img.alt = TIENDA.portadaTitulo || TIENDA.nombre;
-  img.onerror = () => { $("#banner").hidden = true; };
-  if (TIENDA.portadaImagenMovil) $("#banner-movil").srcset = foto(TIENDA.portadaImagenMovil, 1080);
-  else $("#banner-movil").remove();
-  $("#banner-sub").textContent = TIENDA.portadaSubtitulo || "";
-  $("#banner-titulo").textContent = TIENDA.portadaTitulo || "";
-  $("#banner-btn").textContent = TIENDA.portadaBoton || "";
-  $("#banner").hidden = false;
-  $("#banner-link").addEventListener("click", (e) => {
-    // Si la portada apunta a una categoría, el clic la deja filtrada
-    const cat = TIENDA.portadaCategoria;
-    if (cat && PRODUCTOS.some((p) => p.categoria === cat)) {
-      filtro = cat; filtroTalla = null;
-      pintarFiltros(); pintarTallas(); pintarGrilla();
-    }
+// Video de portada a pantalla completa: solo aparece si hay video cargado en el panel
+// (en el celular usa el video vertical si existe)
+const videoSrc = matchMedia("(max-width: 700px)").matches
+  ? TIENDA.videoPortadaMovil || TIENDA.videoPortada
+  : TIENDA.videoPortada || TIENDA.videoPortadaMovil;
+if (videoSrc) {
+  const v = $("#video");
+  if (TIENDA.videoPoster) v.poster = foto(TIENDA.videoPoster, 1600);
+  v.addEventListener("error", () => { if (!TIENDA.videoPoster) $("#video-portada").hidden = true; });
+  v.src = videoSrc;
+  $("#video-portada").hidden = false;
+  // Solo se reproduce mientras se ve en pantalla (ahorra batería y datos)
+  const quieto = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  new IntersectionObserver(([e]) => {
+    if (e.isIntersecting && !quieto) v.play().catch(() => {});
+    else v.pause();
+  }, { threshold: 0.2 }).observe(v);
+  $("#video-sonido").addEventListener("click", (e) => {
+    v.muted = !v.muted;
+    e.currentTarget.setAttribute("aria-pressed", String(!v.muted));
+    e.currentTarget.setAttribute("aria-label", v.muted ? "Activar sonido" : "Silenciar");
+    if (!v.muted) v.play().catch(() => {});
   });
 }
 
@@ -88,8 +91,10 @@ $("#elegir-wa").addEventListener("click", (e) => {
 });
 
 // ---------- Filtros y grilla ----------
+const categorias = () => [...new Set([...(TIENDA.categorias || []), ...PRODUCTOS.map((p) => p.categoria)])];
+
 function pintarFiltros() {
-  const cats = ["Todo", ...new Set([...(TIENDA.categorias || []), ...PRODUCTOS.map((p) => p.categoria)])];
+  const cats = ["Todo", ...categorias()];
   $("#filtros").innerHTML = cats
     .map((c) => `<button class="chip" role="tab" aria-selected="${c === filtro}" data-cat="${esc(c)}">${esc(c)}</button>`)
     .join("");
@@ -119,13 +124,123 @@ function badge(p) {
 }
 const precioHtml = (p) => `${fmt(p.precio)}${p.precioAntes ? `<s>${fmt(p.precioAntes)}</s>` : ""}`;
 
+// Inicio: por cada categoría, 1 foto grande + 2 productos chicos (estilo McQueen)
+function tarjetaChica(p) {
+  const f = p.fotos || [];
+  return `<a class="ed-prod ${p.disponible ? "" : "agotado"}" href="#producto=${esc(p.id)}">
+    <span class="card-media">
+      ${imgTag(f[0], p.nombre + " · 1", 'class="a" loading="lazy"')}
+      ${f[1] ? imgTag(f[1], p.nombre + " · 2", 'class="b" loading="lazy"') : ""}
+      ${badge(p)}
+    </span>
+    <span class="ed-prod-info">
+      <span class="ed-prod-nombre">${esc(p.nombre)}</span>
+      <span class="precio">${precioHtml(p)}</span>
+    </span>
+  </a>`;
+}
+
+// Esta categoría no lleva foto grande: se muestra como 6 fotos chicas (3 por fila)
+const CATEGORIA_SEIS = "Accesorios";
+
+// Recién llegados: los productos con etiqueta "Nuevo"; si no hay, los últimos agregados (los primeros del panel)
+function recienLlegados() {
+  const disponibles = PRODUCTOS.filter((p) => p.disponible);
+  const nuevos = disponibles.filter((p) => p.etiqueta === "Nuevo");
+  return (nuevos.length ? nuevos : disponibles).slice(0, 12);
+}
+
+function pintarEditorial() {
+  let n = 0;
+  const nuevos = recienLlegados();
+  $("#editorial").innerHTML = categorias()
+    .map((cat) => {
+      const prods = PRODUCTOS.filter((p) => p.categoria === cat);
+      if (!prods.length) return "";
+      if (cat === CATEGORIA_SEIS) {
+        n++;
+        return `<section class="ed-bloque">
+          <div class="ed-cab"><h2>${esc(cat)}</h2></div>
+          <div class="ed-seis">${prods.slice(0, 6).map(tarjetaChica).join("")}</div>
+          <a class="ed-btn ed-btn-solo" href="#catalogo" data-ver-cat="${esc(cat)}">Ver todo</a>
+        </section>`;
+      }
+      // La foto grande se sube en el panel; si no hay, se usa la del primer producto (y ese no se repite abajo)
+      const portada = (TIENDA.portadasCategorias || []).find((c) => c && c.categoria === cat && c.foto);
+      const grande = portada ? portada.foto : (prods[0].fotos || [])[0];
+      const chicas = (portada ? prods : prods.slice(1)).slice(0, 2);
+      const carga = n++ === 0 ? "" : 'loading="lazy"';
+      return `<section class="ed-bloque">
+        <a class="ed-grande" href="#catalogo" data-ver-cat="${esc(cat)}">
+          <picture>
+            ${portada && portada.fotoMovil ? `<source media="(max-width: 700px)" srcset="${esc(foto(portada.fotoMovil, 1080))}">` : ""}
+            ${imgTag(grande, cat, carga, 1920)}
+          </picture>
+          <div class="ed-grande-texto"><h2>${esc(cat)}</h2><span class="ed-btn">Ver todo</span></div>
+        </a>
+        ${chicas.length ? `<div class="ed-chicas">${chicas.map(tarjetaChica).join("")}</div>` : ""}
+      </section>`;
+    })
+    .join("") + (nuevos.length ? `
+    <section class="ed-bloque">
+      <div class="ed-cab"><h2>Recién llegados</h2></div>
+      <div class="carrusel" id="carrusel">
+        <div class="carrusel-pista" id="carrusel-pista">${nuevos.map(tarjetaChica).join("")}</div>
+        <button class="flecha izq" data-mover="-1" aria-label="Anteriores">‹</button>
+        <button class="flecha der" data-mover="1" aria-label="Siguientes">›</button>
+        <div class="carrusel-barra" aria-hidden="true"><span></span></div>
+      </div>
+    </section>` : "");
+  prepararCarrusel();
+}
+
+// La barrita amarilla muestra cuánto falta por deslizar; las flechas aparecen solo con mouse
+function prepararCarrusel() {
+  const caja = $("#carrusel");
+  if (!caja) return;
+  const pista = $("#carrusel-pista");
+  const barra = $(".carrusel-barra span", caja);
+  const marcar = () => {
+    if (!pista.clientWidth) return;
+    caja.classList.toggle("quieto", pista.scrollWidth <= pista.clientWidth + 1);
+    barra.style.width = (pista.clientWidth / pista.scrollWidth) * 100 + "%";
+    barra.style.left = (pista.scrollLeft / pista.scrollWidth) * 100 + "%";
+  };
+  pista.addEventListener("scroll", marcar, { passive: true });
+  new ResizeObserver(marcar).observe(pista);
+  caja.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-mover]");
+    if (!b) return;
+    const paso = pista.firstElementChild.offsetWidth + parseFloat(getComputedStyle(pista).columnGap || 0);
+    pista.scrollBy({ left: Number(b.dataset.mover) * paso, behavior: "smooth" });
+  });
+}
+
+// Elegir una categoría (desde los botones o la foto grande) muestra todos sus productos
+function verCategoria(cat) {
+  filtro = cat;
+  filtroTalla = null;
+  pintarFiltros();
+  pintarTallas();
+  pintarGrilla();
+  const arriba = $("#catalogo").getBoundingClientRect().top + scrollY - $(".barra").offsetHeight;
+  if (scrollY > arriba) window.scrollTo({ top: arriba, behavior: "smooth" });
+}
+
 function pintarGrilla() {
   const q = texto.trim().toLowerCase();
+  // Sin categoría ni búsqueda se ve el inicio por categorías; si no, la grilla con todos los productos
+  const inicio = filtro === "Todo" && !q;
+  $("#editorial").hidden = !inicio;
+  $("#vista").hidden = inicio;
+  if (inicio) return;
   const lista = PRODUCTOS.filter(
     (p) => (filtro === "Todo" || p.categoria === filtro) &&
       (!filtroTalla || (p.tallas || []).includes(filtroTalla)) &&
       (!q || `${p.nombre} ${p.categoria} ${p.descripcion}`.toLowerCase().includes(q))
   );
+  $("#vista-titulo").textContent = q ? `${filtro === "Todo" ? "" : filtro + " · "}“${texto.trim()}”` : filtro;
+  $("#vista-cuenta").textContent = lista.length === 1 ? "1 producto" : `${lista.length} productos`;
   $("#grilla").innerHTML = lista
     .map((p) => {
       const f = p.fotos || [];
@@ -153,12 +268,13 @@ function pintarGrilla() {
 
 $("#filtros").addEventListener("click", (e) => {
   const b = e.target.closest("[data-cat]");
-  if (!b) return;
-  filtro = b.dataset.cat;
-  filtroTalla = null;
-  pintarFiltros();
-  pintarTallas();
-  pintarGrilla();
+  if (b) verCategoria(b.dataset.cat);
+});
+$("#editorial").addEventListener("click", (e) => {
+  const g = e.target.closest("[data-ver-cat]");
+  if (!g) return;
+  e.preventDefault();
+  verCategoria(g.dataset.verCat);
 });
 $("#filtro-tallas").addEventListener("click", (e) => {
   const b = e.target.closest("[data-talla]");
@@ -243,7 +359,7 @@ function pintarDetalle() {
       </div>
       <p class="aviso-opcion" id="aviso-opcion"></p>
       <div class="acciones">
-        <button class="btn btn-oro" data-accion="agregar">Agregar a la bolsa</button>
+        <button class="btn btn-oro" data-accion="agregar">Agregar al carrito</button>
         <button class="btn btn-wa" data-accion="pedir">Pedir ahora por WhatsApp</button>
         <button class="compartir" data-accion="compartir">Copiar link de este producto</button>
       </div>` : `
@@ -287,7 +403,7 @@ $("#detalle").addEventListener("click", async (e) => {
   }
   agregarABolsa(item);
   cerrarProducto();
-  aviso("Agregado a tu bolsa 🛍️");
+  aviso("Agregado al carrito 🛒");
 });
 
 $("#g-ant").addEventListener("click", () => moverFoto(-1));
@@ -306,7 +422,7 @@ $("#g-principal").addEventListener("touchend", (e) => {
 });
 $("#modal").addEventListener("click", (e) => { if (e.target.closest("[data-cerrar]")) cerrarProducto(); });
 
-// ---------- Bolsa ----------
+// ---------- Carrito ----------
 function agregarABolsa(item) {
   const igual = bolsa.find((i) => i.id === item.id && i.talla === item.talla && i.color === item.color);
   if (igual) igual.cant = Math.min(20, igual.cant + item.cant);
@@ -338,7 +454,7 @@ function pintarBolsa() {
           </div>
         </div>`;
       }).join("")
-    : `<p class="bolsa-vacia">Tu bolsa está vacía 🐺<br>Elige algo del catálogo.</p>`;
+    : `<p class="bolsa-vacia">Tu carrito está vacío 🐺<br>Elige algo del catálogo.</p>`;
 }
 
 function abrirBolsa() {
@@ -403,6 +519,7 @@ window.addEventListener("hashchange", revisarHash);
 
 pintarFiltros();
 pintarTallas();
+pintarEditorial();
 pintarGrilla();
 pintarBolsa();
 revisarHash();

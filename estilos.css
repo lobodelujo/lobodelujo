@@ -9,6 +9,7 @@
   --oro-claro: #ffe066;
   --wa: #25d366;
   --radio: 14px;
+  --alto-barra: 69px;  /* alto de la barra superior fija */
   --titulo: "Bebas Neue", Impact, sans-serif;
   --cuerpo: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
@@ -63,8 +64,37 @@ img.sin-foto {
   color: var(--negro); font-weight: 600;
 }
 
+/* ---------- Video de portada ---------- */
+.video-portada {
+  position: relative; overflow: hidden; background: var(--negro);
+  height: calc(100vh - 105px); height: calc(100svh - 105px); min-height: 420px;
+}
+.video-portada video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.video-portada::after {
+  content: ""; position: absolute; inset: auto 0 0 0; height: 30%; pointer-events: none;
+  background: linear-gradient(180deg, transparent, rgba(11, 11, 12, .75));
+}
+.video-bajar {
+  position: absolute; left: 50%; bottom: 16px; z-index: 2; transform: translateX(-50%);
+  width: 48px; height: 48px; display: grid; place-items: center;
+  color: var(--oro); animation: bajar 2s ease-in-out infinite;
+}
+.video-bajar svg { width: 32px; height: 32px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+@keyframes bajar { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 7px); } }
+.video-sonido {
+  position: absolute; left: 16px; bottom: 18px; z-index: 2;
+  width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+  background: rgba(11, 11, 12, .6); border: 1px solid var(--linea);
+}
+.video-sonido:hover { border-color: var(--oro); }
+.video-sonido svg { width: 22px; height: 22px; fill: none; stroke: var(--texto); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.video-sonido .ic-sonido, .video-sonido[aria-pressed="true"] .ic-mute { display: none; }
+.video-sonido[aria-pressed="true"] .ic-sonido { display: block; }
+@media (prefers-reduced-motion: reduce) { .video-bajar { animation: none; transform: translateX(-50%); } }
+
 /* ---------- Portada ---------- */
 .hero {
+  scroll-margin-top: var(--alto-barra);
   text-align: center;
   padding: 72px 16px 48px;
   background:
@@ -87,8 +117,6 @@ img.sin-foto {
   color: var(--texto);
 }
 .hero-abajo::before, .hero-abajo::after { content: ""; width: clamp(24px, 7vw, 56px); height: 1.5px; background: var(--oro); }
-.hero-txt { color: var(--suave); max-width: 440px; margin: 0 auto 28px; }
-.intro { text-align: center; padding: 40px 16px 8px; }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -102,31 +130,16 @@ img.sin-foto {
 .btn-borde { border: 1.5px solid var(--oro); color: var(--oro); }
 .btn-wa { background: var(--wa); color: #06301a; width: 100%; }
 
-/* ---------- Foto grande de portada ---------- */
-.banner { border-bottom: 1px solid var(--gris); background: var(--carbon); }
-.banner-link { position: relative; display: block; color: var(--texto); text-decoration: none; overflow: hidden; }
-.banner img { display: block; width: 100%; aspect-ratio: 16 / 9; max-height: 88vh; object-fit: cover; transition: transform .8s ease; }
-.banner-link:hover img { transform: scale(1.02); }
-.banner-texto {
-  position: absolute; inset: auto 0 0 0; padding: 80px 32px 34px;
-  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, .78));
-  display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
-}
-.banner-sub { color: var(--oro); font-size: 13px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; }
-.banner-titulo { font-family: var(--titulo); font-weight: 400; font-size: clamp(42px, 7vw, 92px); line-height: .95; letter-spacing: 2px; text-transform: uppercase; }
-.banner-btn {
-  margin-top: 10px; padding: 11px 22px; border-radius: 999px;
-  background: var(--oro); color: var(--negro); font-weight: 700; font-size: 14px;
-}
-.banner-sub:empty, .banner-titulo:empty, .banner-btn:empty { display: none; }
-@media (max-width: 700px) {
-  .banner img { aspect-ratio: 4 / 5; max-height: none; }
-  .banner-texto { padding: 70px 18px 24px; }
-}
-
 /* ---------- Catálogo ---------- */
-.catalogo { max-width: 1200px; margin: 0 auto; padding: 32px 16px 56px; }
-.herramientas { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
+.catalogo { padding: 32px 0 56px; scroll-margin-top: var(--alto-barra); }
+.buscador { max-width: 1200px; margin: 0 auto 6px; padding: 0 16px; }
+/* Las categorías quedan pegadas bajo la barra superior mientras se baja */
+.categorias {
+  position: sticky; top: var(--alto-barra); z-index: 12;
+  background: rgba(11, 11, 12, .92); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--gris);
+}
+.categorias-in { max-width: 1200px; margin: 0 auto; padding: 10px 16px; display: flex; flex-direction: column; gap: 10px; }
 #buscar {
   width: 100%; padding: 13px 18px; border-radius: 999px;
   background: var(--carbon); border: 1px solid var(--linea); color: var(--texto); font: inherit;
@@ -144,6 +157,67 @@ img.sin-foto {
 .filtros-tallas .chip[aria-pressed="true"] { border-color: var(--oro); color: var(--oro); background: rgba(250, 208, 44, .12); font-weight: 700; }
 .chip[aria-selected="true"] { background: var(--oro); border-color: var(--oro); color: var(--negro); font-weight: 700; }
 
+/* ---------- Inicio por categorías (1 foto grande + 2 chicas, estilo McQueen) ---------- */
+.editorial { display: grid; grid-template-columns: minmax(0, 1fr); gap: 56px; padding-top: 4px; }
+.ed-bloque { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+.ed-grande { position: relative; display: block; overflow: hidden; background: var(--carbon); color: var(--texto); text-decoration: none; }
+.ed-grande img { width: 100%; aspect-ratio: 16 / 9; max-height: 86vh; object-fit: cover; transition: transform .8s ease; }
+.ed-grande img.sin-foto { padding: 12%; }
+.ed-grande:hover img { transform: scale(1.02); }
+.ed-grande-texto {
+  position: absolute; inset: auto 0 0 0; padding: 90px 16px 34px;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, .78));
+  display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center;
+}
+.ed-grande-texto h2 { font-family: var(--titulo); font-weight: 400; font-size: clamp(48px, 8vw, 104px); line-height: .9; letter-spacing: 3px; text-transform: uppercase; }
+.ed-btn { padding: 11px 24px; border-radius: 999px; background: var(--oro); color: var(--negro); font-weight: 700; font-size: 14px; }
+/* Las fotos chicas llevan separación al medio y el mismo margen a los lados, para que queden centradas */
+.ed-chicas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; width: 100%; max-width: 768px; margin: 0 auto; padding: 0 24px; }
+/* Categoría en 6 fotos chicas (3 por fila) */
+.ed-seis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; width: 100%; max-width: 984px; margin: 0 auto; padding: 0 12px; }
+.ed-cab { display: grid; justify-items: center; padding: 0 16px; text-align: center; }
+.ed-cab h2 { font-family: var(--titulo); font-weight: 400; font-size: clamp(44px, 7vw, 76px); line-height: .95; letter-spacing: 3px; text-transform: uppercase; }
+.ed-btn-solo { justify-self: center; margin-top: 6px; text-decoration: none; }
+/* Recién llegados: 3 fotos chicas por fila que se deslizan hacia la izquierda */
+.carrusel { position: relative; width: 100%; max-width: 1008px; margin: 0 auto; }
+.carrusel-pista {
+  display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 48px) / 3); gap: 24px;
+  overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 24px; padding: 0 24px;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.carrusel-pista::-webkit-scrollbar { display: none; }
+.carrusel-pista > * { scroll-snap-align: start; }
+.carrusel .flecha { top: 38%; z-index: 3; }
+.carrusel .flecha.izq { left: 32px; }
+.carrusel .flecha.der { right: 32px; }
+@media (hover: none) { .carrusel .flecha { display: none; } }
+.carrusel-barra { position: relative; height: 2px; margin: 18px 24px 0; background: var(--gris); border-radius: 2px; overflow: hidden; }
+.carrusel-barra span { position: absolute; top: 0; bottom: 0; left: 0; width: 50%; background: var(--oro); border-radius: 2px; transition: left .15s linear; }
+.carrusel.quieto .flecha, .carrusel.quieto .carrusel-barra { display: none; }
+.ed-prod { display: block; color: var(--texto); text-decoration: none; }
+.ed-prod-info { display: block; padding: 12px 12px 0; }
+.ed-prod-nombre { display: block; font-size: 14px; font-weight: 600; line-height: 1.3; }
+.ed-prod .precio { display: block; }
+@media (max-width: 700px) {
+  .editorial { gap: 44px; }
+  .ed-grande img { aspect-ratio: 4 / 5; max-height: none; }
+  .ed-grande-texto { padding: 80px 16px 26px; }
+  .ed-prod-info { padding: 10px 2px 0; }
+  .ed-prod-nombre { font-size: 13px; }
+  .ed-seis { gap: 10px; }
+  .ed-seis .ed-prod-info, .carrusel .ed-prod-info { padding-top: 8px; }
+  .ed-seis .ed-prod-nombre, .carrusel .ed-prod-nombre { font-size: 12px; }
+  .ed-seis .precio, .carrusel .precio { font-size: 13px; }
+  .ed-seis .precio s, .carrusel .precio s { display: block; margin-left: 0; }
+  .ed-seis .badge, .carrusel .badge { top: 6px; left: 6px; padding: 3px 7px; font-size: 9px; }
+}
+
+/* ---------- Grilla al elegir una categoría o buscar ---------- */
+.vista { max-width: 1200px; margin: 0 auto; padding: 24px 16px 0; }
+.vista-cab { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.vista-cab h2 { font-family: var(--titulo); font-weight: 400; font-size: 44px; line-height: 1; letter-spacing: 1px; text-transform: uppercase; }
+.vista-cab p { flex: none; color: var(--suave); font-size: 13px; }
+
 .grilla { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 @media (min-width: 720px) { .grilla { grid-template-columns: repeat(3, 1fr); gap: 20px; } }
 @media (min-width: 1040px) { .grilla { grid-template-columns: repeat(4, 1fr); } }
@@ -153,8 +227,8 @@ img.sin-foto {
 .card-media { position: relative; display: block; width: 100%; aspect-ratio: 4 / 5; overflow: hidden; background: var(--gris); }
 .card-media img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity .35s; }
 .card-media .b { opacity: 0; }
-@media (hover: hover) { .card:hover .card-media .b { opacity: 1; } }
-.card.agotado .card-media img { filter: grayscale(1) brightness(.6); }
+@media (hover: hover) { .card:hover .card-media .b, .ed-prod:hover .card-media .b { opacity: 1; } }
+.card.agotado .card-media img, .ed-prod.agotado .card-media img { filter: grayscale(1) brightness(.6); }
 .card-info { padding: 12px 12px 14px; text-align: left; width: 100%; display: block; }
 .card-info h3 { font-size: 14px; font-weight: 600; line-height: 1.3; }
 .card-fotos { font-size: 11px; color: var(--suave); margin-top: 2px; }
@@ -253,7 +327,7 @@ img.sin-foto {
 .compartir { font-size: 13px; color: var(--suave); text-decoration: underline; justify-self: center; }
 .aviso-opcion { color: #e2483d; font-size: 13px; min-height: 1em; }
 
-/* ---------- Bolsa ---------- */
+/* ---------- Carrito ---------- */
 .bolsa-fondo { position: fixed; inset: 0; z-index: 30; background: rgba(0, 0, 0, .6); }
 .bolsa {
   position: fixed; top: 0; right: 0; bottom: 0; z-index: 35;

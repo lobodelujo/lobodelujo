@@ -6,7 +6,7 @@
   <title>Lobo de Lujo · Moda urbana con envíos a todo Chile</title>
   <meta name="description" content="Gorras, lentes, shorts, calcetines y accesorios de estilo urbano. Desde Antofagasta con envíos a todo Chile.">
   <meta property="og:title" content="Lobo de Lujo 🐺">
-  <meta property="og:description" content="Presencia primero que todo. Moda urbana con envíos a todo Chile: elige, arma tu bolsa y pide por WhatsApp.">
+  <meta property="og:description" content="Presencia primero que todo. Moda urbana con envíos a todo Chile: elige, arma tu carrito y pide por WhatsApp.">
   <meta name="theme-color" content="#0b0b0c">
   <link rel="icon" type="image/png" href="img/logo-lobo-128.png">
   <link rel="apple-touch-icon" href="img/logo-lobo-256.png">
@@ -28,15 +28,27 @@
       <img src="img/logo-lobo-128.png" alt="" width="34" height="39">
       <span>LOBO DE LUJO</span>
     </a>
-    <button class="btn-bolsa" id="abrir-bolsa" aria-label="Ver mi bolsa">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>
+    <button class="btn-bolsa" id="abrir-bolsa" aria-label="Ver mi carrito">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 4h2.6l2.3 10.6a1 1 0 0 0 1 .8h8.8a1 1 0 0 0 1-.8L20 8H6"/><circle cx="9.5" cy="19.5" r="1.4"/><circle cx="17" cy="19.5" r="1.4"/></svg>
       <span class="contador-bolsa" id="contador-bolsa" hidden>0</span>
     </button>
   </header>
 
   <div class="aviso">📦 <span id="aviso-envio"></span></div>
 
-  <section class="hero">
+  <!-- Video de portada a pantalla completa (se cambia desde el panel: Datos de la tienda) -->
+  <section class="video-portada" id="video-portada" hidden>
+    <video id="video" muted loop playsinline preload="auto" aria-label="Video de Lobo de Lujo"></video>
+    <button class="video-sonido" id="video-sonido" aria-label="Activar sonido" aria-pressed="false">
+      <svg class="ic-mute" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9.5l4 5M21 9.5l-4 5"/></svg>
+      <svg class="ic-sonido" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>
+    </button>
+    <a class="video-bajar" href="#lema" aria-label="Bajar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+    </a>
+  </section>
+
+  <section class="hero" id="lema">
     <img class="hero-logo" src="img/logo-lobo-256.png" alt="Logo Lobo de Lujo" width="96" height="110">
     <p class="hero-sub">Tienda online</p>
     <h1 class="hero-titulo">
@@ -45,40 +57,32 @@
     </h1>
   </section>
 
-  <!-- Foto grande de portada (se cambia desde el panel: Datos de la tienda) -->
-  <section class="banner" id="banner" hidden>
-    <a class="banner-link" id="banner-link" href="#catalogo">
-      <picture>
-        <source id="banner-movil" media="(max-width: 700px)">
-        <img id="banner-img" alt="">
-      </picture>
-      <div class="banner-texto">
-        <p class="banner-sub" id="banner-sub"></p>
-        <h2 class="banner-titulo" id="banner-titulo"></h2>
-        <span class="banner-btn" id="banner-btn"></span>
-      </div>
-    </a>
-  </section>
-
-  <section class="intro">
-    <p class="hero-txt">Elige, agrégalo a tu bolsa y envíanos el pedido por WhatsApp. Así de simple.</p>
-    <a href="#catalogo" class="btn btn-oro">Ver catálogo</a>
-  </section>
-
   <main id="catalogo" class="catalogo">
-    <div class="herramientas">
+    <div class="buscador">
       <input type="search" id="buscar" placeholder="Buscar producto…" aria-label="Buscar producto">
-      <div class="filtros" id="filtros" role="tablist"></div>
-      <div class="filtros filtros-tallas" id="filtro-tallas" aria-label="Filtrar por talla" hidden></div>
     </div>
-    <div class="grilla" id="grilla"></div>
-    <p class="vacio" id="sin-resultados" hidden>No encontramos productos con esa búsqueda 🐺</p>
+    <nav class="categorias" aria-label="Categorías">
+      <div class="categorias-in">
+        <div class="filtros" id="filtros" role="tablist"></div>
+        <div class="filtros filtros-tallas" id="filtro-tallas" aria-label="Filtrar por talla" hidden></div>
+      </div>
+    </nav>
+
+    <!-- Inicio: por cada categoría, 1 foto grande + 2 chicas (estilo McQueen) -->
+    <div class="editorial" id="editorial"></div>
+
+    <!-- Al elegir una categoría o buscar: todos sus productos -->
+    <section class="vista" id="vista" hidden>
+      <div class="vista-cab"><h2 id="vista-titulo"></h2><p id="vista-cuenta"></p></div>
+      <div class="grilla" id="grilla"></div>
+      <p class="vacio" id="sin-resultados" hidden>No encontramos productos con esa búsqueda 🐺</p>
+    </section>
   </main>
 
   <section class="pasos">
     <h2>¿Cómo comprar?</h2>
     <ol>
-      <li><b>1</b><span>Elige tus productos y agrégalos a la bolsa</span></li>
+      <li><b>1</b><span>Elige tus productos y agrégalos al carrito</span></li>
       <li><b>2</b><span>Envía el pedido por WhatsApp con un clic</span></li>
       <li><b>3</b><span>Te confirmamos stock, envío y forma de pago</span></li>
       <li><b>4</b><span>Te llega a cualquier parte de Chile 📦</span></li>
@@ -115,12 +119,12 @@
     </div>
   </div>
 
-  <!-- Bolsa -->
+  <!-- Carrito -->
   <div class="bolsa-fondo" id="bolsa-fondo" hidden></div>
-  <aside class="bolsa" id="bolsa" aria-label="Mi bolsa" hidden>
+  <aside class="bolsa" id="bolsa" aria-label="Mi carrito" hidden>
     <div class="bolsa-cab">
-      <h2>Mi bolsa 🐺</h2>
-      <button class="cerrar" id="cerrar-bolsa" aria-label="Cerrar bolsa">×</button>
+      <h2>Mi carrito 🐺</h2>
+      <button class="cerrar" id="cerrar-bolsa" aria-label="Cerrar carrito">×</button>
     </div>
     <div class="bolsa-items" id="bolsa-items"></div>
     <div class="bolsa-pie">
