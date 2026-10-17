@@ -198,6 +198,7 @@ img.sin-foto {
 .ed-prod-info { display: block; padding: 12px 12px 0; }
 .ed-prod-nombre { display: block; font-size: 14px; font-weight: 600; line-height: 1.3; }
 .ed-prod .precio { display: block; }
+.ed-vacio .ed-prod-nombre { color: var(--suave); font-weight: 500; }
 @media (max-width: 700px) {
   .editorial { gap: 44px; }
   .ed-grande img { aspect-ratio: 4 / 5; max-height: none; }

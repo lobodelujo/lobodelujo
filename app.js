@@ -160,9 +160,14 @@ function pintarEditorial() {
       if (!prods.length) return "";
       if (cat === CATEGORIA_SEIS) {
         n++;
+        // Siempre se ven las 6 casillas: las que faltan muestran "Próximamente" hasta que se agreguen productos
+        const vacias = `<div class="ed-prod ed-vacio" aria-hidden="true">
+            <span class="card-media"><img class="sin-foto" src="img/logo-lobo-128.png" alt=""></span>
+            <span class="ed-prod-info"><span class="ed-prod-nombre">Próximamente</span></span>
+          </div>`.repeat(Math.max(0, 6 - prods.length));
         return `<section class="ed-bloque">
           <div class="ed-cab"><h2>${esc(cat)}</h2></div>
-          <div class="ed-seis">${prods.slice(0, 6).map(tarjetaChica).join("")}</div>
+          <div class="ed-seis">${prods.slice(0, 6).map(tarjetaChica).join("")}${vacias}</div>
           <a class="ed-btn ed-btn-solo" href="#catalogo" data-ver-cat="${esc(cat)}">Ver todo</a>
         </section>`;
       }
