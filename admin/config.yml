@@ -80,14 +80,21 @@ collections:
           - { name: frase, label: "Palabra grande de la portada", widget: string }
           - { name: fraseAbajo, label: "Línea pequeña debajo", widget: string, required: false }
           - { name: envio, label: "Texto de la barra amarilla", widget: string }
-          - { name: portadaImagen, label: "📸 Foto grande de portada (horizontal, ideal 1920×1080)", widget: image, required: false, choose_url: false }
-          - { name: portadaImagenMovil, label: "📱 Foto de portada para celular (vertical 1080×1350, opcional)", widget: image, required: false, choose_url: false }
-          - { name: portadaSubtitulo, label: "Portada · texto pequeño amarillo (ej: NUEVA COLECCIÓN)", widget: string, required: false }
-          - { name: portadaTitulo, label: "Portada · texto grande (ej: DROP OCTUBRE)", widget: string, required: false }
-          - { name: portadaBoton, label: "Portada · texto del botón (ej: Ver colección)", widget: string, required: false }
-          - name: portadaCategoria
-            label: "Portada · al tocarla, mostrar esta categoría (opcional)"
-            widget: select
+          - { name: videoPortada, label: "🎬 Video de portada · computador (MP4 horizontal, máximo 10 MB)", widget: file, required: false, choose_url: false }
+          - { name: videoPortadaMovil, label: "📱 Video de portada · celular (MP4 vertical, opcional)", widget: file, required: false, choose_url: false }
+          - { name: videoPoster, label: "🖼️ Imagen que se ve mientras carga el video (opcional)", widget: image, required: false, choose_url: false }
+          - name: portadasCategorias
+            label: "📸 Foto grande de cada categoría (si no subes una, se usa la del primer producto)"
+            label_singular: foto de categoría
+            widget: list
             required: false
-            options: [Poleras, Polerones, Pantalones, Shorts, Gorras, Lentes, Accesorios]
+            collapsed: true
+            summary: "{{fields.categoria}}"
+            fields:
+              - name: categoria
+                label: Categoría
+                widget: select
+                options: [Poleras, Polerones, Pantalones, Shorts, Gorras, Lentes, Accesorios]
+              - { name: foto, label: "Foto grande (horizontal, ideal 1920×1080)", widget: image, choose_url: false }
+              - { name: fotoMovil, label: "Foto para celular (vertical 1080×1350, opcional)", widget: image, required: false, choose_url: false }
           - { name: categorias, label: "Orden de las categorías (separadas por coma)", widget: list }
