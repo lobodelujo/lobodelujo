@@ -494,7 +494,7 @@ $("#visor-minis").addEventListener("click", (e) => {
 
 vEscena.addEventListener("pointerdown", (e) => {
   gesto = { x: e.clientX, y: e.clientY, origen: { ...origen }, tipo: e.pointerType };
-  vEscena.setPointerCapture(e.pointerId);
+  try { vEscena.setPointerCapture(e.pointerId); } catch {}
 });
 vEscena.addEventListener("pointermove", (e) => {
   if (!zoom) return;
