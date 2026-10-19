@@ -6,6 +6,8 @@ backend:
   repo: lobodelujo/lobodelujo
   branch: main
   base_url: https://api.netlify.com
+  # El inicio de sesión con GitHub sigue pasando por Netlify aunque la web esté en Cloudflare
+  site_domain: lobodelujo.netlify.app
   commit_messages:
     update: "Actualizar {{collection}}: {{slug}}"
     uploadMedia: "Subir foto {{path}}"
