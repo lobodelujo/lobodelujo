@@ -2,6 +2,23 @@
   "productos": [
     {
       "precio": 46000,
+      "nombre": "GUCCI",
+      "descripcion": ">cuello redondo\n>100% algodón\n>logo en el pecho en alto relieve\n>logo cocido en la espalda",
+      "fotos": [
+        "img/productos/20261019-192408-vdp-3.jpg"
+      ],
+      "colores": [
+        "beige"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "etiqueta": "Nuevo",
+      "tallas": [
+        "S"
+      ]
+    },
+    {
+      "precio": 46000,
       "nombre": "REPRESENT",
       "descripcion": "> polera oversize\n> cuello redondo\n> algodón 100%\n> estampado\n> hebilla metálica",
       "fotos": [
