@@ -315,6 +315,7 @@ function abrirProducto(id) {
 }
 
 function cerrarProducto() {
+  $("#visor").hidden = true;
   $("#modal").hidden = true;
   document.body.classList.remove("bloqueado");
   actual = null;
@@ -428,6 +429,105 @@ $("#g-principal").addEventListener("touchend", (e) => {
 });
 $("#modal").addEventListener("click", (e) => { if (e.target.closest("[data-cerrar]")) cerrarProducto(); });
 
+// ---------- Visor a pantalla completa con zoom (al tocar la foto de la ficha) ----------
+// Toque/clic = zoom donde tocaste · con zoom: mover el mouse o arrastrar el dedo recorre la foto
+// Sin zoom: deslizar o flechas para cambiar de foto
+const visor = $("#visor"), vImg = $("#visor-img"), vEscena = $("#visor-escena");
+const ZOOM = 2.5;
+let vIdx = 0, zoom = false, origen = { x: 50, y: 50 }, gesto = null;
+
+function aplicarZoom() {
+  vImg.style.transformOrigin = `${origen.x}% ${origen.y}%`;
+  vImg.style.transform = zoom ? `scale(${ZOOM})` : "";
+  visor.classList.toggle("con-zoom", zoom);
+}
+function pintarVisor() {
+  const f = actual.fotos;
+  zoom = false;
+  aplicarZoom();
+  vImg.classList.remove("sin-foto");
+  vImg.onerror = () => ph(vImg);
+  vImg.alt = `${actual.nombre} · ${vIdx + 1}`;
+  vImg.src = foto(f[vIdx], 2000);
+  $("#visor-contador").textContent = `${vIdx + 1} / ${f.length}`;
+  $("#visor-ant").hidden = $("#visor-sig").hidden = $("#visor-minis").hidden = f.length < 2;
+  $("#visor-minis").innerHTML = f
+    .map((src, i) => `<button data-vfoto="${i}" aria-current="${i === vIdx}" aria-label="Foto ${i + 1}">${imgTag(src, String(i + 1), "", 200)}</button>`)
+    .join("");
+}
+function abrirVisor() {
+  if (!actual || !actual.fotos.length) return;
+  vIdx = fotoIdx;
+  pintarVisor();
+  visor.hidden = false;
+}
+function cerrarVisor() {
+  if (visor.hidden) return;
+  visor.hidden = true;
+  zoom = false;
+  aplicarZoom();
+  if (actual) { fotoIdx = vIdx; pintarFoto(); }
+}
+const moverVisor = (d) => {
+  const n = actual.fotos.length;
+  vIdx = (vIdx + d + n) % n;
+  pintarVisor();
+};
+// Posición del dedo o mouse dentro de la foto, en %
+const puntoEn = (x, y) => {
+  const r = vEscena.getBoundingClientRect();
+  return {
+    x: Math.min(100, Math.max(0, ((x - r.left) / r.width) * 100)),
+    y: Math.min(100, Math.max(0, ((y - r.top) / r.height) * 100)),
+  };
+};
+
+$("#g-img").addEventListener("click", abrirVisor);
+$("#g-ampliar").addEventListener("click", abrirVisor);
+$("#visor-cerrar").addEventListener("click", cerrarVisor);
+$("#visor-ant").addEventListener("click", () => moverVisor(-1));
+$("#visor-sig").addEventListener("click", () => moverVisor(1));
+$("#visor-minis").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-vfoto]");
+  if (b) { vIdx = Number(b.dataset.vfoto); pintarVisor(); }
+});
+
+vEscena.addEventListener("pointerdown", (e) => {
+  gesto = { x: e.clientX, y: e.clientY, origen: { ...origen }, tipo: e.pointerType };
+  vEscena.setPointerCapture(e.pointerId);
+});
+vEscena.addEventListener("pointermove", (e) => {
+  if (!zoom) return;
+  if (e.pointerType === "mouse") {
+    // Con mouse la foto sigue al cursor, como en las tiendas grandes
+    origen = puntoEn(e.clientX, e.clientY);
+    aplicarZoom();
+  } else if (gesto) {
+    // Con el dedo: arrastrar mueve la foto en la dirección del dedo (1 px de dedo = 1 px de foto)
+    const r = vEscena.getBoundingClientRect();
+    origen = {
+      x: Math.min(100, Math.max(0, gesto.origen.x - ((e.clientX - gesto.x) / r.width) * 100 / (ZOOM - 1))),
+      y: Math.min(100, Math.max(0, gesto.origen.y - ((e.clientY - gesto.y) / r.height) * 100 / (ZOOM - 1))),
+    };
+    aplicarZoom();
+  }
+});
+vEscena.addEventListener("pointerup", (e) => {
+  if (!gesto) return;
+  const dx = e.clientX - gesto.x, dy = e.clientY - gesto.y;
+  const fueToque = Math.abs(dx) < 8 && Math.abs(dy) < 8;
+  if (fueToque) {
+    if (vImg.classList.contains("sin-foto")) { gesto = null; return; }
+    if (!zoom) origen = puntoEn(e.clientX, e.clientY);
+    zoom = !zoom;
+    aplicarZoom();
+  } else if (!zoom && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) && actual.fotos.length > 1) {
+    moverVisor(dx < 0 ? 1 : -1);
+  }
+  gesto = null;
+});
+vEscena.addEventListener("pointercancel", () => { gesto = null; });
+
 // ---------- Carrito ----------
 function agregarABolsa(item) {
   const igual = bolsa.find((i) => i.id === item.id && i.talla === item.talla && i.color === item.color);
@@ -510,6 +610,12 @@ function aviso(msg) {
 }
 
 document.addEventListener("keydown", (e) => {
+  if (!visor.hidden) {
+    if (e.key === "Escape") cerrarVisor();
+    if (e.key === "ArrowLeft") moverVisor(-1);
+    if (e.key === "ArrowRight") moverVisor(1);
+    return;
+  }
   if (e.key === "Escape") { if (!$("#modal").hidden) cerrarProducto(); else cerrarBolsa(); }
   if (actual && e.key === "ArrowLeft") moverFoto(-1);
   if (actual && e.key === "ArrowRight") moverFoto(1);

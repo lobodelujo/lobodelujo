@@ -112,11 +112,27 @@
           <button class="flecha izq" id="g-ant" aria-label="Foto anterior">‹</button>
           <button class="flecha der" id="g-sig" aria-label="Foto siguiente">›</button>
           <span class="g-contador" id="g-contador"></span>
+          <button class="g-ampliar" id="g-ampliar" aria-label="Ver foto en grande">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+          </button>
         </div>
         <div class="miniaturas" id="g-minis"></div>
       </div>
       <div class="detalle" id="detalle"></div>
     </div>
+  </div>
+
+  <!-- Visor de fotos a pantalla completa con zoom (se abre al tocar la foto de la ficha) -->
+  <div class="visor" id="visor" role="dialog" aria-modal="true" aria-label="Fotos del producto en grande" hidden>
+    <div class="visor-escena" id="visor-escena">
+      <img id="visor-img" alt="" draggable="false">
+      <p class="visor-ayuda">Toca la foto para hacer zoom</p>
+    </div>
+    <span class="visor-contador" id="visor-contador"></span>
+    <button class="visor-cerrar" id="visor-cerrar" aria-label="Cerrar">×</button>
+    <button class="visor-flecha izq" id="visor-ant" aria-label="Foto anterior">‹</button>
+    <button class="visor-flecha der" id="visor-sig" aria-label="Foto siguiente">›</button>
+    <div class="visor-minis" id="visor-minis"></div>
   </div>
 
   <!-- Carrito -->

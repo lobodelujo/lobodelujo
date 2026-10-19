@@ -310,6 +310,62 @@ img.sin-foto {
 .miniaturas button[aria-current="true"] { border-color: var(--oro); opacity: 1; }
 .miniaturas img { width: 100%; height: 100%; object-fit: cover; }
 
+/* Botón y cursor para abrir la foto en grande */
+#g-img { cursor: zoom-in; }
+.g-ampliar {
+  position: absolute; top: 10px; left: 10px; z-index: 2;
+  width: 40px; height: 40px; border-radius: 50%;
+  display: grid; place-items: center; background: rgba(11, 11, 12, .65);
+}
+.g-ampliar:hover { background: var(--oro); }
+.g-ampliar svg { width: 18px; height: 18px; fill: none; stroke: var(--texto); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.g-ampliar:hover svg { stroke: var(--negro); }
+
+/* ---------- Visor a pantalla completa con zoom (estilo tiendas de lujo) ---------- */
+.visor {
+  position: fixed; inset: 0; z-index: 55;
+  display: grid; grid-template-rows: minmax(0, 1fr) auto;
+  background: #f3f3f2; color: #111;
+}
+.visor-escena {
+  position: relative; overflow: hidden; min-height: 0;
+  touch-action: none; cursor: zoom-in; user-select: none;
+}
+.visor.con-zoom .visor-escena { cursor: zoom-out; }
+.visor-escena img {
+  width: 100%; height: 100%; object-fit: contain; display: block;
+  transition: transform .3s ease; -webkit-user-drag: none;
+}
+.visor-escena img.sin-foto { object-fit: contain; padding: 30%; }
+.visor-ayuda {
+  position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%);
+  padding: 6px 14px; border-radius: 999px; background: rgba(17, 17, 17, .72); color: #fff;
+  font-size: 12px; white-space: nowrap; pointer-events: none; transition: opacity .3s;
+}
+.visor-contador {
+  position: absolute; top: 22px; left: 50%; transform: translateX(-50%); z-index: 2;
+  padding: 4px 12px; border-radius: 999px; background: rgba(255, 255, 255, .85);
+  font-size: 13px; font-weight: 600; letter-spacing: 1px;
+}
+.visor-cerrar, .visor-flecha {
+  position: absolute; z-index: 2; border-radius: 50%;
+  background: #fff; color: #111; line-height: 1; box-shadow: 0 2px 12px rgba(0, 0, 0, .15);
+}
+.visor-cerrar { top: 14px; right: 14px; width: 46px; height: 46px; font-size: 30px; }
+.visor-flecha { top: 50%; transform: translateY(-50%); width: 50px; height: 50px; font-size: 32px; }
+.visor-flecha.izq { left: 18px; }
+.visor-flecha.der { right: 18px; }
+.visor-cerrar:hover, .visor-flecha:hover { background: #111; color: #fff; }
+.visor.con-zoom .visor-flecha, .visor.con-zoom .visor-ayuda, .visor.con-zoom .visor-minis { opacity: 0; pointer-events: none; }
+.visor-minis {
+  display: flex; gap: 8px; justify-content: center; overflow-x: auto;
+  padding: 10px 12px 16px; transition: opacity .3s;
+}
+.visor-minis button { flex: none; width: 54px; aspect-ratio: 4 / 5; border-radius: 6px; overflow: hidden; border: 2px solid transparent; opacity: .5; }
+.visor-minis button[aria-current="true"] { border-color: #111; opacity: 1; }
+.visor-minis img { width: 100%; height: 100%; object-fit: cover; }
+@media (hover: none) { .visor-flecha { display: none; } }
+
 .detalle { padding: 24px 20px 32px; display: flex; flex-direction: column; gap: 18px; }
 .detalle .cat { color: var(--oro); text-transform: uppercase; letter-spacing: 2px; font-size: 12px; font-weight: 600; }
 .detalle h2 { font-family: var(--titulo); font-size: 40px; line-height: 1; letter-spacing: 1px; font-weight: 400; }
