@@ -1,27 +1,23 @@
 {
   "productos": [
     {
-      "precio": 15990,
-      "nombre": "Polera Oversize Negra",
-      "descripcion": "Corte oversize, algodón grueso y caída perfecta.",
+      "precio": 46000,
+      "nombre": "REPRESENT",
+      "descripcion": "> polera oversize\n> cuello redondo\n> algodón 100%\n> estampado\n> evilla metálico ",
       "fotos": [
-        "img/productos/polera-oversize-1.jpg",
-        "img/productos/polera-oversize-2.jpg",
-        "img/productos/polera-oversize-3.jpg",
-        "img/productos/polera-oversize-4.jpg"
+        "img/productos/1.jpg",
+        "img/productos/2.jpg",
+        "img/productos/3.jpg",
+        "img/productos/4.jpg"
       ],
       "colores": [
-        "Negro",
-        "Blanco"
+        "Negro"
       ],
       "categoria": "Poleras",
       "disponible": true,
       "etiqueta": "Nuevo",
       "tallas": [
-        "S",
-        "M",
-        "L",
-        "XL"
+        "S"
       ]
     },
     {
