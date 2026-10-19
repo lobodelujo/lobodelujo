@@ -1,5 +1,8 @@
 # Catálogo Lobo de Lujo · Guía
 
+> 🌐 **La web ahora está en Cloudflare Pages: https://lobodelujo.pages.dev** · Panel: https://lobodelujo.pages.dev/admin
+> Cada "Publicar" del panel se ve en la web en menos de 1 minuto. (La Parte A de abajo describe la configuración original con Netlify; ya no hace falta repetirla.)
+
 - **Parte A:** configurar todo (una sola vez, unos 20 minutos, mejor desde el computador)
 - **Parte B:** usar el panel día a día (desde el celular)
 
@@ -38,14 +41,14 @@ por tu usuario real. ✅ Ya está listo en tu ZIP, no tienes que tocar nada.
 2. **Add new project** → **Import an existing project** → **GitHub** → autoriza → elige `lobodelujo`.
 3. No cambies nada → **Deploy**.
 4. Cuando termine, ve a **Project configuration** → **Change project name** y pon `lobodelujo` (o el que esté libre).
-   Tu web queda en: **https://lobodelujo.netlify.app** ✅
+   Tu web queda en: **https://lobodelujo.pages.dev** ✅
 
 ## Paso 6 · Conectar el inicio de sesión del panel
 **6a · En GitHub**
 1. Foto de perfil → **Settings** → abajo a la izquierda **Developer settings** → **OAuth Apps** → **New OAuth App**.
 2. Llena:
    - **Application name:** `Panel Lobo de Lujo`
-   - **Homepage URL:** `https://lobodelujo.netlify.app` (tu dirección del paso 5)
+   - **Homepage URL:** `https://lobodelujo.pages.dev` (tu dirección del paso 5)
    - **Authorization callback URL:** `https://api.netlify.com/auth/done`
 3. **Register application**.
 4. Copia el **Client ID**. Luego toca **Generate a new client secret** y copia el **secret**.
@@ -56,7 +59,7 @@ por tu usuario real. ✅ Ya está listo en tu ZIP, no tienes que tocar nada.
 2. **Install a provider** → **GitHub** → pega el **Client ID** y el **Secret** → **Install**.
 
 ## Paso 7 · ¡Probar!
-Entra desde el celular a **https://lobodelujo.netlify.app/admin** → **Iniciar sesión con GitHub** → listo 🐺
+Entra desde el celular a **https://lobodelujo.pages.dev/admin** → **Iniciar sesión con GitHub** → listo 🐺
 
 💡 **Tip:** en el celular, abre `/admin` y usa "Agregar a pantalla de inicio" para tener el panel como una app.
 
