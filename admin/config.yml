@@ -5,9 +5,9 @@ backend:
   name: github
   repo: lobodelujo/lobodelujo
   branch: main
-  base_url: https://api.netlify.com
-  # El inicio de sesión con GitHub sigue pasando por Netlify aunque la web esté en Cloudflare
-  site_domain: lobodelujo.netlify.app
+  # El inicio de sesión con GitHub lo hace la propia web en Cloudflare (carpeta functions/api)
+  base_url: https://lobodelujo.pages.dev
+  auth_endpoint: api/auth
   commit_messages:
     update: "Actualizar {{collection}}: {{slug}}"
     uploadMedia: "Subir foto {{path}}"
