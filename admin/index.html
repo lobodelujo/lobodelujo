@@ -8,6 +8,37 @@
   <link rel="icon" type="image/png" href="../img/logo-lobo-128.png">
 </head>
 <body>
+  <!-- Cada foto que se sube recibe un nombre único (fecha + hora), para que los 1.jpg, 2.jpg…
+       de Canva de una prenda no choquen con los de otra ni pisen sus fotos -->
+  <script>
+    (function () {
+      var limpiar = function (s) {
+        return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+          .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+      };
+      var dos = function (n) { return String(n).padStart(2, "0"); };
+      var sello = function () {
+        var d = new Date();
+        return "" + d.getFullYear() + dos(d.getMonth() + 1) + dos(d.getDate()) + "-" +
+          dos(d.getHours()) + dos(d.getMinutes()) + dos(d.getSeconds()) + "-" +
+          Math.random().toString(36).slice(2, 5);
+      };
+      // Se ejecuta antes que el panel (fase de captura) y cambia los archivos por copias renombradas
+      window.addEventListener("change", function (e) {
+        var input = e.target;
+        if (!(input instanceof HTMLInputElement) || input.type !== "file" || !input.files || !input.files.length) return;
+        var s = sello(), dt = new DataTransfer();
+        Array.prototype.forEach.call(input.files, function (f) {
+          var punto = f.name.lastIndexOf(".");
+          var base = limpiar(punto > 0 ? f.name.slice(0, punto) : f.name) || "foto";
+          var ext = punto > 0 ? f.name.slice(punto).toLowerCase() : "";
+          dt.items.add(new File([f], s + "-" + base + ext, { type: f.type, lastModified: f.lastModified }));
+        });
+        input.files = dt.files;
+      }, true);
+    })();
+  </script>
+
   <!-- Panel de administración (Decap CMS). La configuración está en config.yml -->
   <script src="https://unpkg.com/decap-cms@^3.6.0/dist/decap-cms.js"></script>
 </body>
