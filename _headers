@@ -1,0 +1,5 @@
+# Cloudflare Pages: que los cambios hechos en el panel se vean al tiro (sin caché vieja)
+/datos/*
+  Cache-Control: no-cache
+/admin/*
+  Cache-Control: no-cache

@@ -9,8 +9,8 @@ function ordenarTallas(a, b) {
   return a.localeCompare(b, "es");
 }
 
-// En Netlify las fotos se achican solas (Image CDN) para que la web cargue rápido en el celular
-const EN_NETLIFY = location.protocol.startsWith("http") && !/^(localhost|127\.0\.0\.1)$/.test(location.hostname);
+// Solo en Netlify las fotos se achican solas (Image CDN); en Cloudflare u otro hosting se usan tal cual
+const EN_NETLIFY = location.hostname.endsWith(".netlify.app");
 function foto(src, ancho) {
   if (!src || !EN_NETLIFY || /^(https?:|data:)/.test(src)) return src;
   return `/.netlify/images?url=/${encodeURIComponent(src.replace(/^\//, ""))}&w=${ancho}&q=80`;
