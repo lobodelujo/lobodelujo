@@ -11,6 +11,8 @@ const NUMEROS = Array.isArray(TIENDA.whatsapp)
   : [{ nombre: "WhatsApp", numero: TIENDA.whatsapp }];
 const linkWa = (texto, numero = NUMEROS[0] ? NUMEROS[0].numero : "") =>
   `https://wa.me/${String(numero).replace(/\D/g, "")}?text=${encodeURIComponent(texto)}`;
+// Link de cada prenda: en WhatsApp o Instagram se ve con su foto, nombre y precio (lo arma functions/p/[id].js)
+const linkProducto = (p) => `${location.origin}/p/${encodeURIComponent(p.id)}`;
 
 // Con un número abre WhatsApp directo; con varios, el cliente elige a quién escribir
 let textoPendiente = "";
@@ -392,7 +394,7 @@ $("#detalle").addEventListener("click", async (e) => {
   const accion = a.dataset.accion;
 
   if (accion === "compartir") {
-    const url = location.href.split("#")[0] + "#producto=" + actual.id;
+    const url = linkProducto(actual);
     try { await navigator.clipboard.writeText(url); aviso("Link copiado 🔗"); }
     catch { prompt("Copia este link:", url); }
     return;
@@ -404,7 +406,7 @@ $("#detalle").addEventListener("click", async (e) => {
   if (accion === "pedir") {
     const d = descripcionItem(item);
     enviarWa(
-      `Hola ${TIENDA.nombre} 🐺 Quiero este producto:\n\n• ${item.cant}x ${actual.nombre}${d ? ` (${d})` : ""} – ${fmt(actual.precio * item.cant)}\n\n¿Me confirman disponibilidad y envío a mi ciudad?`
+      `Hola ${TIENDA.nombre} 🐺 Quiero este producto:\n\n• ${item.cant}x ${actual.nombre}${d ? ` (${d})` : ""} – ${fmt(actual.precio * item.cant)}\n📸 ${linkProducto(actual)}\n\n¿Me confirman disponibilidad?`
     );
     return;
   }
@@ -592,10 +594,10 @@ $("#enviar-pedido").addEventListener("click", () => {
   const lineas = bolsa.map((i) => {
     const p = buscarProducto(i.id);
     const d = descripcionItem(i);
-    return `• ${i.cant}x ${p.nombre}${d ? ` (${d})` : ""} – ${fmt(p.precio * i.cant)}`;
+    return `• ${i.cant}x ${p.nombre}${d ? ` (${d})` : ""} – ${fmt(p.precio * i.cant)}\n📸 ${linkProducto(p)}`;
   });
   enviarWa(
-    `Hola ${TIENDA.nombre} 🐺 Quiero hacer este pedido:\n\n${lineas.join("\n")}\n\nTotal: ${fmt(totalBolsa())}\n\nMi ciudad es: \n¿Me confirman disponibilidad y envío?`
+    `Hola ${TIENDA.nombre} 🐺 Quiero hacer este pedido:\n\n${lineas.join("\n\n")}\n\nTotal: ${fmt(totalBolsa())}\n\n¿Me confirman disponibilidad?`
   );
 });
 

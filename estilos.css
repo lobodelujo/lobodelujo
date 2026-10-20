@@ -96,14 +96,14 @@ img.sin-foto {
 .hero {
   scroll-margin-top: var(--alto-barra);
   text-align: center;
-  padding: 72px 16px 48px;
+  padding: 36px 16px 28px;
   background:
     radial-gradient(ellipse at 50% 0%, rgba(250, 208, 44, .18), transparent 60%),
     linear-gradient(180deg, var(--carbon), var(--negro));
   border-bottom: 1px solid var(--gris);
 }
 .hero-sub { color: var(--oro); text-transform: uppercase; letter-spacing: 3px; font-size: 12px; font-weight: 600; }
-.hero-titulo { display: flex; flex-direction: column; align-items: center; margin: 14px 0 22px; font-weight: 400; }
+.hero-titulo { display: flex; flex-direction: column; align-items: center; margin: 14px 0 10px; font-weight: 400; }
 .hero-grande {
   font-family: var(--titulo); font-size: clamp(64px, 17vw, 140px);
   line-height: .9; letter-spacing: clamp(4px, 1.2vw, 12px);
@@ -131,7 +131,7 @@ img.sin-foto {
 .btn-wa { background: var(--wa); color: #06301a; width: 100%; }
 
 /* ---------- Catálogo ---------- */
-.catalogo { padding: 32px 0 56px; scroll-margin-top: var(--alto-barra); }
+.catalogo { padding: 24px 0 56px; scroll-margin-top: var(--alto-barra); }
 .buscador { max-width: 1200px; margin: 0 auto 6px; padding: 0 16px; }
 /* Las categorías quedan pegadas bajo la barra superior mientras se baja */
 .categorias {
