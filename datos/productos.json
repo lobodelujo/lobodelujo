@@ -2,6 +2,27 @@
   "productos": [
     {
       "precio": 46000,
+      "nombre": "BURBERRY CON CUELLO",
+      "descripcion": ">100% algodón\n>polera tipo pique\n>detalle logo bordado\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261019-212341-3uw-1.jpg",
+        "img/productos/20261019-212350-31p-2.jpg",
+        "img/productos/20261019-212357-0mr-3.jpg",
+        "img/productos/20261019-212406-z7o-4.jpg"
+      ],
+      "colores": [
+        "negro"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "etiqueta": "Nuevo",
+      "tallas": [
+        "S",
+        "M"
+      ]
+    },
+    {
+      "precio": 46000,
       "nombre": "BALENCIAGA",
       "descripcion": ">100% algodón\n>cuello redondo\n> diseño adelante y atrás \n>estampado y alto relieve  ",
       "fotos": [
