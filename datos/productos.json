@@ -2,6 +2,23 @@
   "productos": [
     {
       "precio": 46000,
+      "nombre": "BALENCIAGA",
+      "descripcion": ">100% algodón\n>cuello redondo\n> diseño adelante y atrás \n>estampado y alto relieve  ",
+      "fotos": [
+        "img/productos/20261019-211511-vyq-1.jpg"
+      ],
+      "colores": [
+        "negro"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "etiqueta": "Nuevo",
+      "tallas": [
+        "L"
+      ]
+    },
+    {
+      "precio": 46000,
       "nombre": "GUCCI",
       "descripcion": ">cuello redondo\n>100% algodón\n>logo en el pecho en alto relieve\n>logo cocido en la espalda",
       "fotos": [
