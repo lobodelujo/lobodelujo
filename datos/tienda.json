@@ -1,5 +1,20 @@
 {
+  "categorias": [
+    "Poleras",
+    "Polerones",
+    "Pantalones",
+    "Shorts",
+    "Gorras",
+    "Lentes",
+    "Accesorios"
+  ],
+  "videoPortada": "img/productos/20261020-141033-3de-video-final-pc.mp4",
+  "frase": "Presencia",
+  "portadaImagenMovil": "img/portada-movil.jpg",
+  "videoPoster": "img/productos/20261020-141138-c75-justin-dj-horizontal-5.jpg",
+  "portadaBoton": "Ver colección",
   "nombre": "Lobo de Lujo",
+  "portadaImagen": "img/portada.jpg",
   "whatsapp": [
     {
       "nombre": "Ventas 1",
@@ -11,21 +26,8 @@
     }
   ],
   "instagram": "https://www.instagram.com/lobo_de_lujo_/",
-  "frase": "Presencia",
-  "fraseAbajo": "primero que todo",
   "envio": "Envíos a todo Chile desde Antofagasta",
-  "portadaImagen": "img/portada.jpg",
-  "portadaImagenMovil": "img/portada-movil.jpg",
-  "portadaSubtitulo": "Nueva colección",
   "portadaTitulo": "Disponible ya",
-  "portadaBoton": "Ver colección",
-  "categorias": [
-    "Poleras",
-    "Polerones",
-    "Pantalones",
-    "Shorts",
-    "Gorras",
-    "Lentes",
-    "Accesorios"
-  ]
+  "portadaSubtitulo": "Nueva colección",
+  "fraseAbajo": "primero que todo"
 }
