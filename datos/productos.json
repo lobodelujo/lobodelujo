@@ -2,6 +2,26 @@
   "productos": [
     {
       "precio": 46000,
+      "nombre": "REPRESENT",
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo estampado serigrafia\n>hebilla metálica\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261019-215446-2w8-4.jpg",
+        "img/productos/20261019-215454-mog-1.jpg",
+        "img/productos/20261019-215504-wez-3.jpg",
+        "img/productos/20261019-215512-2hl-2.jpg"
+      ],
+      "colores": [
+        "negro"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "etiqueta": "Nuevo",
+      "tallas": [
+        "S"
+      ]
+    },
+    {
+      "precio": 46000,
       "nombre": "LOUIS VUITTON",
       "descripcion": ">100% algodón\n>cuello redondo\n>logo cocido sobre la prenda adelante y atrás\n>bordado\n>lavar a mano",
       "fotos": [
