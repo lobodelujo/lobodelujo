@@ -315,23 +315,156 @@ function animarTitulos(raiz) {
 }
 const repetirEntrada = (el) => { el.classList.remove("entra"); void el.offsetWidth; el.classList.add("entra"); };
 
-// ---------- Toque en fotos: onda + sonido ----------
-// La acción (abrir la categoría o la prenda) espera un poquito para que se alcance a ver la onda
-const ESPERA_ONDA = 240;
+// ---------- Toque en fotos: onda tipo burbuja + sonido ----------
+// La misma foto se deforma como si una burbuja de vidrio creciera desde el dedo (lente que agranda,
+// brillo y colores de pompa en el borde) y al disolverse deja una onda como de agua.
+// Se dibuja con la tarjeta gráfica (WebGL); si el teléfono no puede, se ve una burbuja más simple.
+// La acción (abrir la categoría o la prenda) espera un poquito para que se alcance a ver.
+const ESPERA_ONDA = 360;
+const sinMovimiento = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const SOMBREADOR_BURBUJA = `
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+varying vec2 v;
+uniform sampler2D u_foto;
+uniform vec2 u_tam;     // tamaño de la foto en px
+uniform vec2 u_toque;   // dónde tocaron, en px
+uniform vec4 u_cubrir;  // escala y corrimiento de object-fit: cover
+uniform float u_radio;  // radio final de la burbuja en px
+uniform float u_t;      // segundos desde el toque
+
+vec3 foto(vec2 px) { return texture2D(u_foto, clamp(px * u_cubrir.xy + u_cubrir.zw, 0.0, 1.0)).rgb; }
+
+void main() {
+  vec2 p = v * u_tam;
+  vec2 d = p - u_toque;
+  float dist = length(d);
+  vec2 dir = d / max(dist, 0.001);
+
+  // Crece rápido y frena; la piel de la burbuja se ve al principio y se disuelve
+  float k = clamp(u_t / 0.55, 0.0, 1.0);
+  float R = u_radio * (1.0 - pow(1.0 - k, 3.0)) + 0.001;
+  float piel = smoothstep(0.0, 0.06, u_t) * (1.0 - smoothstep(0.30, 0.62, u_t));
+  float r = dist / R;
+  float dentro = 1.0 - smoothstep(0.98, 1.02, r);
+
+  // Lente: el centro se agranda como vidrio curvo y el borde dobla la luz
+  float lente = 0.22 * piel * (1.0 - r * r) * dentro;
+  float e = (r - 0.96) / 0.06;
+  float borde = 0.10 * piel * exp(-e * e);
+  // Onda que queda al disolverse la burbuja
+  float o = smoothstep(0.25, 0.45, u_t) * (1.0 - smoothstep(0.55, 0.9, u_t));
+  float agua = o * sin(dist * 0.11 - u_t * 26.0) * exp(-dist / (u_radio * 0.9)) * (1.0 - smoothstep(R * 0.9, R * 1.15, dist));
+  vec3 col = foto(p - d * lente + dir * (borde * R + agua * 7.0));
+
+  // Volumen, colores de pompa en la piel, brillo de vidrio y sombra suave por fuera
+  float ang = atan(d.y, d.x);
+  vec3 iris = 0.5 + 0.5 * cos(6.2831 * (vec3(0.0, 0.33, 0.67) + r * 1.4 + ang * 0.16 + u_t * 0.8));
+  float anillo = smoothstep(0.86, 0.985, r) * (1.0 - smoothstep(0.985, 1.03, r));
+  col *= 1.0 - 0.14 * piel * smoothstep(0.55, 0.97, r) * dentro;
+  col += (iris * 0.42 + 0.18) * anillo * piel;
+  // Reflejos curvos que siguen el borde (arriba a la izquierda fuerte, abajo a la derecha suave)
+  float a1 = abs(mod(ang + 2.25 + 3.14159, 6.28318) - 3.14159);
+  float a2 = abs(mod(ang - 0.89 + 3.14159, 6.28318) - 3.14159);
+  float brillo = (1.0 - smoothstep(0.0, 0.62, a1)) * smoothstep(0.60, 0.70, r) * (1.0 - smoothstep(0.78, 0.88, r)) * 0.62;
+  brillo += (1.0 - smoothstep(0.0, 0.45, a2)) * smoothstep(0.80, 0.86, r) * (1.0 - smoothstep(0.90, 0.95, r)) * 0.30;
+  col += brillo * piel * dentro;
+  col *= 1.0 - 0.12 * piel * smoothstep(1.0, 1.04, r) * (1.0 - smoothstep(1.04, 1.16, r));
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
+function crearBurbuja() {
+  const lienzo = document.createElement("canvas");
+  lienzo.className = "burbuja";
+  let gl = null;
+  try { gl = lienzo.getContext("webgl", { antialias: false, alpha: false }); } catch {}
+  if (!gl) return null;
+  const sombreador = (tipo, codigo) => {
+    const s = gl.createShader(tipo);
+    gl.shaderSource(s, codigo);
+    gl.compileShader(s);
+    return gl.getShaderParameter(s, gl.COMPILE_STATUS) ? s : null;
+  };
+  const vs = sombreador(gl.VERTEX_SHADER, "attribute vec2 a; varying vec2 v; void main() { v = vec2(a.x * 0.5 + 0.5, 0.5 - a.y * 0.5); gl_Position = vec4(a, 0.0, 1.0); }");
+  const fs = sombreador(gl.FRAGMENT_SHADER, SOMBREADOR_BURBUJA);
+  if (!vs || !fs) return null;
+  const prog = gl.createProgram();
+  gl.attachShader(prog, vs);
+  gl.attachShader(prog, fs);
+  gl.linkProgram(prog);
+  if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) return null;
+  gl.useProgram(prog);
+  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer());
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+  const a = gl.getAttribLocation(prog, "a");
+  gl.enableVertexAttribArray(a);
+  gl.vertexAttribPointer(a, 2, gl.FLOAT, false, 0, 0);
+  gl.bindTexture(gl.TEXTURE_2D, gl.createTexture());
+  for (const [p, val] of [[gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE], [gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE], [gl.TEXTURE_MIN_FILTER, gl.LINEAR], [gl.TEXTURE_MAG_FILTER, gl.LINEAR]]) {
+    gl.texParameteri(gl.TEXTURE_2D, p, val);
+  }
+  const u = Object.fromEntries(["u_tam", "u_toque", "u_cubrir", "u_radio", "u_t"].map((n) => [n, gl.getUniformLocation(prog, n)]));
+  const DURACION = 0.95;
+  let anim = 0;
+
+  // Dibuja la burbuja sobre la foto visible de la caja; devuelve false si no se puede
+  function lanzar(caja, x, y) {
+    if (gl.isContextLost()) return false;
+    const img = [...caja.querySelectorAll("img")]
+      .filter((i) => i.complete && i.naturalWidth && !i.classList.contains("sin-foto") && getComputedStyle(i).opacity > 0.5)
+      .pop();
+    if (!img) return false;
+    const w = img.offsetWidth, h = img.offsetHeight;
+    try { gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img); } catch { return false; } // foto de otro sitio
+    cancelAnimationFrame(anim);
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    lienzo.width = Math.round(w * dpr);
+    lienzo.height = Math.round(h * dpr);
+    lienzo.style.cssText = `left:${img.offsetLeft}px;top:${img.offsetTop}px;width:${w}px;height:${h}px;filter:${getComputedStyle(img).filter}`;
+    gl.viewport(0, 0, lienzo.width, lienzo.height);
+    // Igual que object-fit: cover, para que la foto del lienzo calce exacto con la de la página
+    const esc = Math.max(w / img.naturalWidth, h / img.naturalHeight);
+    const sx = 1 / (esc * img.naturalWidth), sy = 1 / (esc * img.naturalHeight);
+    gl.uniform4f(u.u_cubrir, sx, sy, -((w - img.naturalWidth * esc) / 2) * sx, -((h - img.naturalHeight * esc) / 2) * sy);
+    gl.uniform2f(u.u_tam, w, h);
+    gl.uniform2f(u.u_toque, x - img.offsetLeft, y - img.offsetTop);
+    gl.uniform1f(u.u_radio, Math.min(Math.max(Math.min(w, h) * 0.55, 70), 380));
+    caja.append(lienzo);
+    const inicio = performance.now();
+    const cuadro = (ahora) => {
+      const t = (ahora - inicio) / 1000;
+      if (t >= DURACION) { lienzo.remove(); return; }
+      gl.uniform1f(u.u_t, t);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      anim = requestAnimationFrame(cuadro);
+    };
+    cuadro(inicio);
+    return true;
+  }
+  return { lanzar };
+}
+const burbuja = sinMovimiento ? null : crearBurbuja();
+
 function onda(caja, e) {
+  sonidoToque();
+  if (sinMovimiento) return;
+  // Punto tocado dentro de la caja (las fotos del carrusel están achicadas, por eso se corrige la escala)
   const r = caja.getBoundingClientRect();
   const conPunto = e.detail > 0 && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
-  const x = conPunto ? e.clientX - r.left : r.width / 2;
-  const y = conPunto ? e.clientY - r.top : r.height / 2;
-  const t = Math.hypot(Math.max(x, r.width - x), Math.max(y, r.height - y)) * 2;
-  for (const retraso of [0, 150]) {
-    const s = document.createElement("span");
-    s.className = "onda";
-    s.style.cssText = `left:${x - t / 2}px;top:${y - t / 2}px;width:${t}px;height:${t}px;animation-delay:${retraso}ms`;
-    s.addEventListener("animationend", () => s.remove());
-    caja.append(s);
-  }
-  sonidoToque();
+  const x = conPunto ? ((e.clientX - r.left) * caja.offsetWidth) / r.width : caja.offsetWidth / 2;
+  const y = conPunto ? ((e.clientY - r.top) * caja.offsetHeight) / r.height : caja.offsetHeight / 2;
+  if (burbuja && burbuja.lanzar(caja, x, y)) return;
+  // Burbuja simple para teléfonos sin WebGL o fotos de ejemplo
+  const t = Math.min(Math.max(Math.min(caja.offsetWidth, caja.offsetHeight) * 1.1, 140), 760);
+  const s = document.createElement("span");
+  s.className = "onda";
+  s.style.cssText = `left:${x - t / 2}px;top:${y - t / 2}px;width:${t}px;height:${t}px`;
+  s.addEventListener("animationend", () => s.remove());
+  caja.append(s);
 }
 
 // Elegir una categoría (desde los botones o la foto grande) muestra todos sus productos
