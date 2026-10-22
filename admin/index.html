@@ -8,10 +8,15 @@
   <link rel="icon" type="image/png" href="../img/logo-lobo-128.png">
 </head>
 <body>
-  <!-- Cada foto que se sube recibe un nombre único (fecha + hora), para que los 1.jpg, 2.jpg…
-       de Canva de una prenda no choquen con los de otra ni pisen sus fotos -->
+  <!-- Cada foto que se sube:
+       1) recibe un nombre único (fecha + hora), para que los 1.jpg, 2.jpg… de Canva de una prenda
+          no choquen con los de otra ni pisen sus fotos
+       2) se achica y se le baja el peso (máx. 1800 px por lado, JPG al 82%), para que el catálogo cargue
+          rápido en el teléfono sin que se note la diferencia. Las fotos que ya son livianas quedan igual,
+          los PNG con fondo transparente siguen siendo PNG y los videos solo se renombran. -->
   <script>
     (function () {
+      var LADO_MAX = 1800, CALIDAD = 0.82, YA_LIVIANA = 250 * 1024;
       var limpiar = function (s) {
         return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
           .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
@@ -23,18 +28,79 @@
           dos(d.getHours()) + dos(d.getMinutes()) + dos(d.getSeconds()) + "-" +
           Math.random().toString(36).slice(2, 5);
       };
-      // Se ejecuta antes que el panel (fase de captura) y cambia los archivos por copias renombradas
+      var cargar = function (f) {
+        return new Promise(function (ok, mal) {
+          var img = new Image(), url = URL.createObjectURL(f);
+          img.onload = function () { URL.revokeObjectURL(url); ok(img); };
+          img.onerror = function () { URL.revokeObjectURL(url); mal(new Error("No se pudo leer la foto")); };
+          img.src = url;
+        });
+      };
+      var tieneTransparencia = function (ctx, w, h) {
+        var d = ctx.getImageData(0, 0, w, h).data;
+        for (var i = 3; i < d.length; i += 4) if (d[i] < 250) return true;
+        return false;
+      };
+      // Devuelve la foto optimizada, o la original renombrada si ya era liviana, no es foto o algo falla
+      var optimizar = function (f, base, ext) {
+        var original = new File([f], base + ext, { type: f.type, lastModified: f.lastModified });
+        if (!/^image\/(jpeg|png|webp)$/.test(f.type)) return Promise.resolve(original);
+        return cargar(f).then(function (img) {
+          var lado = Math.max(img.naturalWidth, img.naturalHeight);
+          if (f.size <= YA_LIVIANA && lado <= LADO_MAX) return original;
+          var k = Math.min(1, LADO_MAX / lado);
+          var w = Math.round(img.naturalWidth * k), h = Math.round(img.naturalHeight * k);
+          var lienzo = document.createElement("canvas");
+          lienzo.width = w;
+          lienzo.height = h;
+          var ctx = lienzo.getContext("2d");
+          ctx.imageSmoothingQuality = "high";
+          ctx.drawImage(img, 0, 0, w, h);
+          var transparente = f.type !== "image/jpeg" && tieneTransparencia(ctx, w, h);
+          if (!transparente) {
+            ctx.globalCompositeOperation = "destination-over";
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(0, 0, w, h);
+          }
+          return new Promise(function (ok) { lienzo.toBlob(ok, transparente ? "image/png" : "image/jpeg", CALIDAD); })
+            .then(function (b) {
+              if (!b || b.size >= f.size) return original;
+              return new File([b], base + (transparente ? ".png" : ".jpg"), { type: b.type, lastModified: f.lastModified });
+            });
+        }).catch(function () { return original; });
+      };
+      var aviso = null;
+      var mostrarAviso = function (si) {
+        if (!aviso) {
+          aviso = document.createElement("div");
+          aviso.textContent = "Optimizando fotos…";
+          aviso.style.cssText = "position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:99999;" +
+            "padding:10px 18px;border-radius:999px;background:#111;color:#fad02c;font:600 14px system-ui,sans-serif;" +
+            "box-shadow:0 6px 20px rgba(0,0,0,.35)";
+        }
+        if (si) document.body.appendChild(aviso);
+        else if (aviso.parentNode) aviso.parentNode.removeChild(aviso);
+      };
+      // Se ejecuta antes que el panel (fase de captura): el panel recibe las fotos recién cuando están listas
       window.addEventListener("change", function (e) {
         var input = e.target;
-        if (!(input instanceof HTMLInputElement) || input.type !== "file" || !input.files || !input.files.length) return;
-        var s = sello(), dt = new DataTransfer();
-        Array.prototype.forEach.call(input.files, function (f) {
+        if (e.loboListo || !(input instanceof HTMLInputElement) || input.type !== "file" || !input.files || !input.files.length) return;
+        e.stopImmediatePropagation();
+        var s = sello();
+        mostrarAviso(true);
+        Promise.all(Array.prototype.map.call(input.files, function (f) {
           var punto = f.name.lastIndexOf(".");
-          var base = limpiar(punto > 0 ? f.name.slice(0, punto) : f.name) || "foto";
-          var ext = punto > 0 ? f.name.slice(punto).toLowerCase() : "";
-          dt.items.add(new File([f], s + "-" + base + ext, { type: f.type, lastModified: f.lastModified }));
+          var base = s + "-" + (limpiar(punto > 0 ? f.name.slice(0, punto) : f.name) || "foto");
+          return optimizar(f, base, punto > 0 ? f.name.slice(punto).toLowerCase() : "");
+        })).then(function (listos) {
+          var dt = new DataTransfer();
+          listos.forEach(function (f) { dt.items.add(f); });
+          input.files = dt.files;
+          mostrarAviso(false);
+          var ev = new Event("change", { bubbles: true });
+          ev.loboListo = true;
+          input.dispatchEvent(ev);
         });
-        input.files = dt.files;
       }, true);
     })();
   </script>
