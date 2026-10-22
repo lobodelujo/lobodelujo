@@ -54,6 +54,25 @@ $("#link-wa").dataset.wa = `Hola ${TIENDA.nombre} 🐺`;
 $("#wa-flotante").dataset.wa = `Hola ${TIENDA.nombre} 🐺 Vengo de la web y tengo una consulta.`;
 $("#anio").textContent = new Date().getFullYear();
 
+// ---------- Sonido de toque (se genera en el momento, no necesita archivo) ----------
+let ctxAudio = null;
+function sonidoToque() {
+  try {
+    ctxAudio = ctxAudio || new (window.AudioContext || window.webkitAudioContext)();
+    if (ctxAudio.state === "suspended") ctxAudio.resume();
+    const t = ctxAudio.currentTime, osc = ctxAudio.createOscillator(), vol = ctxAudio.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(950, t);
+    osc.frequency.exponentialRampToValueAtTime(420, t + 0.09);
+    vol.gain.setValueAtTime(0.0001, t);
+    vol.gain.exponentialRampToValueAtTime(0.22, t + 0.006);
+    vol.gain.exponentialRampToValueAtTime(0.0001, t + 0.14);
+    osc.connect(vol).connect(ctxAudio.destination);
+    osc.start(t);
+    osc.stop(t + 0.15);
+  } catch {}
+}
+
 // Video de portada a pantalla completa: solo aparece si hay video cargado en el panel
 // (en el celular usa el video vertical si existe)
 const videoSrc = matchMedia("(max-width: 700px)").matches
@@ -65,17 +84,47 @@ if (videoSrc) {
   v.addEventListener("error", () => { if (!TIENDA.videoPoster) $("#video-portada").hidden = true; });
   v.src = videoSrc;
   $("#video-portada").hidden = false;
-  // Solo se reproduce mientras se ve en pantalla (ahorra batería y datos)
+
+  // Siempre con sonido, a volumen bajo, y el sonido se va apagando al bajar y dejar atrás el video.
+  // Los navegadores no dejan partir con sonido a quien recién entra: parte en silencio
+  // y el sonido se enciende con el primer toque en cualquier parte de la pantalla.
+  const VOLUMEN = 0.35;
   const quieto = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  v.volume = 0.5;
+  const volumenFijo = v.volume !== 0.5; // en iPhone el volumen lo maneja el teléfono: ahí solo se apaga al bajar
+  let visible = 0, conSonido = false;
+  function ajustarSonido() {
+    if (!conSonido) return;
+    // Con la ficha de un producto o el carrito abiertos, el video no suena
+    const x = document.body.classList.contains("bloqueado") ? 0 : VOLUMEN * Math.min(1, Math.max(0, (visible - 0.3) / 0.5));
+    if (volumenFijo) v.muted = x === 0;
+    else { v.muted = false; v.volume = x; }
+  }
+  const TOQUES = ["pointerup", "touchend", "keydown"];
+  function activarSonido() {
+    if (navigator.userActivation && !navigator.userActivation.hasBeenActive) return;
+    for (const t of TOQUES) removeEventListener(t, activarSonido, true);
+    conSonido = true;
+    $("#video-tocar").hidden = true;
+    // Encender el sonido dentro del toque deja el video desbloqueado para después (lo exige el iPhone)
+    v.muted = false;
+    v.play().then(() => { if (visible < 0.2 || quieto) v.pause(); }).catch(() => {});
+    ajustarSonido();
+  }
+  for (const t of TOQUES) addEventListener(t, activarSonido, true);
+  $("#video-tocar").hidden = false;
+
+  // Solo se reproduce mientras se ve en pantalla (ahorra batería y datos)
   new IntersectionObserver(([e]) => {
-    if (e.isIntersecting && !quieto) v.play().catch(() => {});
+    visible = e.isIntersecting ? e.intersectionRatio : 0;
+    if (visible >= 0.2 && !quieto) v.play().catch(() => {});
     else v.pause();
-  }, { threshold: 0.2 }).observe(v);
-  $("#video-sonido").addEventListener("click", (e) => {
-    v.muted = !v.muted;
-    e.currentTarget.setAttribute("aria-pressed", String(!v.muted));
-    e.currentTarget.setAttribute("aria-label", v.muted ? "Activar sonido" : "Silenciar");
-    if (!v.muted) v.play().catch(() => {});
+    ajustarSonido();
+  }, { threshold: Array.from({ length: 21 }, (_, i) => i / 20) }).observe(v);
+  new MutationObserver(ajustarSonido).observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) v.pause();
+    else if (visible >= 0.2 && !quieto) v.play().catch(() => {});
   });
 }
 
@@ -97,9 +146,13 @@ const categorias = () => [...new Set([...(TIENDA.categorias || []), ...PRODUCTOS
 
 function pintarFiltros() {
   const cats = ["Todo", ...categorias()];
-  $("#filtros").innerHTML = cats
+  const fila = $("#filtros");
+  fila.innerHTML = cats
     .map((c) => `<button class="chip" role="tab" aria-selected="${c === filtro}" data-cat="${esc(c)}">${esc(c)}</button>`)
     .join("");
+  // La categoría elegida queda al centro de la fila (en el celular la fila se desliza)
+  const activa = $('[aria-selected="true"]', fila);
+  if (activa) fila.scrollTo({ left: activa.offsetLeft - (fila.clientWidth - activa.offsetWidth) / 2, behavior: "smooth" });
 }
 
 // Subfiltro de tallas: muestra las tallas que existen en la categoría elegida
@@ -200,28 +253,85 @@ function pintarEditorial() {
       </div>
     </section>` : "");
   prepararCarrusel();
+  animarTitulos($("#editorial"));
 }
 
-// La barrita amarilla muestra cuánto falta por deslizar; las flechas aparecen solo con mouse
+// La barrita amarilla muestra cuánto falta por deslizar; las flechas aparecen solo con mouse.
+// La foto del medio se ve grande y las de los lados más chicas y giradas, como un carrusel 3D.
 function prepararCarrusel() {
   const caja = $("#carrusel");
   if (!caja) return;
   const pista = $("#carrusel-pista");
   const barra = $(".carrusel-barra span", caja);
+  const tarjetas = [...pista.children];
+  let paso = 0, empezo = false, pendiente = false;
   const marcar = () => {
+    pendiente = false;
     if (!pista.clientWidth) return;
     caja.classList.toggle("quieto", pista.scrollWidth <= pista.clientWidth + 1);
     barra.style.width = (pista.clientWidth / pista.scrollWidth) * 100 + "%";
     barra.style.left = (pista.scrollLeft / pista.scrollWidth) * 100 + "%";
+    const medio = pista.scrollLeft + pista.clientWidth / 2;
+    let centro = null, menor = Infinity;
+    for (const t of tarjetas) {
+      const d = Math.max(-1, Math.min(1, (t.offsetLeft + t.offsetWidth / 2 - medio) / paso));
+      t.style.setProperty("--d", d.toFixed(3));
+      t.style.setProperty("--a", Math.abs(d).toFixed(3));
+      if (Math.abs(d) < menor) { menor = Math.abs(d); centro = t; }
+    }
+    for (const t of tarjetas) t.classList.toggle("centro", t === centro);
   };
-  pista.addEventListener("scroll", marcar, { passive: true });
-  new ResizeObserver(marcar).observe(pista);
+  const medir = () => {
+    if (!pista.clientWidth) return;
+    paso = tarjetas[0].offsetWidth + parseFloat(getComputedStyle(pista).columnGap || 0);
+    // De entrada se ven 3 fotos con la segunda al medio
+    if (!empezo && tarjetas.length > 1) { pista.scrollLeft = paso; empezo = true; }
+    marcar();
+  };
+  pista.addEventListener("scroll", () => {
+    if (!pendiente) { pendiente = true; requestAnimationFrame(marcar); }
+  }, { passive: true });
+  new ResizeObserver(medir).observe(pista);
   caja.addEventListener("click", (e) => {
     const b = e.target.closest("[data-mover]");
-    if (!b) return;
-    const paso = pista.firstElementChild.offsetWidth + parseFloat(getComputedStyle(pista).columnGap || 0);
-    pista.scrollBy({ left: Number(b.dataset.mover) * paso, behavior: "smooth" });
+    if (b) pista.scrollBy({ left: Number(b.dataset.mover) * paso, behavior: "smooth" });
   });
+}
+
+// Los títulos grandes de cada categoría aparecen desde el desenfoque a medida que se baja
+const vigiaTitulos = "IntersectionObserver" in window && new IntersectionObserver((entradas, vigia) => {
+  for (const e of entradas) {
+    if (!e.isIntersecting) continue;
+    e.target.classList.replace("por-entrar", "entra");
+    vigia.unobserve(e.target);
+  }
+}, { threshold: 0.4 });
+function animarTitulos(raiz) {
+  if (!vigiaTitulos) return;
+  raiz.querySelectorAll(".ed-grande-texto h2, .ed-cab h2, .pasos h2").forEach((h) => {
+    h.classList.add("por-entrar");
+    vigiaTitulos.observe(h);
+  });
+}
+const repetirEntrada = (el) => { el.classList.remove("entra"); void el.offsetWidth; el.classList.add("entra"); };
+
+// ---------- Toque en fotos: onda + sonido ----------
+// La acción (abrir la categoría o la prenda) espera un poquito para que se alcance a ver la onda
+const ESPERA_ONDA = 240;
+function onda(caja, e) {
+  const r = caja.getBoundingClientRect();
+  const conPunto = e.detail > 0 && e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+  const x = conPunto ? e.clientX - r.left : r.width / 2;
+  const y = conPunto ? e.clientY - r.top : r.height / 2;
+  const t = Math.hypot(Math.max(x, r.width - x), Math.max(y, r.height - y)) * 2;
+  for (const retraso of [0, 150]) {
+    const s = document.createElement("span");
+    s.className = "onda";
+    s.style.cssText = `left:${x - t / 2}px;top:${y - t / 2}px;width:${t}px;height:${t}px;animation-delay:${retraso}ms`;
+    s.addEventListener("animationend", () => s.remove());
+    caja.append(s);
+  }
+  sonidoToque();
 }
 
 // Elegir una categoría (desde los botones o la foto grande) muestra todos sus productos
@@ -231,6 +341,7 @@ function verCategoria(cat) {
   pintarFiltros();
   pintarTallas();
   pintarGrilla();
+  if (!$("#vista").hidden) repetirEntrada($("#vista-titulo"));
   const arriba = $("#catalogo").getBoundingClientRect().top + scrollY - $(".barra").offsetHeight;
   if (scrollY > arriba) window.scrollTo({ top: arriba, behavior: "smooth" });
 }
@@ -280,9 +391,20 @@ $("#filtros").addEventListener("click", (e) => {
 });
 $("#editorial").addEventListener("click", (e) => {
   const g = e.target.closest("[data-ver-cat]");
-  if (!g) return;
+  if (g) {
+    e.preventDefault();
+    // La foto grande de la categoría hace la onda; el botón "Ver todo" suelto abre al tiro
+    if (!g.classList.contains("ed-grande")) { verCategoria(g.dataset.verCat); return; }
+    onda(g, e);
+    setTimeout(() => verCategoria(g.dataset.verCat), ESPERA_ONDA);
+    return;
+  }
+  const prod = e.target.closest("a.ed-prod");
+  const media = e.target.closest(".card-media");
+  if (!prod || !media || e.ctrlKey || e.metaKey || e.shiftKey) return;
   e.preventDefault();
-  verCategoria(g.dataset.verCat);
+  onda(media, e);
+  setTimeout(() => { location.hash = prod.getAttribute("href").slice(1); }, ESPERA_ONDA);
 });
 $("#filtro-tallas").addEventListener("click", (e) => {
   const b = e.target.closest("[data-talla]");
@@ -294,7 +416,11 @@ $("#filtro-tallas").addEventListener("click", (e) => {
 $("#buscar").addEventListener("input", (e) => { texto = e.target.value; pintarGrilla(); });
 $("#grilla").addEventListener("click", (e) => {
   const b = e.target.closest("[data-abrir]");
-  if (b) location.hash = "producto=" + b.dataset.abrir;
+  if (!b) return;
+  const abrir = () => { location.hash = "producto=" + b.dataset.abrir; };
+  if (!b.classList.contains("card-media")) { abrir(); return; }
+  onda(b, e);
+  setTimeout(abrir, ESPERA_ONDA);
 });
 
 // ---------- Ficha de producto ----------
@@ -484,7 +610,10 @@ const puntoEn = (x, y) => {
   };
 };
 
-$("#g-img").addEventListener("click", abrirVisor);
+$("#g-img").addEventListener("click", (e) => {
+  onda($("#g-principal"), e);
+  setTimeout(abrirVisor, ESPERA_ONDA);
+});
 $("#g-ampliar").addEventListener("click", abrirVisor);
 $("#visor-cerrar").addEventListener("click", cerrarVisor);
 $("#visor-ant").addEventListener("click", () => moverVisor(-1));
@@ -634,6 +763,7 @@ window.addEventListener("hashchange", revisarHash);
 pintarFiltros();
 pintarTallas();
 pintarEditorial();
+animarTitulos($(".pasos"));
 pintarGrilla();
 pintarBolsa();
 revisarHash();
