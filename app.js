@@ -54,13 +54,27 @@ $("#link-wa").dataset.wa = `Hola ${TIENDA.nombre} 🐺`;
 $("#wa-flotante").dataset.wa = `Hola ${TIENDA.nombre} 🐺 Vengo de la web y tengo una consulta.`;
 $("#anio").textContent = new Date().getFullYear();
 
-// ---------- Sonido de toque (se genera en el momento, no necesita archivo) ----------
-let ctxAudio = null;
+// ---------- Sonido de toque: sonidos/toque.wav (si no carga, se genera uno parecido) ----------
+let ctxAudio = null, toque = null;
+fetch("sonidos/toque.wav")
+  .then((r) => r.arrayBuffer())
+  .then((b) => new OfflineAudioContext(1, 1, 44100).decodeAudioData(b))
+  .then((b) => { toque = b; })
+  .catch(() => {});
 function sonidoToque() {
   try {
     ctxAudio = ctxAudio || new (window.AudioContext || window.webkitAudioContext)();
     if (ctxAudio.state === "suspended") ctxAudio.resume();
-    const t = ctxAudio.currentTime, osc = ctxAudio.createOscillator(), vol = ctxAudio.createGain();
+    const t = ctxAudio.currentTime, vol = ctxAudio.createGain();
+    if (toque) {
+      const s = ctxAudio.createBufferSource();
+      s.buffer = toque;
+      vol.gain.value = 0.6;
+      s.connect(vol).connect(ctxAudio.destination);
+      s.start(t);
+      return;
+    }
+    const osc = ctxAudio.createOscillator();
     osc.type = "sine";
     osc.frequency.setValueAtTime(950, t);
     osc.frequency.exponentialRampToValueAtTime(420, t + 0.09);
