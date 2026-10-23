@@ -1,6 +1,26 @@
 {
   "productos": [
     {
+      "precio": 43000,
+      "nombre": "LOUIS VUITTON",
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo estampado\n>atrás bordado con hilo\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261023-201304-esx-4.jpg",
+        "img/productos/20261023-201247-xx2-2.jpg",
+        "img/productos/20261023-201256-mz5-3.jpg",
+        "img/productos/20261023-201238-9do-1.jpg"
+      ],
+      "colores": [
+        "blanco"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "etiqueta": "Nuevo",
+      "tallas": [
+        "M"
+      ]
+    },
+    {
       "disponible": true,
       "nombre": "PRADA",
       "categoria": "Poleras",
