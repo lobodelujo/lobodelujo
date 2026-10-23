@@ -54,8 +54,128 @@ $("#link-wa").dataset.wa = `Hola ${TIENDA.nombre} 🐺`;
 $("#wa-flotante").dataset.wa = `Hola ${TIENDA.nombre} 🐺 Vengo de la web y tengo una consulta.`;
 $("#anio").textContent = new Date().getFullYear();
 
-// ---------- Sonido de toque: sonidos/toque.wav (si no carga, se genera uno parecido) ----------
+// ---------- Sonidos ----------
+// Los navegadores no dejan sonar nada hasta que la persona toca la página una vez:
+// con ese primer toque queda lista la tarjeta de sonido para el toque en fotos y la moto.
 let ctxAudio = null, toque = null;
+const audio = () => {
+  ctxAudio = ctxAudio || new (window.AudioContext || window.webkitAudioContext)();
+  if (ctxAudio.state === "suspended") ctxAudio.resume();
+  return ctxAudio;
+};
+for (const t of ["pointerup", "touchend", "keydown"]) addEventListener(t, () => { try { audio(); } catch {} }, { capture: true, once: true });
+// Solo para sonidos que no vienen de un toque (la moto): si todavía no se puede, no suena
+const audioListo = () => (ctxAudio && ctxAudio.state === "running" ? ctxAudio : null);
+// Ruido blanco corto (escape del motor, cartón)
+const ruido = (ctx, seg) => {
+  const b = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * seg), ctx.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  const s = ctx.createBufferSource();
+  s.buffer = b;
+  return s;
+};
+
+// Motor de la moto: sube de vueltas al acelerar y baja al frenar (dur en segundos)
+function sonidoMotor(dur) {
+  const ctx = audioListo();
+  if (!ctx) return;
+  try {
+    const t = ctx.currentTime, punta = t + dur * 0.6, fin = t + dur + 0.18;
+    const salida = ctx.createGain();
+    salida.gain.setValueAtTime(0.0001, t);
+    salida.gain.exponentialRampToValueAtTime(0.36, t + 0.07);
+    salida.gain.setValueAtTime(0.36, punta);
+    salida.gain.exponentialRampToValueAtTime(0.12, t + dur);
+    salida.gain.exponentialRampToValueAtTime(0.0001, fin);
+    salida.connect(ctx.destination);
+    // Traqueteo del motor de 2 tiempos: el volumen late al ritmo de las explosiones
+    const latido = ctx.createGain(), lfo = ctx.createOscillator(), prof = ctx.createGain();
+    latido.gain.value = 0.65;
+    prof.gain.value = 0.35;
+    lfo.type = "square";
+    lfo.frequency.setValueAtTime(26, t);
+    lfo.frequency.exponentialRampToValueAtTime(58, punta);
+    lfo.frequency.exponentialRampToValueAtTime(32, t + dur);
+    lfo.connect(prof).connect(latido.gain);
+    latido.connect(salida);
+    // Tono del motor (zumbido + cuerpo una octava abajo), suavizado como si saliera por el escape
+    const filtro = ctx.createBiquadFilter();
+    filtro.type = "lowpass";
+    filtro.Q.value = 2;
+    filtro.frequency.setValueAtTime(650, t);
+    filtro.frequency.linearRampToValueAtTime(1900, punta);
+    filtro.frequency.linearRampToValueAtTime(750, t + dur);
+    filtro.connect(latido);
+    const fuentes = [lfo];
+    for (const [tipo, mult, vol] of [["sawtooth", 1, 0.55], ["square", 0.5, 0.3]]) {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = tipo;
+      o.frequency.setValueAtTime(52 * mult, t);
+      o.frequency.exponentialRampToValueAtTime(116 * mult, punta);
+      o.frequency.exponentialRampToValueAtTime(64 * mult, t + dur);
+      g.gain.value = vol;
+      o.connect(g).connect(filtro);
+      fuentes.push(o);
+    }
+    // Soplido del escape
+    const escape = ruido(ctx, dur + 0.2), fe = ctx.createBiquadFilter(), ge = ctx.createGain();
+    fe.type = "bandpass";
+    fe.frequency.value = 1200;
+    fe.Q.value = 0.7;
+    ge.gain.value = 0.12;
+    escape.connect(fe).connect(ge).connect(latido);
+    fuentes.push(escape);
+    for (const f of fuentes) { f.start(t); f.stop(fin); }
+  } catch {}
+}
+
+// Chirrido corto y suave de freno
+function sonidoFreno() {
+  const ctx = audioListo();
+  if (!ctx) return;
+  try {
+    const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain(), vib = ctx.createOscillator(), vg = ctx.createGain();
+    o.type = "triangle";
+    o.frequency.setValueAtTime(2150, t);
+    o.frequency.linearRampToValueAtTime(1750, t + 0.2);
+    vib.frequency.value = 30;
+    vg.gain.value = 45;
+    vib.connect(vg).connect(o.frequency);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.065, t + 0.03);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+    o.connect(g).connect(ctx.destination);
+    for (const f of [o, vib]) { f.start(t); f.stop(t + 0.25); }
+  } catch {}
+}
+
+// Caja de cartón que cae al suelo: golpe sordo + roce del cartón (suave = rebote)
+function sonidoPaquete(suave = 1) {
+  const ctx = audioListo();
+  if (!ctx) return;
+  try {
+    const t = ctx.currentTime, o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(150, t);
+    o.frequency.exponentialRampToValueAtTime(48, t + 0.14);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.55 * suave, t + 0.005);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+    o.connect(g).connect(ctx.destination);
+    o.start(t);
+    o.stop(t + 0.25);
+    const carton = ruido(ctx, 0.08), f = ctx.createBiquadFilter(), gc = ctx.createGain();
+    f.type = "bandpass";
+    f.frequency.value = 900;
+    f.Q.value = 0.8;
+    gc.gain.setValueAtTime(0.35 * suave, t);
+    gc.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
+    carton.connect(f).connect(gc).connect(ctx.destination);
+    carton.start(t);
+  } catch {}
+}
+
+// Toque en fotos: sonidos/toque.wav (si no carga, se genera uno parecido)
 fetch("sonidos/toque.wav")
   .then((r) => r.arrayBuffer())
   .then((b) => new OfflineAudioContext(1, 1, 44100).decodeAudioData(b))
@@ -63,8 +183,7 @@ fetch("sonidos/toque.wav")
   .catch(() => {});
 function sonidoToque() {
   try {
-    ctxAudio = ctxAudio || new (window.AudioContext || window.webkitAudioContext)();
-    if (ctxAudio.state === "suspended") ctxAudio.resume();
+    audio();
     const t = ctxAudio.currentTime, vol = ctxAudio.createGain();
     if (toque) {
       const s = ctxAudio.createBufferSource();
@@ -927,8 +1046,10 @@ function prepararRuta() {
     poner(nx); // queda puesta en el destino; la animación la lleva hasta ahí
     moto.classList.add("andando", "acelera");
     const frenar = setTimeout(() => moto.classList.replace("acelera", "frena"), dur * 0.6);
+    const chirrido = setTimeout(() => { if (mi === turno) sonidoFreno(); }, Math.max(0, dur - 230));
     const anim = moto.animate([{ transform: `translateX(${desde}px)` }, { transform: `translateX(${nx}px)` }], { duration: dur, easing: "cubic-bezier(.45,0,.3,1)" });
-    try { await anim.finished; } catch { return false; } finally { clearTimeout(frenar); }
+    sonidoMotor(dur / 1000);
+    try { await anim.finished; } catch { clearTimeout(chirrido); return false; } finally { clearTimeout(frenar); }
     moto.classList.remove("andando", "acelera", "frena");
     return mi === turno;
   }
@@ -945,6 +1066,9 @@ function prepararRuta() {
       { transform: `translate(${x1}px, 0) rotate(0deg) scale(1.08, .9)`, offset: 0.85 },
       { transform: `translate(${x1}px, 0) rotate(0deg) scale(1)` },
     ], { duration: 750, easing: "cubic-bezier(.3,.1,.5,1)", fill: "forwards" });
+    // Golpe de la caja justo cuando toca el camino (al 85% de la caída)
+    const mi = turno;
+    setTimeout(() => { if (mi === turno) sonidoPaquete(); }, 640);
   }
 
   function reiniciar() {
