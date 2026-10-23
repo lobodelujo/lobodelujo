@@ -2,6 +2,25 @@
   "productos": [
     {
       "disponible": true,
+      "nombre": "DIOR",
+      "categoria": "Poleras",
+      "precio": 43000,
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo bordado\n>lavar a mano",
+      "tallas": [
+        "M"
+      ],
+      "colores": [
+        "negro"
+      ],
+      "fotos": [
+        "img/productos/20261023-195715-6yy-1.jpg",
+        "img/productos/20261023-195721-qym-2.jpg",
+        "img/productos/20261023-195728-z7y-3.jpg",
+        "img/productos/20261023-195739-ts3-4.jpg"
+      ]
+    },
+    {
+      "disponible": true,
       "nombre": "ESSENTIALS",
       "categoria": "Poleras",
       "precio": 46000,
