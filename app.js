@@ -1064,7 +1064,8 @@ function prepararRuta() {
 
   // Avanza hasta nx acelerando y frenando; devuelve false si mientras tanto se reinició
   async function ir(nx, mi) {
-    const desde = x, dur = Math.max(550, (Math.abs(nx - desde) / 420) * 1000);
+    // Velocidad pausada para que alcancen a leer (máx. 1,8 s por tramo: lo que dura el sonido del motor)
+    const desde = x, dur = Math.min(1800, Math.max(850, (Math.abs(nx - desde) / 280) * 1000));
     poner(nx); // queda puesta en el destino; la animación la lleva hasta ahí
     moto.classList.add("andando", "acelera");
     const frenar = setTimeout(() => moto.classList.replace("acelera", "frena"), dur * 0.6);
@@ -1115,7 +1116,7 @@ function prepararRuta() {
       pasos.forEach((p, k) => p.classList.toggle("activo", k === i));
       paradas[i].classList.add("hecha", "actual");
       if (i === paradas.length - 1) break;
-      await espera(900);
+      await espera(1900); // tiempo en cada parada para leer la tarjeta
       if (mi !== turno) return;
       paradas[i].classList.remove("actual");
       pasos[i].classList.add("hecho");
