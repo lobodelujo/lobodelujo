@@ -75,12 +75,34 @@ const ruido = (ctx, seg) => {
   return s;
 };
 
-// Motor de la moto: sube de vueltas al acelerar y baja al frenar (dur en segundos)
+// Motor de la moto: sonidos/motor.wav (acelerada grabada de CapCut). Al frenar baja de tono y de volumen,
+// como al soltar el acelerador. Si el archivo no carga, se genera uno parecido. (dur en segundos)
+let motorGrabado = null;
+fetch("sonidos/motor.wav")
+  .then((r) => r.arrayBuffer())
+  .then((b) => new OfflineAudioContext(1, 1, 22050).decodeAudioData(b))
+  .then((b) => { motorGrabado = b; })
+  .catch(() => {});
 function sonidoMotor(dur) {
   const ctx = audioListo();
   if (!ctx) return;
   try {
     const t = ctx.currentTime, punta = t + dur * 0.6, fin = t + dur + 0.18;
+    if (motorGrabado) {
+      const s = ctx.createBufferSource(), g = ctx.createGain();
+      s.buffer = motorGrabado;
+      s.playbackRate.setValueAtTime(1, punta);
+      s.playbackRate.linearRampToValueAtTime(0.8, t + dur);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.42, t + 0.04);
+      g.gain.setValueAtTime(0.42, punta);
+      g.gain.exponentialRampToValueAtTime(0.13, t + dur);
+      g.gain.exponentialRampToValueAtTime(0.0001, fin);
+      s.connect(g).connect(ctx.destination);
+      s.start(t);
+      s.stop(fin);
+      return;
+    }
     const salida = ctx.createGain();
     salida.gain.setValueAtTime(0.0001, t);
     salida.gain.exponentialRampToValueAtTime(0.36, t + 0.07);
