@@ -2,6 +2,25 @@
   "productos": [
     {
       "disponible": true,
+      "nombre": "PRADA",
+      "categoria": "Poleras",
+      "precio": 43000,
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo con costura\n>lavar a mano",
+      "tallas": [
+        "M"
+      ],
+      "colores": [
+        "blanco"
+      ],
+      "fotos": [
+        "img/productos/20261023-200933-9bk-1.jpg",
+        "img/productos/20261023-200939-t1n-2.jpg",
+        "img/productos/20261023-200947-tcq-3.jpg",
+        "img/productos/20261023-200954-zvy-4.jpg"
+      ]
+    },
+    {
+      "disponible": true,
       "nombre": "DIOR",
       "categoria": "Poleras",
       "precio": 43000,
