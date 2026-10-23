@@ -907,9 +907,103 @@ function revisarHash() {
 }
 window.addEventListener("hashchange", revisarHash);
 
+// ---------- Lobo en moto que recorre los 4 pasos de "¿Cómo comprar?" ----------
+// Al llegar a esta parte la moto entra por la izquierda y para en cada paso (se ilumina su tarjeta);
+// en el último deja el paquete. Si se sale de la sección y se vuelve, se repite.
+function prepararRuta() {
+  const ruta = $("#ruta");
+  if (!ruta) return;
+  const moto = $("#ruta-moto");
+  const paradas = [...ruta.querySelectorAll(".ruta-paradas span")];
+  const pasos = [...document.querySelectorAll(".pasos li")];
+  const espera = (ms) => new Promise((ok) => setTimeout(ok, ms));
+  const centro = (i) => paradas[i].offsetLeft + paradas[i].offsetWidth / 2 - moto.offsetWidth / 2;
+  let x = 0, turno = 0, corriendo = false, ultima = -1;
+  const poner = (nx) => { x = nx; moto.style.transform = `translateX(${nx}px)`; };
+
+  // Avanza hasta nx acelerando y frenando; devuelve false si mientras tanto se reinició
+  async function ir(nx, mi) {
+    const desde = x, dur = Math.max(550, (Math.abs(nx - desde) / 420) * 1000);
+    poner(nx); // queda puesta en el destino; la animación la lleva hasta ahí
+    moto.classList.add("andando", "acelera");
+    const frenar = setTimeout(() => moto.classList.replace("acelera", "frena"), dur * 0.6);
+    const anim = moto.animate([{ transform: `translateX(${desde}px)` }, { transform: `translateX(${nx}px)` }], { duration: dur, easing: "cubic-bezier(.45,0,.3,1)" });
+    try { await anim.finished; } catch { return false; } finally { clearTimeout(frenar); }
+    moto.classList.remove("andando", "acelera", "frena");
+    return mi === turno;
+  }
+
+  function soltarPaquete() {
+    const p = document.createElement("div");
+    p.className = "paquete";
+    ruta.append(p);
+    // Sale de la maleta (atrás y arriba de la moto) y cae al camino detrás de la rueda trasera
+    const w = moto.offsetWidth, h = moto.offsetHeight, x0 = x + w * 0.15 - 10, y0 = -h * 0.58, x1 = x - 22;
+    p.animate([
+      { transform: `translate(${x0}px, ${y0}px) rotate(0deg) scale(.6)`, opacity: 0 },
+      { transform: `translate(${x0 - 14}px, ${y0 - 24}px) rotate(-25deg) scale(1)`, opacity: 1, offset: 0.35 },
+      { transform: `translate(${x1}px, 0) rotate(0deg) scale(1.08, .9)`, offset: 0.85 },
+      { transform: `translate(${x1}px, 0) rotate(0deg) scale(1)` },
+    ], { duration: 750, easing: "cubic-bezier(.3,.1,.5,1)", fill: "forwards" });
+  }
+
+  function reiniciar() {
+    turno++;
+    corriendo = false;
+    ultima = -1;
+    moto.getAnimations().forEach((a) => a.cancel());
+    moto.classList.remove("andando", "acelera", "frena");
+    poner(-ruta.getBoundingClientRect().left - moto.offsetWidth - 20);
+    paradas.forEach((p) => p.classList.remove("hecha", "actual"));
+    pasos.forEach((p) => p.classList.remove("hecho", "activo"));
+    ruta.querySelectorAll(".paquete").forEach((p) => p.remove());
+  }
+
+  async function recorrer() {
+    if (corriendo || ultima >= 0) return;
+    corriendo = true;
+    const mi = ++turno;
+    for (let i = 0; i < paradas.length; i++) {
+      if (!(await ir(centro(i), mi))) return;
+      ultima = i;
+      pasos.forEach((p, k) => p.classList.toggle("activo", k === i));
+      paradas[i].classList.add("hecha", "actual");
+      if (i === paradas.length - 1) break;
+      await espera(900);
+      if (mi !== turno) return;
+      paradas[i].classList.remove("actual");
+      pasos[i].classList.add("hecho");
+    }
+    soltarPaquete();
+    corriendo = false;
+  }
+
+  // Si el teléfono pide menos movimiento, la moto queda estacionada en el último paso
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    poner(centro(paradas.length - 1));
+    addEventListener("resize", () => poner(centro(paradas.length - 1)));
+    return;
+  }
+  reiniciar();
+  new IntersectionObserver(([e]) => {
+    if (e.intersectionRatio >= 0.55) recorrer();
+    else if (!e.isIntersecting) reiniciar();
+  }, { threshold: [0, 0.55] }).observe($(".pasos"));
+  // Al girar el teléfono o cambiar el tamaño, la moto estacionada se reacomoda en su parada
+  addEventListener("resize", () => {
+    if (corriendo || ultima < 0) return;
+    poner(centro(ultima));
+    ruta.querySelectorAll(".paquete").forEach((p) => {
+      p.getAnimations().forEach((a) => a.cancel());
+      p.style.transform = `translate(${x - 22}px, 0)`;
+    });
+  });
+}
+
 pintarFiltros();
 pintarTallas();
 pintarEditorial();
+prepararRuta();
 animarTitulos($(".pasos"));
 pintarGrilla();
 pintarBolsa();

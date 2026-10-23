@@ -316,13 +316,76 @@ img.sin-foto {
 .vacio { text-align: center; color: var(--suave); padding: 40px 0; }
 
 /* ---------- Cómo comprar ---------- */
-.pasos { background: var(--carbon); border-top: 1px solid var(--gris); padding: 48px 16px; }
+.pasos { background: var(--carbon); border-top: 1px solid var(--gris); padding: 48px 16px; overflow: hidden; }
 .pasos h2 { font-family: var(--titulo); font-size: 40px; letter-spacing: 1px; text-align: center; margin-bottom: 24px; }
 .pasos ol { list-style: none; max-width: 980px; margin: 0 auto; display: grid; gap: 12px; }
 @media (min-width: 720px) { .pasos ol { grid-template-columns: repeat(4, 1fr); } }
-.pasos li { display: flex; gap: 14px; align-items: center; padding: 16px; border: 1px solid var(--linea); border-radius: var(--radio); }
+.pasos li {
+  display: flex; gap: 14px; align-items: center; padding: 16px; border: 1px solid var(--linea); border-radius: var(--radio);
+  transition: border-color .35s, box-shadow .35s, transform .35s;
+}
 .pasos b { flex: none; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--oro); color: var(--negro); font-family: var(--titulo); font-size: 20px; }
-.pasos span { font-size: 14px; color: var(--suave); }
+.pasos li > span { font-size: 14px; color: var(--suave); }
+/* La tarjeta donde está la moto se ilumina; las que ya pasó quedan marcadas */
+.pasos li.hecho { border-color: rgba(250, 208, 44, .4); }
+.pasos li.activo { border-color: var(--oro); transform: translateY(-3px); box-shadow: 0 0 0 1px rgba(250, 208, 44, .35), 0 12px 28px rgba(250, 208, 44, .14); }
+.pasos li.activo > span { color: var(--texto); }
+.pasos li.activo b { animation: latido-paso .9s ease-in-out infinite; }
+@keyframes latido-paso { 50% { box-shadow: 0 0 0 7px rgba(250, 208, 44, .22); } }
+
+/* Lobo en moto que recorre los 4 pasos: camino, paradas alineadas con las tarjetas y la moto encima */
+.ruta { --moto: 150px; position: relative; max-width: 980px; margin: 0 auto 22px; padding-top: calc(var(--moto) + 2px); }
+.ruta-camino {
+  position: relative; height: 12px; border-radius: 6px;
+  background: linear-gradient(180deg, #2e2e34, #1c1c20); border: 1px solid #3a3a41;
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, .5);
+}
+.ruta-camino::before {
+  content: ""; position: absolute; left: 10px; right: 10px; top: 50%; height: 2px; margin-top: -1px;
+  background: repeating-linear-gradient(90deg, rgba(250, 208, 44, .7) 0 14px, transparent 14px 26px);
+}
+.ruta-paradas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 8px; }
+.ruta-paradas span {
+  justify-self: center; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center;
+  font: 400 14px/1 var(--titulo); color: var(--suave); background: var(--negro); border: 1px solid var(--linea);
+  transition: background .3s, color .3s, border-color .3s, box-shadow .3s, transform .3s;
+}
+.ruta-paradas span.hecha { background: var(--oro); border-color: var(--oro); color: var(--negro); }
+.ruta-paradas span.actual { transform: scale(1.15); box-shadow: 0 0 0 5px rgba(250, 208, 44, .2); }
+.ruta-moto { position: absolute; left: 0; bottom: 40px; width: var(--moto); transform: translateX(-200vw); will-change: transform; }
+.moto-cuerpo { transform-origin: 50% 94%; transition: transform .3s ease; }
+.moto-cuerpo img { display: block; width: 100%; height: auto; filter: drop-shadow(0 6px 8px rgba(0, 0, 0, .45)); animation: motor .12s linear infinite alternate; }
+/* Al acelerar levanta un poco la rueda de adelante; al frenar se inclina hacia adelante */
+.ruta-moto.acelera .moto-cuerpo { transform: rotate(-4deg); }
+.ruta-moto.frena .moto-cuerpo { transform: rotate(2.5deg); }
+.ruta-moto.andando img { animation: rebote .22s ease-in-out infinite alternate; }
+@keyframes motor { to { transform: translateY(.6px); } }
+@keyframes rebote { to { transform: translateY(-2px); } }
+/* Líneas de velocidad detrás de la moto y sombra en el piso */
+.ruta-moto::before {
+  content: ""; position: absolute; right: 96%; top: 40%; width: 46%; height: 30%; opacity: 0; pointer-events: none;
+  background: repeating-linear-gradient(180deg, transparent 0 7px, rgba(255, 255, 255, .55) 7px 9px);
+  -webkit-mask: linear-gradient(90deg, transparent, #000); mask: linear-gradient(90deg, transparent, #000);
+  transition: opacity .25s;
+}
+.ruta-moto.andando::before { opacity: .7; animation: viento .3s linear infinite; }
+@keyframes viento { from { transform: translateX(14px); } to { transform: translateX(-14px); } }
+.ruta-moto::after {
+  content: ""; position: absolute; left: 10%; right: 8%; bottom: -3px; height: 9px; z-index: -1; border-radius: 50%;
+  background: radial-gradient(rgba(0, 0, 0, .6), transparent 70%);
+}
+/* Paquete que deja en el último paso */
+.paquete {
+  position: absolute; left: 0; bottom: 40px; width: 20px; height: 16px; border-radius: 3px;
+  background: linear-gradient(180deg, #e3b37d, #b8834f); box-shadow: inset 0 -2px 0 rgba(0, 0, 0, .15), 0 3px 6px rgba(0, 0, 0, .45);
+}
+.paquete::before { content: ""; position: absolute; left: 44%; width: 12%; top: 0; bottom: 0; background: rgba(255, 255, 255, .35); }
+@media (max-width: 719px) {
+  /* En el teléfono las paradas se separan de los bordes para que la moto quepa entera */
+  .ruta { --moto: 104px; margin-bottom: 18px; }
+  .ruta-paradas { padding: 0 34px; }
+}
+@media (prefers-reduced-motion: reduce) { .moto-cuerpo img, .ruta-moto.andando img { animation: none; } }
 
 .pie { text-align: center; padding: 40px 16px 100px; color: var(--suave); font-size: 14px; display: grid; gap: 8px; }
 .pie-logo { font-family: var(--titulo); font-size: 28px; letter-spacing: 2px; color: var(--texto); }
