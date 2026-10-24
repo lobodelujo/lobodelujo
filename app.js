@@ -1454,10 +1454,11 @@ function prepararPerchero() {
       <path d="${d}" fill="none" stroke="#c3c7cd" stroke-width="${1.9 * s}" stroke-linecap="round"/>
       <path d="${d}" fill="none" stroke="#f5f6f8" stroke-width="${0.6 * s}" stroke-linecap="round" transform="translate(${-0.45 * s} ${-0.3 * s})"/>`;
   const curvaGancho = (yFin) => `M0 ${yFin} L0 8 C0 3 6.5 3 6.5 -2 C6.5 -7.5 2 -9.5 -2 -8 C-5 -6.8 -6 -4 -4.8 -1.6`;
-  function pintarGancho(it, rec, e, arriba) {
+  // g: ancho de una polera al tamaño en que se está dibujando (más grande cuando la prenda está acercada)
+  function pintarGancho(it, rec, e, arriba, g) {
     const atras = rec === it.espalda && !it.pinzas;
     it.gancho.classList.toggle("detras", atras);
-    const s = G / 230, n = rec.perfil.length - 1, alto = rec.lienzo.height * e, id = "percha" + ++nPercha;
+    const s = g / 230, n = rec.perfil.length - 1, alto = rec.lienzo.height * e, id = "percha" + ++nPercha;
     const yCuello = arriba + rec.gy * e;
     // Pantalones y shorts: percha de pinzas. Barra de madera clara sobre la pretina con el lobo grabado y dos
     // pinzas de acero que la toman (igual por delante y por detrás)
@@ -1477,7 +1478,7 @@ function prepararPerchero() {
     // Capucha: junto al cuello (a un cuarto del ancho) la prenda queda mucho más abajo que al centro
     const yHombros = arriba + ((rec.perfil[Math.round(n * 0.25)][1] + rec.perfil[Math.round(n * 0.75)][1]) / 2) * e;
     const capucha = yHombros - yCuello > alto * 0.1;
-    const grosor = 6 * s, mitad = G * 0.1, yBarra = yCuello + alto * 0.05, comba = 1.4 * s;
+    const grosor = 6 * s, mitad = g * 0.1, yBarra = yCuello + alto * 0.05, comba = 1.4 * s;
     const barra = `M${-mitad} ${yBarra} Q0 ${yBarra - comba * 2} ${mitad} ${yBarra}`;
     // Bloque central: trapecio más ancho abajo, con la cara de arriba más clara (como en la foto de referencia)
     const abajo = 15 * s, tope = 11 * s, altoB = 23 * s, yBase = yBarra + grosor * 0.35, yTope = capucha ? yCuello + 2 * s : yBase - altoB;
@@ -1535,21 +1536,32 @@ function prepararPerchero() {
 
   // Pone una foto recortada en la percha con el cuello (o la pretina) justo bajo el gancho. Las poleras y
   // polerones van todos del mismo ancho; pantalones y shorts más angostos, como se ven colgados de verdad.
+  // capa: tamaño al que se dibuja (1 en el riel; al terminar de acercarse se dibuja de verdad en grande,
+  // porque agrandar con zoom una imagen chica se ve borroso en el celular)
   function ponerLienzo(it, rec) {
     it.actual = rec;
-    const objetivo = G * (it.pinzas ? 0.62 : 1), largoMax = G * (it.pinzas ? 1.9 : 1.3);
+    const capa = it.capa || 1, g = G * capa;
+    const objetivo = g * (it.pinzas ? 0.62 : 1), largoMax = g * (it.pinzas ? 1.9 : 1.3);
     let e = objetivo / rec.lienzo.width;
     if (rec.lienzo.height * e > largoMax) e = largoMax / rec.lienzo.height;
-    const s = it.prenda.style, arriba = GANCHO - rec.gy * e + 1;
+    const s = it.prenda.style, arriba = GANCHO * capa - rec.gy * e + 1;
     s.left = -rec.gx * e + "px";
     s.top = arriba + "px";
     s.width = rec.lienzo.width * e + "px";
     s.height = rec.lienzo.height * e + "px";
     s.transformOrigin = `${rec.gx * e}px 0`;
     if (rec.lienzo.parentNode !== it.prenda) it.prenda.replaceChildren(rec.lienzo);
-    it.ancho = rec.lienzo.width * e;
-    it.alto = rec.lienzo.height * e;
-    pintarGancho(it, rec, e, arriba);
+    it.ancho = rec.lienzo.width * e / capa;
+    it.alto = rec.lienzo.height * e / capa;
+    pintarGancho(it, rec, e, arriba, g);
+    colocarEtiquetas(it);
+  }
+
+  // Cambia el tamaño al que se dibuja la prenda (sin que se note: la escala de la animación lo compensa)
+  function cambiarCapa(it, capa) {
+    if ((it.capa || 1) === capa) return;
+    it.capa = capa;
+    ponerLienzo(it, it.actual);
   }
 
   // Toma de lejos, como una foto de estudio: en el ancho de la "foto" caben unas 5 prendas, un poco separadas,
@@ -1586,7 +1598,7 @@ function prepararPerchero() {
       if (foco === it) {
         const p = suave(zoomP);
         tx = (ancho / 2 - (relleno + i * S + S / 2 - pista.scrollLeft)) * p;
-        sc = 1 + (Z - 1) * p;
+        sc = (1 + (Z - 1) * p) / (it.capa || 1);
       }
       it.mover.style.transform = `translateX(${tx.toFixed(1)}px) rotateZ(${it.th.toFixed(2)}deg) scale(${sc.toFixed(3)})`;
       it.el.style.zIndex = foco === it ? 200 : 100;
@@ -1627,8 +1639,13 @@ function prepararPerchero() {
       if (Math.abs(zoomP - meta) < 0.002) zoomP = meta;
       sigue = true;
     }
-    // Ya de vuelta en su lugar del riel
-    if (!abierto && zoomP === 0 && foco) { foco.el.classList.remove("elegido"); foco = null; }
+    // Ya acercada: se dibuja de verdad en grande (nítida). Ya de vuelta en el riel: otra vez a su tamaño.
+    if (abierto && zoomP === 1) cambiarCapa(abierto, Z);
+    if (!abierto && zoomP === 0 && foco) {
+      cambiarCapa(foco, 1);
+      foco.el.classList.remove("elegido");
+      foco = null;
+    }
     const c = pintar();
     if (c !== centro) cambiarCentro(c);
     if (sigue) anim = requestAnimationFrame(cuadro);
@@ -1650,15 +1667,23 @@ function prepararPerchero() {
   }
 
   // La etiqueta de cartón con las tallas cuelga del hombro. Va dentro de la prenda (se mece con ella), así que
-  // se achica en la misma medida en que la prenda se agranda, para que se vea de su tamaño
+  // se ajusta a la escala de la prenda para que siempre se vea de su tamaño
+  function colocarEtiquetas(it) {
+    const grupo = it.llega.querySelector(".etiquetas");
+    if (!grupo) return;
+    const capa = it.capa || 1;
+    grupo.style.left = (it.ancho * capa * 0.34).toFixed(1) + "px";
+    grupo.style.top = ((GANCHO + it.alto * 0.08) * capa).toFixed(1) + "px";
+    grupo.style.transform = `scale(${((1.35 * capa) / Z).toFixed(3)})`;
+  }
   function colgarEtiquetas(it) {
     const tallas = it.p.tallas.filter((t) => t.toLowerCase() !== "única");
     if (!tallas.length) return;
     const grupo = document.createElement("span");
     grupo.className = "etiquetas";
-    grupo.style.cssText = `left:${(it.ancho * 0.34).toFixed(1)}px;top:${(GANCHO + it.alto * 0.08).toFixed(1)}px;transform:scale(${(1.35 / Z).toFixed(3)})`;
     grupo.innerHTML = `<span class="etiqueta kraft"><i></i><span class="carton"><small>Tallas</small><b>${tallas.map(esc).join(" ")}</b></span></span>`;
     it.llega.append(grupo);
+    colocarEtiquetas(it);
     // Entra balanceándose y queda un poco ladeada (reposo, en grados)
     it.etiquetas = [...grupo.querySelectorAll(".etiqueta")].map((el) => ({ el, th: -50, w: 0, reposo: -12 }));
     requestAnimationFrame(() => grupo.classList.add("visible"));
@@ -1670,7 +1695,8 @@ function prepararPerchero() {
 
   async function abrir(it) {
     if (abierto || !listo) return;
-    if (foco && foco !== it) { foco.el.classList.remove("elegido"); zoomP = 0; }
+    if (foco && foco !== it) { cambiarCapa(foco, 1); foco.el.classList.remove("elegido"); zoomP = 0; }
+    cambiarCapa(it, 1);
     abierto = foco = it;
     sonidoTela();
     const alto = altoZoom();
