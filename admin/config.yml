@@ -50,6 +50,7 @@ collections:
                 required: false
                 options: [Nuevo, Oferta, "Últimas unidades"]
               - { name: disponible, label: "¿Hay stock? (apágalo para mostrar AGOTADO)", widget: boolean, default: true }
+              - { name: perchero, label: "🐺 Colgar en El Perchero de Lobo (necesita una foto de la prenda sola con fondo claro; si no marcas ninguna, se cuelgan solas las poleras y polerones)", widget: boolean, default: false, required: false }
               - { name: descripcion, label: "Descripción corta", widget: text, required: false }
               - name: tallas
                 label: Tallas disponibles
