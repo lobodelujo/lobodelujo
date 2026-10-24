@@ -71,7 +71,7 @@ El video suena al 35% del volumen y el sonido parte con el primer toque del clie
 - Si una categoría no tiene foto, se usa la del primer producto de esa categoría.
 - **Accesorios** no lleva foto grande: se muestra con 6 fotos chicas.
 
-*Prompts para crear fotos de portada: LDL-11, LDL-12 y LDL-13 del manual.*
+*Prompts para crear fotos de portada: PORTADA WEB · COMPUTADOR, PORTADA WEB · CELULAR y PORTADA · VARIAS PRENDAS del manual.*
 
 ---
 

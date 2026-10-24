@@ -1103,11 +1103,11 @@ window.addEventListener("hashchange", revisarHash);
 // Prendas colgadas DE LADO en un riel, como un perchero de tienda mirado de frente (caben unas 4 a lo ancho).
 // En el panel, cada producto tiene la casilla "Colgar en El Perchero de Lobo": se cuelgan solo los marcados
 // (en el orden de la lista). Si no hay ninguno marcado, la sección no aparece.
-// Fotos: lo ideal son 3 PNG sin fondo con la prenda en su percha de madera (prompts LDL-P1, P2 y P3): de frente,
+// Fotos: lo ideal son 3 PNG sin fondo con la prenda en su percha de madera (prompts PERCHERO del manual): de frente,
 // de lado (como cuelga en el riel) y de espalda. Al tocar una prenda, corre por el riel hasta el centro y se
 // da vuelta de frente (las de al lado le hacen espacio); al tocarla otra vez se acerca grande y se puede girar.
 // Sin foto de lado, cuelga de frente con una percha de nogal dibujada; sin ningún PNG, la página recorta sola
-// la foto de la prenda sola (fondo claro y liso, como las del prompt LDL-01).
+// la foto de la prenda sola (fondo claro y liso, como las del prompt CATÁLOGO · FRENTE PLANA FLOTANDO).
 const PERCHERO = ["Poleras", "Polerones"]; // la sección va justo después de la primera de estas categorías
 const PERCHERO_NO_CUELGAN = ["Gorras", "Lentes", "Accesorios"];
 const PERCHERO_PINZAS = ["Pantalones", "Shorts"]; // estos van en percha de pinzas, tomados de la pretina
@@ -1501,7 +1501,7 @@ async function recortarPrenda(fuente, anchoMax) {
   return { lienzo, gx: cx - bx0 + m, gy: arriba - by0 + m, perfil, fondo: F[1][1] };
 }
 
-// Mira si la foto trae su propia percha (como las de los prompts LDL-P): arriba el gancho de metal, delgado, y
+// Mira si la foto trae su propia percha (como las de los prompts PERCHERO): arriba el gancho de metal, delgado, y
 // bajo él la madera. Si trae gancho se le saca (la página dibuja uno recto hasta el riel, igual en todas las
 // vistas) y la prenda se cuelga desde donde empieza la madera. esLado: es la foto de lado (esa siempre trae
 // percha). Devuelve el mismo rec con percha: true o false.
