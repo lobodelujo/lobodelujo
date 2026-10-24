@@ -1526,8 +1526,8 @@ function prepararPerchero() {
     const ancho = caja.clientWidth, movil = ancho < 700;
     anchoAntes = ancho;
     G = movil ? Math.min(270, ancho * 0.62) : 230;
-    S = G * (movil ? 0.42 : 0.5);
-    E = G * 0.27;
+    S = G * (movil ? 0.55 : 0.58);
+    E = G * 0.14;
     GANCHO = Math.round(G * 0.19);
     altoRack = Math.round(RIEL + GANCHO + G * 1.3 + 150);
     caja.style.setProperty("--slot", S + "px");
@@ -1537,17 +1537,17 @@ function prepararPerchero() {
     for (const it of items) ponerLienzo(it, it.actual);
   }
 
-  // Ubica cada prenda según qué tan lejos está del medio: la del medio de frente, las demás de lado
+  // Como en un perchero de verdad: todas las prendas cuelgan de frente, juntas y montadas por las mangas.
+  // La del medio se adelanta un poco más grande y las de al lado le hacen espacio.
   function pintar() {
     const pos = pista.scrollLeft / S;
     let menor = Infinity, c = -1;
     items.forEach((it, i) => {
       const d = i - pos, a = Math.min(1, Math.abs(d)), sg = Math.sign(d), elegido = abierto === it;
       if (Math.abs(d) < menor) { menor = Math.abs(d); c = i; }
-      const zoom = elegido ? 1 + (Z - 1) * suave(zoomP) : 1;
-      const ry = -sg * 58 * Math.pow(a, 0.75);
-      const sc = (1 - 0.12 * a) * zoom;
-      it.mover.style.transform = `translateX(${(sg * E * a).toFixed(1)}px) perspective(800px) rotateZ(${it.th.toFixed(2)}deg) rotateY(${ry.toFixed(1)}deg) scale(${sc.toFixed(3)})`;
+      const base = 1 + 0.1 * (1 - a);
+      const sc = elegido ? base + (Z - base) * suave(zoomP) : base;
+      it.mover.style.transform = `translateX(${(sg * E * a).toFixed(1)}px) rotateZ(${it.th.toFixed(2)}deg) scale(${sc.toFixed(3)})`;
       it.el.style.zIndex = elegido ? 200 : 100 - Math.round(Math.abs(d) * 10);
     });
     return c;
