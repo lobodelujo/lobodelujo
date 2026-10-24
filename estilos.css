@@ -273,9 +273,11 @@ img.sin-foto {
 .perchero.quieto .colgado-mueve { will-change: auto; }
 .colgado-llega { position: absolute; left: 0; top: 0; transition: opacity .5s, filter .5s; }
 .perchero.esperando .colgado-llega { opacity: 0; }
-.gancho { position: absolute; left: 0; top: 0; }
+/* La percha va delante de la prenda (se ve por la abertura del cuello); de espalda, detrás */
+.gancho { position: absolute; left: 0; top: 0; z-index: 2; }
+.gancho.detras { z-index: 0; }
 .gancho svg { display: block; overflow: visible; }
-.prenda { position: absolute; display: block; filter: drop-shadow(0 10px 12px rgba(0, 0, 0, .14)); }
+.prenda { position: absolute; z-index: 1; display: block; filter: drop-shadow(0 10px 12px rgba(0, 0, 0, .14)); }
 .prenda canvas { display: block; width: 100%; height: 100%; }
 /* Prenda acercada: el resto del perchero queda desenfocado atrás */
 .perchero.abierto .colgado:not(.elegido) .colgado-llega { opacity: .45; filter: blur(6px); }

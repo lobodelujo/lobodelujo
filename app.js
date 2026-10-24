@@ -1442,9 +1442,13 @@ function prepararPerchero() {
   // cuello se ve la madera de los hombros (se pierde en la tela a los lados), sobre el cuello asoma el bloque
   // central con el lobo grabado a fuego y de ahí sube el gancho de acero satinado al riel.
   // En un polerón con capucha la percha queda escondida: solo asoma el gancho.
+  // Vista de espalda: la percha queda detrás de la prenda (se ve el borde del cuello de la espalda entero),
+  // la barra no se ve y el bloque asoma desde dentro del cuello, por su lado sin grabado.
   // El (0,0) es donde el gancho toca el riel · e: escala de la foto · arriba: dónde empieza la foto
   let nPercha = 0;
   function pintarGancho(it, rec, e, arriba) {
+    const atras = rec === it.espalda;
+    it.gancho.classList.toggle("detras", atras);
     const s = G / 230, n = rec.perfil.length - 1, alto = rec.lienzo.height * e, id = "percha" + ++nPercha;
     const yCuello = arriba + rec.gy * e;
     // Capucha: junto al cuello (a un cuarto del ancho) la prenda queda mucho más abajo que al centro
@@ -1457,7 +1461,17 @@ function prepararPerchero() {
     const bloque = `M${-abajo} ${yBase} L${-tope} ${yTope + 1.5 * s} Q${-tope} ${yTope} ${-tope + 1.5 * s} ${yTope} L${tope - 1.5 * s} ${yTope} Q${tope} ${yTope} ${tope} ${yTope + 1.5 * s} L${abajo} ${yBase} Z`;
     const logo = 15.5 * s;
     const gancho = `M0 ${yTope + s} L0 8 C0 3 6.5 3 6.5 -2 C6.5 -7.5 2 -9.5 -2 -8 C-5 -6.8 -6 -4 -4.8 -1.6`;
-    const madera = capucha ? "" : `
+    // El bloque de madera con su veta y el canto de arriba más claro (se ve por delante y por detrás)
+    const cuerpo = `
+      <path d="${bloque}" fill="url(#perchero-madera)" stroke="#a37b4c" stroke-width="${0.6 * s}"/>
+      <g clip-path="url(#${id}c)" fill="none" stroke="#b8925f" stroke-width="${0.45 * s}" opacity=".55">
+        <path d="M${-8 * s} ${yBase} C${-7 * s} ${yBase - 9 * s} ${-9 * s} ${yTope + 8 * s} ${-6.5 * s} ${yTope}"/>
+        <path d="M${7 * s} ${yBase} C${8 * s} ${yBase - 10 * s} ${5.5 * s} ${yTope + 9 * s} ${7 * s} ${yTope}"/>
+        <path d="M${-12 * s} ${yBase} C${-11 * s} ${yBase - 6 * s} ${-11.5 * s} ${yTope + 12 * s} ${-9.5 * s} ${yTope + 3 * s}"/>
+        <path d="M${12.5 * s} ${yBase} C${11 * s} ${yBase - 7 * s} ${11.5 * s} ${yTope + 11 * s} ${9.5 * s} ${yTope + 3 * s}"/>
+      </g>
+      <rect x="${-tope + 1.2 * s}" y="${yTope + 0.4 * s}" width="${(tope - 1.2 * s) * 2}" height="${1.6 * s}" rx="${0.8 * s}" fill="#f6e6c6" opacity=".9"/>`;
+    const madera = capucha ? "" : atras ? `<defs><clipPath id="${id}c"><path d="${bloque}"/></clipPath></defs>${cuerpo}` : `
       <defs>
         <linearGradient id="${id}f" gradientUnits="userSpaceOnUse" x1="${-mitad}" x2="${mitad}" y1="0" y2="0">
           <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".28" stop-color="#fff"/>
@@ -1473,15 +1487,7 @@ function prepararPerchero() {
         <path d="${barra}" fill="none" stroke="#d6b383" stroke-width="${grosor}"/>
         <path d="${barra}" fill="none" stroke="#ebd2a8" stroke-width="${grosor * 0.45}" transform="translate(0 ${-grosor * 0.2})"/>
         <path d="${barra}" fill="none" stroke="#b8925f" stroke-width="${grosor * 0.1}" stroke-dasharray="${13 * s} ${5 * s} ${4 * s} ${8 * s}" opacity=".6" transform="translate(0 ${grosor * 0.18})"/>
-      </g>
-      <path d="${bloque}" fill="url(#perchero-madera)" stroke="#a37b4c" stroke-width="${0.6 * s}"/>
-      <g clip-path="url(#${id}c)" fill="none" stroke="#b8925f" stroke-width="${0.45 * s}" opacity=".55">
-        <path d="M${-8 * s} ${yBase} C${-7 * s} ${yBase - 9 * s} ${-9 * s} ${yTope + 8 * s} ${-6.5 * s} ${yTope}"/>
-        <path d="M${7 * s} ${yBase} C${8 * s} ${yBase - 10 * s} ${5.5 * s} ${yTope + 9 * s} ${7 * s} ${yTope}"/>
-        <path d="M${-12 * s} ${yBase} C${-11 * s} ${yBase - 6 * s} ${-11.5 * s} ${yTope + 12 * s} ${-9.5 * s} ${yTope + 3 * s}"/>
-        <path d="M${12.5 * s} ${yBase} C${11 * s} ${yBase - 7 * s} ${11.5 * s} ${yTope + 11 * s} ${9.5 * s} ${yTope + 3 * s}"/>
-      </g>
-      <rect x="${-tope + 1.2 * s}" y="${yTope + 0.4 * s}" width="${(tope - 1.2 * s) * 2}" height="${1.6 * s}" rx="${0.8 * s}" fill="#f6e6c6" opacity=".9"/>
+      </g>${cuerpo}
       <image href="img/logo-lobo-128.png" x="${-logo / 2}" y="${yBase - altoB * 0.5 - logo * 0.42}" width="${logo}" height="${logo}" filter="url(#perchero-grabado)"/>`;
     it.gancho.innerHTML = `<svg width="1" height="1" overflow="visible" aria-hidden="true">
       <path d="${gancho}" fill="none" stroke="#6f737a" stroke-width="${2.8 * s}" stroke-linecap="round"/>
