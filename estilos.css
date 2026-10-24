@@ -234,6 +234,111 @@ img.sin-foto {
 .ed-prod .precio { display: block; }
 .ed-vacio .ed-prod-nombre { color: var(--suave); font-weight: 500; }
 
+/* ---------- El Perchero de Lobo: ropa colgada en un riel sobre una pared clara de showroom ----------
+   La pared toma el mismo gris de las fotos (lo calcula app.js) para que los recortes calcen perfecto. */
+.perchero {
+  --pared: #ececec; --riel: 74px; --slot: 92px; --relleno: 40%;
+  position: relative; isolation: isolate; width: 100%; height: 560px; overflow: hidden; color: #141414;
+  background: radial-gradient(120% 70% at 50% 0%, rgba(255, 255, 255, .5), transparent 62%), var(--pared);
+  transition: height .55s cubic-bezier(.3, .7, .2, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+.perchero-logo { position: absolute; top: 14px; left: 50%; z-index: 1; width: 36px; height: auto; transform: translateX(-50%); filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .15)); }
+.perchero-riel {
+  position: absolute; left: 3%; right: 3%; top: calc(var(--riel) - 3.5px); z-index: 300; height: 7px; border-radius: 4px; pointer-events: none;
+  background: linear-gradient(180deg, #fdfdfd 0%, #d6d6d8 34%, #8e8e94 62%, #cbcbce 100%);
+  box-shadow: 0 5px 9px rgba(0, 0, 0, .14);
+}
+/* Soportes del riel en la pared */
+.perchero-riel::before, .perchero-riel::after {
+  content: ""; position: absolute; top: -22px; width: 6px; height: 26px; border-radius: 3px;
+  background: linear-gradient(90deg, #8e8e94, #ebebed, #8e8e94);
+}
+.perchero-riel::before { left: 8px; }
+.perchero-riel::after { right: 8px; }
+.perchero-pista {
+  position: absolute; inset: 0; display: flex;
+  overflow-x: auto; overflow-y: hidden; scroll-snap-type: x mandatory; overscroll-behavior-x: contain;
+  scrollbar-width: none; -webkit-overflow-scrolling: touch;
+}
+.perchero-pista::-webkit-scrollbar { display: none; }
+.perchero-pista::before, .perchero-pista::after { content: ""; flex: none; width: var(--relleno); }
+.colgado { position: relative; flex: none; width: var(--slot); height: 100%; scroll-snap-align: center; }
+.colgado:focus-visible { outline: none; }
+.colgado:focus-visible .prenda { outline: 2px solid var(--oro); outline-offset: 6px; border-radius: 6px; }
+/* El punto (0,0) es donde el gancho toca el riel: desde ahí se mece y se acerca */
+.colgado-mueve { position: absolute; left: 50%; top: var(--riel); width: 0; height: 0; transform-origin: 0 0; will-change: transform; }
+.colgado-llega { position: absolute; left: 0; top: 0; transition: opacity .5s, filter .5s; }
+.perchero.esperando .colgado-llega { opacity: 0; }
+.gancho { position: absolute; left: -13px; top: -9px; }
+.gancho svg { display: block; overflow: visible; }
+.prenda { position: absolute; display: block; filter: drop-shadow(0 10px 12px rgba(0, 0, 0, .14)); }
+.prenda canvas { display: block; width: 100%; height: 100%; }
+/* Prenda acercada: el resto del perchero queda desenfocado atrás */
+.perchero.abierto .colgado:not(.elegido) .colgado-llega { opacity: .45; filter: blur(6px); }
+.perchero.abierto .perchero-pista { overflow-x: hidden; }
+.perchero.cargando .perchero-pista { visibility: hidden; }
+.perchero .flecha { top: var(--flecha-y, 50%); z-index: 305; background: rgba(20, 20, 20, .78); color: #fff; transition: opacity .3s; }
+.perchero .flecha.izq { left: 16px; }
+.perchero .flecha.der { right: 16px; }
+.perchero.abierto .flecha, .perchero.cargando .flecha { opacity: 0; pointer-events: none; }
+@media (hover: none) { .perchero .flecha { display: none; } }
+.perchero-cerrar {
+  position: absolute; top: 12px; right: 12px; z-index: 320; width: 42px; height: 42px; border-radius: 50%;
+  background: rgba(20, 20, 20, .85); color: #fff; font-size: 26px; line-height: 1;
+  opacity: 0; pointer-events: none; transform: scale(.8); transition: opacity .3s, transform .3s;
+}
+.perchero.abierto .perchero-cerrar { opacity: 1; pointer-events: auto; transform: none; }
+.perchero-info {
+  position: absolute; left: 0; right: 0; bottom: 50px; z-index: 310;
+  display: grid; justify-items: center; gap: 4px; padding: 0 16px; text-align: center; pointer-events: none;
+}
+.perchero-info > * { pointer-events: auto; }
+.pi-nombre { max-width: 34ch; font-size: 12px; font-weight: 800; line-height: 1.35; letter-spacing: .14em; text-transform: uppercase; }
+.perchero .pi-precio { margin-top: 0; color: #141414; font-size: 15px; }
+.perchero .pi-precio s { color: rgba(20, 20, 20, .5); }
+.pi-pista { margin-top: 4px; font-size: 12px; color: rgba(20, 20, 20, .55); }
+.pi-lados { display: inline-flex; gap: 2px; margin-top: 6px; padding: 3px; border-radius: 999px; background: rgba(0, 0, 0, .08); }
+.pi-lados button { padding: 6px 16px; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: rgba(20, 20, 20, .6); transition: background .2s, color .2s; }
+.pi-lados button[aria-pressed="true"] { background: #141414; color: #fff; }
+.pi-comprar { margin-top: 8px; }
+/* Etiquetas de la tienda colgando del hombro (se mecen con la prenda) */
+.etiquetas { position: absolute; z-index: 2; width: 0; height: 0; opacity: 0; transition: opacity .35s; pointer-events: none; }
+.etiquetas.visible { opacity: 1; }
+.etiquetas::before { content: ""; position: absolute; left: -2px; top: -2px; width: 5px; height: 5px; border-radius: 50%; background: #1c1c1e; }
+/* Cada etiqueta gira desde la punta de su hilo */
+.etiqueta { position: absolute; left: -22px; top: 0; width: 44px; display: flex; flex-direction: column; align-items: center; transform-origin: 50% 0; }
+.etiqueta > i { display: block; width: 1px; height: 18px; background: rgba(20, 20, 20, .6); }
+.etiqueta.kraft { left: -20px; width: 40px; }
+.etiqueta.kraft > i { height: 32px; }
+.etiqueta .carton {
+  position: relative; display: grid; justify-items: center; align-content: start; gap: 3px;
+  width: 100%; min-height: 64px; padding: 13px 4px 7px; border-radius: 3px;
+  box-shadow: 0 3px 7px rgba(0, 0, 0, .2);
+}
+/* Ojal de la etiqueta */
+.etiqueta .carton::before {
+  content: ""; position: absolute; top: 4px; left: 50%; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%;
+  background: var(--pared); box-shadow: inset 0 1px 1px rgba(0, 0, 0, .35);
+}
+.etiqueta.negra { z-index: 1; }
+.etiqueta.negra .carton { background: #121214; color: var(--oro); }
+.etiqueta.negra img { width: 24px; height: auto; }
+.etiqueta.negra b { font-size: 9px; letter-spacing: .02em; }
+.etiqueta.kraft .carton { min-height: 58px; background: linear-gradient(160deg, #ddc59f, #c8a97b); color: #3b2d1c; }
+.etiqueta.kraft small { font-size: 6.5px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+.etiqueta.kraft b { font-size: 8px; line-height: 1.3; text-align: center; }
+/* Cinta amarilla que corre abajo */
+.perchero-cinta { position: absolute; left: 0; right: 0; bottom: 0; z-index: 310; height: 34px; display: flex; align-items: center; overflow: hidden; background: var(--oro); color: var(--negro); }
+.cinta-pista { display: flex; flex: none; white-space: nowrap; animation: cinta 40s linear infinite; }
+.cinta-pista span { padding: 0 12px; font-family: var(--titulo); font-size: 19px; letter-spacing: 2px; text-transform: uppercase; }
+@keyframes cinta { to { transform: translateX(-50%); } }
+.perchero.fuera .cinta-pista { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .perchero, .colgado-llega { transition: none; }
+  .cinta-pista { animation: none; }
+}
+
 /* Onda tipo burbuja al tocar una foto: la dibuja app.js sobre la misma foto */
 .burbuja { position: absolute; z-index: 1; pointer-events: none; }
 /* Burbuja simple para teléfonos sin WebGL: vidrio con brillo y borde de pompa */

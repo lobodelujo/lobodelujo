@@ -228,6 +228,53 @@ function sonidoToque() {
   } catch {}
 }
 
+// Perchero: gancho metálico que tintinea contra el riel (2 golpecitos, cada vez con tono un poco distinto)
+function sonidoGancho(fuerza = 1) {
+  const ctx = audioListo();
+  if (!ctx) return;
+  try {
+    const salida = ctx.createGain(), base = 2500 * (0.93 + Math.random() * 0.14);
+    salida.gain.value = fuerza;
+    salida.connect(ctx.destination);
+    for (const [espera, vol] of [[0, 1], [0.06, 0.4]]) {
+      const t = ctx.currentTime + espera;
+      for (const [mult, pico, dur] of [[1, 0.16, 0.2], [2.71, 0.09, 0.11], [5.12, 0.05, 0.05]]) {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.frequency.value = base * mult * (espera ? 1.06 : 1);
+        g.gain.setValueAtTime(0.0001, t);
+        g.gain.exponentialRampToValueAtTime(pico * vol, t + 0.002);
+        g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.connect(g).connect(salida);
+        o.start(t);
+        o.stop(t + dur + 0.02);
+      }
+      const clic = ruido(ctx, 0.012), f = ctx.createBiquadFilter(), gc = ctx.createGain();
+      f.type = "highpass";
+      f.frequency.value = 3500;
+      gc.gain.value = 0.14 * vol;
+      clic.connect(f).connect(gc).connect(salida);
+      clic.start(t);
+    }
+  } catch {}
+}
+
+// Perchero: roce de la tela al sacar la prenda del riel (suena con el toque, por eso usa audio())
+function sonidoTela(fuerza = 1) {
+  try {
+    const ctx = audio(), t = ctx.currentTime, s = ruido(ctx, 0.5), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    f.type = "bandpass";
+    f.Q.value = 0.8;
+    f.frequency.setValueAtTime(600, t);
+    f.frequency.exponentialRampToValueAtTime(2400, t + 0.32);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.7 * fuerza, t + 0.09);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.45);
+    s.connect(f).connect(g).connect(ctx.destination);
+    s.start(t);
+    s.stop(t + 0.5);
+  } catch {}
+}
+
 // Video de portada a pantalla completa: solo aparece si hay video cargado en el panel
 // (en el celular usa el video vertical si existe)
 const videoSrc = matchMedia("(max-width: 700px)").matches
@@ -364,10 +411,13 @@ function recienLlegados() {
 function pintarEditorial() {
   let n = 0;
   const nuevos = recienLlegados();
+  // El Perchero de Lobo va justo después de la primera categoría que se cuelga (Poleras)
+  const anclaPerchero = categorias().find((c) => PERCHERO.includes(c) && PRODUCTOS.some((p) => p.categoria === c));
   $("#editorial").innerHTML = categorias()
     .map((cat) => {
       const prods = PRODUCTOS.filter((p) => p.categoria === cat);
       if (!prods.length) return "";
+      const perchero = cat === anclaPerchero ? percheroHtml() : "";
       if (cat === CATEGORIA_SEIS) {
         n++;
         // Siempre se ven las 6 casillas: las que faltan muestran "Próximamente" hasta que se agreguen productos
@@ -379,7 +429,7 @@ function pintarEditorial() {
           <div class="ed-cab"><h2>${esc(cat)}</h2></div>
           <div class="ed-seis">${prods.slice(0, 6).map(tarjetaChica).join("")}${vacias}</div>
           <a class="ed-btn ed-btn-solo" href="#catalogo" data-ver-cat="${esc(cat)}">Ver todo</a>
-        </section>`;
+        </section>${perchero}`;
       }
       // La foto grande se sube en el panel; si no hay, se usa la del primer producto (y ese no se repite abajo)
       const portada = (TIENDA.portadasCategorias || []).find((c) => c && c.categoria === cat && c.foto);
@@ -395,7 +445,7 @@ function pintarEditorial() {
           <div class="ed-grande-texto"><h2>${esc(cat)}</h2><span class="ed-btn">Ver todo</span></div>
         </a>
         ${chicas.length ? `<div class="ed-chicas">${chicas.map(tarjetaChica).join("")}</div>` : ""}
-      </section>`;
+      </section>${perchero}`;
     })
     .join("") + (nuevos.length ? `
     <section class="ed-bloque">
@@ -408,6 +458,7 @@ function pintarEditorial() {
       </div>
     </section>` : "");
   prepararCarrusel();
+  prepararPerchero();
   animarTitulos($("#editorial"));
 }
 
@@ -1047,6 +1098,652 @@ function revisarHash() {
   else if (actual) cerrarProducto();
 }
 window.addEventListener("hashchange", revisarHash);
+
+// ---------- El Perchero de Lobo ----------
+// Poleras y polerones colgados en un riel, como en la tienda. La página recorta sola cada prenda desde
+// su foto 1 (frente) y su foto 2 (espalda) cuando tienen fondo claro y liso, como las del prompt LDL-01.
+// Las fotos que no se pueden recortar limpio quedan fuera del perchero (igual se ven en el catálogo).
+// Al deslizar, la ropa se mece; al tocar la del medio viene al frente con sus etiquetas y se puede girar.
+const PERCHERO = ["Poleras", "Polerones"];
+const PERCHERO_MAX = 16;
+
+function percheroHtml() {
+  const frases = [`${TIENDA.frase || ""} ${TIENDA.fraseAbajo || ""}`.trim(), "Nuevos drops", TIENDA.envio || "Envíos a todo Chile", TIENDA.nombre]
+    .filter(Boolean)
+    .map((t) => `<span>${esc(t)}</span><span>✦</span>`)
+    .join("");
+  return `<section class="ed-bloque perchero-bloque" id="perchero-bloque">
+    <div class="ed-cab"><h2>El Perchero de Lobo</h2></div>
+    <div class="perchero cargando esperando" id="perchero">
+      <img class="perchero-logo" src="img/logo-lobo-128.png" alt="" width="128" height="128">
+      <div class="perchero-riel" aria-hidden="true"></div>
+      <div class="perchero-pista" id="perchero-pista" aria-label="Prendas colgadas"></div>
+      <button class="flecha izq" data-correr="-1" aria-label="Prenda anterior">‹</button>
+      <button class="flecha der" data-correr="1" aria-label="Prenda siguiente">›</button>
+      <button class="perchero-cerrar" id="perchero-cerrar" aria-label="Volver al perchero">×</button>
+      <div class="perchero-info" id="perchero-info" aria-live="polite"><p class="pi-pista">Colgando la ropa…</p></div>
+      <div class="perchero-cinta" aria-hidden="true"><div class="cinta-pista">${frases.repeat(6)}</div></div>
+    </div>
+  </section>`;
+}
+
+const cargarImagen = (src) => new Promise((ok, mal) => {
+  const i = new Image();
+  i.decoding = "async";
+  i.onload = () => ok(i);
+  i.onerror = mal;
+  i.src = foto(src, 1200);
+});
+
+// Recorta la prenda de una foto con fondo claro y liso (fuente: la ruta de la foto o la foto ya cargándose).
+// Devuelve { lienzo, gx, gy, fondo } (gx, gy: dónde entra el gancho, en px del lienzo) o null si la foto no sirve.
+async function recortarPrenda(fuente, anchoMax) {
+  if (!fuente) return null;
+  let img;
+  try { img = await (typeof fuente === "string" ? cargarImagen(fuente) : fuente); } catch { return null; }
+  if (!img) return null;
+  const k = Math.min(1, anchoMax / img.naturalWidth);
+  const w = Math.round(img.naturalWidth * k), h = Math.round(img.naturalHeight * k), n = w * h;
+  if (w < 120 || h < 120) return null;
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  const g = c.getContext("2d", { willReadFrequently: true });
+  g.drawImage(img, 0, 0, w, h);
+  let datos;
+  try { datos = g.getImageData(0, 0, w, h); } catch { return null; }
+  const px = datos.data;
+
+  // 1) Color del fondo: se mide en 8 trozos del borde y se arma una grilla de 3x3 que sigue el degradado
+  const banda = Math.max(3, Math.round(Math.min(w, h) * 0.02)), L = banda * 3;
+  const medir = (x0, y0, x1, y1) => {
+    const r = [], v = [], a = [];
+    for (let y = y0; y < y1; y += 2) for (let x = x0; x < x1; x += 2) {
+      const i = (y * w + x) * 4;
+      r.push(px[i]); v.push(px[i + 1]); a.push(px[i + 2]);
+    }
+    const med = (l) => l.sort((p, q) => p - q)[l.length >> 1];
+    return [med(r), med(v), med(a)];
+  };
+  const x0 = Math.round(w * 0.4), x1 = Math.round(w * 0.6), y0 = Math.round(h * 0.4), y1 = Math.round(h * 0.6);
+  const F = [
+    [medir(0, 0, L, L), medir(x0, 0, x1, banda), medir(w - L, 0, w, L)],
+    [medir(0, y0, banda, y1), null, medir(w - banda, y0, w, y1)],
+    [medir(0, h - L, L, h), medir(x0, h - banda, x1, h), medir(w - L, h - L, w, h)],
+  ];
+  F[1][1] = [0, 1, 2].map((j) => (F[0][1][j] + F[2][1][j] + F[1][0][j] + F[1][2][j]) / 4);
+
+  // 2) Para cada punto: qué tan distinto es del fondo esperado, cuánto más claro que el fondo es
+  //    y si tiene el mismo tono del fondo: más oscuro (sombra, tono 1) o más claro (foco de luz, tono 2)
+  const dist = new Uint8Array(n), luz = new Uint8Array(n), mas = new Int16Array(n), tono = new Uint8Array(n);
+  for (let y = 0; y < h; y++) {
+    const fv = (y / (h - 1)) * 2, j = fv < 1 ? 0 : 1, tv = fv - j;
+    // fondo esperado en esta fila, en la izquierda, el centro y la derecha
+    const fila = [0, 1, 2].map((i) => [0, 1, 2].map((ch) => F[j][i][ch] * (1 - tv) + F[j + 1][i][ch] * tv));
+    for (let x = 0; x < w; x++) {
+      const fu = (x / (w - 1)) * 2, i = fu < 1 ? 0 : 1, tu = fu - i, p = (y * w + x) * 4, a = fila[i], b = fila[i + 1], k = y * w + x;
+      const f0 = a[0] + (b[0] - a[0]) * tu, f1 = a[1] + (b[1] - a[1]) * tu, f2 = a[2] + (b[2] - a[2]) * tu;
+      const r0 = px[p], g0 = px[p + 1], b0 = px[p + 2];
+      const d0 = Math.abs(r0 - f0), d1 = Math.abs(g0 - f1), d2 = Math.abs(b0 - f2);
+      const m = d0 > d1 ? (d0 > d2 ? d0 : d2) : d1 > d2 ? d1 : d2;
+      dist[k] = m > 255 ? 255 : m;
+      const l = (r0 * 77 + g0 * 150 + b0 * 29) >> 8;
+      luz[k] = l;
+      mas[k] = l - (f0 * 77 + f1 * 150 + f2 * 29) / 256;
+      const q0 = r0 / f0, q1 = g0 / f1, q2 = b0 / f2, s = (q0 + q1 + q2) / 3;
+      const abre = Math.max(q0, q1, q2) - Math.min(q0, q1, q2);
+      if (s >= 0.7 && s < 0.985 && abre < 0.06) tono[k] = 1;
+      else if (s > 1 && s < 1.25 && abre < 0.04) tono[k] = 2;
+    }
+  }
+
+  // 3) El borde de la foto tiene que ser fondo claro y parejo; si no (foto en la calle, con modelo), no sirve
+  const hist = new Uint32Array(256), histMas = new Uint32Array(256);
+  let total = 0;
+  const contar = (k) => { hist[dist[k]]++; histMas[Math.max(0, Math.min(255, mas[k] + 128))]++; total++; };
+  for (let x = 0; x < w; x++) { contar(x); contar(w + x); contar((h - 2) * w + x); contar((h - 1) * w + x); }
+  for (let y = 2; y < h - 2; y++) { contar(y * w); contar(y * w + 1); contar(y * w + w - 2); contar(y * w + w - 1); }
+  const p90 = (hs) => { let acum = 0, v = 0; for (; v < 255; v++) { acum += hs[v]; if (acum >= total * 0.9) break; } return v; };
+  const ruidoFondo = p90(hist), ruidoClaro = p90(histMas) - 128;
+  const claro = (F[0][1][0] + F[0][1][1] + F[0][1][2]) / 3;
+  if (ruidoFondo > 16 || claro < 150) return null;
+  // T: cuánto puede variar el fondo · CLARO: cuánto más claro que el fondo puede ser (una prenda blanca lo es más)
+  const T = Math.min(16, Math.max(8, ruidoFondo + 6)), CLARO = Math.min(10, Math.max(4, ruidoClaro + 3));
+
+  // 4) Separar prenda y fondo, como las herramientas de recorte profesionales:
+  //    a) mapa de bordes: qué tan marcado es el cambio de brillo o de color en cada punto (suavizado
+  //       en 3x3 para que el grano de la foto no moleste)
+  //    b) fondo seguro: desde las orillas de la foto, por donde el color es el del fondo (o un foco de luz
+  //       del mismo tono) y sin cruzar ningún borde. Las sombras se dejan para el reparto del final:
+  //       una prenda clara sombreada se parece a una sombra y por ahí se colaría el fondo
+  //    c) prenda segura: lo que se aleja harto del fondo (estampado, cuello, tela de color), lo que es más
+  //       claro que el fondo sin estar unido a él (una prenda blanca) y el centro de la foto
+  //    d) el resto se reparte creciendo desde los dos lados a la vez, de lo más parejo a lo más marcado:
+  //       la frontera queda en el borde más marcado entre los dos, que es el contorno de la prenda
+  const fila = new Uint16Array(n), luz9 = new Uint16Array(n), dist9 = new Uint16Array(n), relieve = new Uint8Array(n);
+  for (let i = 1; i < n - 1; i++) fila[i] = luz[i - 1] + luz[i] + luz[i + 1];
+  for (let i = w; i < n - w; i++) luz9[i] = fila[i - w] + fila[i] + fila[i + w];
+  for (let i = 1; i < n - 1; i++) fila[i] = dist[i - 1] + dist[i] + dist[i + 1];
+  for (let i = w; i < n - w; i++) dist9[i] = fila[i - w] + fila[i] + fila[i + w];
+  for (let y = 2; y < h - 2; y++) for (let x = 2; x < w - 2; x++) {
+    const i = y * w + x;
+    const gl = Math.abs(luz9[i + 1] - luz9[i - 1]) + Math.abs(luz9[i + w] - luz9[i - w]);
+    const gd = Math.abs(dist9[i + 1] - dist9[i - 1]) + Math.abs(dist9[i + w] - dist9[i - w]);
+    const g = (gl > gd ? gl : gd) / 9;
+    relieve[i] = g > 255 ? 255 : g;
+  }
+  // Muro: el borde engrosado 1 px hacia cada lado, para que el fondo no se cuele por un hueco de un punto
+  const muro = new Uint8Array(n), max3 = (a, b, c) => (a > b ? (a > c ? a : c) : b > c ? b : c);
+  for (let i = 1; i < n - 1; i++) fila[i] = max3(relieve[i - 1], relieve[i], relieve[i + 1]);
+  for (let i = w; i < n - w; i++) muro[i] = max3(fila[i - w], fila[i], fila[i + w]);
+  // Cuánto "borde" tiene el fondo de por sí (grano, degradado): se mide cerca de las orillas de la foto
+  const histR = new Uint32Array(256);
+  let totalR = 0;
+  for (let x = 3; x < w - 3; x++) for (const y of [3, h - 4]) { histR[muro[y * w + x]]++; totalR++; }
+  for (let y = 4; y < h - 4; y++) for (const x of [3, w - 4]) { histR[muro[y * w + x]]++; totalR++; }
+  let acumR = 0, BARRERA = 0;
+  for (; BARRERA < 255; BARRERA++) { acumR += histR[BARRERA]; if (acumR >= totalR * 0.95) break; }
+  BARRERA = Math.min(12, Math.max(4, BARRERA + 3));
+  const SEGURO = Math.min(T, 10);
+  const marca = new Uint8Array(n), cola = new Int32Array(n); // marca: 1 = fondo, 2 = prenda
+  let ini = 0, fin = 0;
+  const crecer = (k) => {
+    if (marca[k] || muro[k] > BARRERA || !((dist[k] <= SEGURO && mas[k] <= CLARO) || tono[k] === 2)) return;
+    marca[k] = 1;
+    cola[fin++] = k;
+  };
+  for (let x = 0; x < w; x++) { crecer(x); crecer((h - 1) * w + x); }
+  for (let y = 0; y < h; y++) { crecer(y * w); crecer(y * w + w - 1); }
+  while (ini < fin) {
+    const i = cola[ini++], x = i % w;
+    if (x > 0) crecer(i - 1);
+    if (x < w - 1) crecer(i + 1);
+    if (i >= w) crecer(i - w);
+    if (i < n - w) crecer(i + w);
+  }
+  const mx = Math.round(w * 0.04), my = Math.round(h * 0.04);
+  let semillas = 0;
+  for (let y = my; y < h - my; y++) for (let x = mx; x < w - mx; x++) {
+    const k = y * w + x;
+    if (marca[k] || tono[k] === 1) continue;
+    const centro = Math.abs(x - w / 2) < w * 0.05 && Math.abs(y - h / 2) < h * 0.1;
+    if (dist[k] > 45 || mas[k] > CLARO + 3 || centro) { marca[k] = 2; semillas++; }
+  }
+  if (semillas < n * 0.01) return null;
+  // Cola por niveles de relieve: cada punto entra una vez y toma el lado de sus vecinos ya decididos
+  const niveles = Array.from({ length: 256 }, () => []), enCola = new Uint8Array(n);
+  const meter = (j, nivel) => {
+    if (marca[j] || enCola[j]) return;
+    enCola[j] = 1;
+    niveles[relieve[j] > nivel ? relieve[j] : nivel].push(j);
+  };
+  const vecinosDe = (i, nivel) => {
+    const x = i % w;
+    if (x > 0) meter(i - 1, nivel);
+    if (x < w - 1) meter(i + 1, nivel);
+    if (i >= w) meter(i - w, nivel);
+    if (i < n - w) meter(i + w, nivel);
+  };
+  for (let i = 0; i < n; i++) if (marca[i]) vecinosDe(i, 0);
+  for (let nivel = 0; nivel < 256; nivel++) {
+    const lista = niveles[nivel];
+    for (let k = 0; k < lista.length; k++) {
+      const i = lista[k], x = i % w;
+      let f = 0, p = 0, m = 0;
+      if (x > 0) { m = marca[i - 1]; f |= m === 1; p |= m === 2; }
+      if (x < w - 1) { m = marca[i + 1]; f |= m === 1; p |= m === 2; }
+      if (i >= w) { m = marca[i - w]; f |= m === 1; p |= m === 2; }
+      if (i < n - w) { m = marca[i + w]; f |= m === 1; p |= m === 2; }
+      // Justo en la frontera decide el color: si se aleja del fondo, es prenda
+      marca[i] = f && p ? (dist[i] > T ? 2 : 1) : p ? 2 : 1;
+      vecinosDe(i, nivel);
+    }
+    niveles[nivel] = null;
+  }
+  const fondo = new Uint8Array(n);
+  for (let i = 0; i < n; i++) fondo[i] = marca[i] !== 2 ? 1 : 0;
+
+  // 5) Se queda solo con la prenda (la mancha más grande) y se borran motitas sueltas
+  const grupo = new Int32Array(n), tamanos = [0];
+  let mayor = 0, b = 0, id = 0;
+  const unir = (j) => { if (!fondo[j] && !grupo[j]) { grupo[j] = id; cola[b++] = j; } };
+  for (let s = 0; s < n; s++) {
+    if (fondo[s] || grupo[s]) continue;
+    id = tamanos.length;
+    let a = 0;
+    b = 0;
+    cola[b++] = s;
+    grupo[s] = id;
+    while (a < b) {
+      const i = cola[a++], x = i % w;
+      if (x > 0) unir(i - 1);
+      if (x < w - 1) unir(i + 1);
+      if (i >= w) unir(i - w);
+      if (i < n - w) unir(i + w);
+    }
+    tamanos.push(b);
+    if (b > mayor) mayor = b;
+  }
+  const minimo = mayor * 0.03, prenda = new Uint8Array(n);
+  let area = 0, toca = 0;
+  for (let i = 0; i < n; i++) if (!fondo[i] && tamanos[grupo[i]] >= minimo) { prenda[i] = 1; area++; }
+  for (let x = 0; x < w; x++) toca += prenda[x] + prenda[(h - 1) * w + x];
+  for (let y = 0; y < h; y++) toca += prenda[y * w] + prenda[y * w + w - 1];
+  // Muy chica, casi toda la foto o cortada por el borde (foto de detalle): no sirve para colgar
+  if (area < n * 0.07 || area > n * 0.85 || toca > (w + h) * 2 * 0.03) return null;
+  // Control de calidad: lo que se ve claramente distinto al fondo (estampado, cuello, tela) no puede quedar
+  // fuera del contorno recortado (con un margen para las sombras pegadas a la prenda). Si queda afuera,
+  // el recorte salió roto (pasa con prendas claras muy sombreadas) y esa prenda no se cuelga.
+  let px0 = w, px1 = 0, py0 = h, py1 = 0;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) if (prenda[y * w + x]) {
+    if (x < px0) px0 = x;
+    if (x > px1) px1 = x;
+    if (y < py0) py0 = y;
+    if (y > py1) py1 = y;
+  }
+  const holgura = Math.round(Math.min(w, h) * 0.03);
+  let afuera = 0;
+  for (let y = my; y < h - my; y++) for (let x = mx; x < w - mx; x++) {
+    if (dist[y * w + x] > 45 && (x < px0 - holgura || x > px1 + holgura || y < py0 - holgura || y > py1 + holgura)) afuera++;
+  }
+  if (afuera > area * 0.002) return null;
+
+  // 6) Borde suave: se achica 1 px (ahí se mezcla el fondo) y se difumina, como un recorte profesional
+  const nucleo = new Uint8Array(n);
+  let bx0 = w, bx1 = 0, by0 = h, by1 = 0;
+  for (let y = 1; y < h - 1; y++) for (let x = 1; x < w - 1; x++) {
+    const i = y * w + x;
+    if (prenda[i] && prenda[i - 1] && prenda[i + 1] && prenda[i - w] && prenda[i + w]) {
+      nucleo[i] = 1;
+      if (x < bx0) bx0 = x;
+      if (x > bx1) bx1 = x;
+      if (y < by0) by0 = y;
+      if (y > by1) by1 = y;
+    }
+  }
+  if (bx1 <= bx0 || by1 <= by0) return null;
+  const vecinos = [-w - 1, -w, -w + 1, -1, 0, 1, w - 1, w, w + 1];
+  const borde = new Uint8Array(n);
+  // Difuminado de 3x3 en dos pasadas (de lado y de alto): mucho más rápido en el celular
+  fila.fill(0);
+  for (let i = 1; i < n - 1; i++) fila[i] = nucleo[i - 1] + nucleo[i] + nucleo[i + 1];
+  for (let i = 0; i < n; i++) {
+    const s = i >= w && i < n - w ? fila[i - w] + fila[i] + fila[i + w] : 0;
+    px[i * 4 + 3] = (s * 255) / 9;
+    if (s > 0 && s < 9) borde[i] = 1;
+  }
+  // En el contorno, el color se toma de la prenda de más adentro (así no queda un hilo gris del fondo):
+  // primero la orilla de la prenda y después el difuminado de afuera
+  for (const adentro of [1, 0]) for (let i = 0; i < n; i++) {
+    if (!borde[i] || nucleo[i] !== adentro) continue;
+    let r = 0, v = 0, a = 0, cuantos = 0;
+    for (const d of vecinos) {
+      const j = i + d;
+      if (!nucleo[j] || (adentro && borde[j])) continue;
+      r += px[j * 4]; v += px[j * 4 + 1]; a += px[j * 4 + 2]; cuantos++;
+    }
+    if (cuantos) { px[i * 4] = r / cuantos; px[i * 4 + 1] = v / cuantos; px[i * 4 + 2] = a / cuantos; }
+  }
+  g.putImageData(datos, 0, 0);
+
+  // 7) El gancho entra por lo más alto del cuello, al centro de la prenda
+  const cx = Math.round((bx0 + bx1) / 2), r = Math.max(2, Math.round((bx1 - bx0) * 0.04));
+  let arriba = by1;
+  for (let x = cx - r; x <= cx + r; x++) for (let y = by0; y < arriba; y++) if (nucleo[y * w + x]) { arriba = y; break; }
+  const m = 2, cw = bx1 - bx0 + 1 + m * 2, ch = by1 - by0 + 1 + m * 2;
+  const lienzo = document.createElement("canvas");
+  lienzo.width = cw;
+  lienzo.height = ch;
+  lienzo.getContext("2d").drawImage(c, bx0 - m, by0 - m, cw, ch, 0, 0, cw, ch);
+  c.width = 0; // libera la memoria de la foto completa
+  return { lienzo, gx: cx - bx0 + m, gy: arriba - by0 + m, fondo: F[1][1] };
+}
+
+function prepararPerchero() {
+  const bloque = $("#perchero-bloque");
+  if (!bloque) return;
+  const caja = $("#perchero"), pista = $("#perchero-pista"), info = $("#perchero-info");
+  const candidatos = PRODUCTOS.filter((p) => PERCHERO.includes(p.categoria) && p.disponible && p.fotos.length).slice(0, PERCHERO_MAX);
+  if (candidatos.length < 3) { bloque.remove(); return; }
+
+  const RIEL = 74; // distancia del riel al borde de arriba del panel
+  // Física de la ropa colgada (resorte con roce) y de las etiquetas (más livianas, se mecen más)
+  const K = 52, C = 2.6, K_ET = 95, C_ET = 1.8;
+  let items = [], G = 220, S = 92, E = 60, GANCHO = 38, altoRack = 560;
+  let centro = -1, abierto = null, zoomP = 0, Z = 1, anim = 0, antes = 0, scrollAntes = 0, vel = 0;
+  let empezo = false, listo = false, mostrado = false, girando = false, anchoAntes = 0;
+  const suave = (t) => t * t * (3 - 2 * t);
+
+  // Gancho metálico que cuelga del riel; el pivote (donde toca el riel) queda en (13, 9) del dibujo
+  function pintarGancho(it) {
+    const alto = GANCHO + 15, fin = GANCHO + 9;
+    const curva = `M13 ${fin} L13 17 C13 12 19.5 12 19.5 7 C19.5 1.5 15 -.5 11 1 C8 2.2 7 5 8.2 7.4`;
+    it.gancho.innerHTML = `<svg width="26" height="${alto}" viewBox="0 0 26 ${alto}" aria-hidden="true">
+      <path d="${curva}" fill="none" stroke="#8e8e94" stroke-width="2.8" stroke-linecap="round"/>
+      <path d="${curva}" fill="none" stroke="#f2f2f4" stroke-width=".9" stroke-linecap="round" transform="translate(-.5 -.3)"/>
+      <rect x="9.5" y="${fin - 5}" width="7" height="10" rx="2" fill="#1c1c1e"/>
+    </svg>`;
+  }
+
+  function crearItem(p, rec) {
+    const el = document.createElement("button");
+    el.className = "colgado";
+    el.setAttribute("aria-label", `Ver ${p.nombre}`);
+    el.innerHTML = `<span class="colgado-mueve"><span class="colgado-llega"><span class="gancho"></span><span class="prenda"></span></span></span>`;
+    // Cada prenda pesa y cuelga un poco distinto: así no se mecen todas iguales, como robots
+    return { p, el, mover: el.firstElementChild, llega: el.querySelector(".colgado-llega"), gancho: el.querySelector(".gancho"), prenda: el.querySelector(".prenda"),
+      frente: rec, alta: null, espalda: undefined, actual: rec, alto: 0, th: 0, w: 0, etiquetas: null,
+      k: K * (0.8 + Math.random() * 0.4), c: C * (0.85 + Math.random() * 0.3), masa: 0.85 + Math.random() * 0.3 };
+  }
+
+  // Pone una foto recortada en la percha: todas del mismo ancho y con el cuello justo bajo el gancho
+  function ponerLienzo(it, rec) {
+    it.actual = rec;
+    let e = G / rec.lienzo.width;
+    if (rec.lienzo.height * e > G * 1.3) e = (G * 1.3) / rec.lienzo.height;
+    const s = it.prenda.style;
+    s.left = -rec.gx * e + "px";
+    s.top = GANCHO - rec.gy * e + 1 + "px";
+    s.width = rec.lienzo.width * e + "px";
+    s.height = rec.lienzo.height * e + "px";
+    s.transformOrigin = `${rec.gx * e}px 0`;
+    if (rec.lienzo.parentNode !== it.prenda) it.prenda.replaceChildren(rec.lienzo);
+    it.alto = rec.lienzo.height * e;
+    pintarGancho(it);
+  }
+
+  function medidas() {
+    const ancho = caja.clientWidth, movil = ancho < 700;
+    anchoAntes = ancho;
+    G = movil ? Math.min(270, ancho * 0.62) : 230;
+    S = G * (movil ? 0.42 : 0.5);
+    E = G * 0.27;
+    GANCHO = Math.round(G * 0.17);
+    altoRack = Math.round(RIEL + GANCHO + G * 1.3 + 150);
+    caja.style.setProperty("--slot", S + "px");
+    caja.style.setProperty("--relleno", (ancho - S) / 2 + "px");
+    caja.style.setProperty("--flecha-y", RIEL + GANCHO + G * 0.55 + "px");
+    if (!abierto) caja.style.height = altoRack + "px";
+    for (const it of items) ponerLienzo(it, it.actual);
+  }
+
+  // Ubica cada prenda según qué tan lejos está del medio: la del medio de frente, las demás de lado
+  function pintar() {
+    const pos = pista.scrollLeft / S;
+    let menor = Infinity, c = -1;
+    items.forEach((it, i) => {
+      const d = i - pos, a = Math.min(1, Math.abs(d)), sg = Math.sign(d), elegido = abierto === it;
+      if (Math.abs(d) < menor) { menor = Math.abs(d); c = i; }
+      const zoom = elegido ? 1 + (Z - 1) * suave(zoomP) : 1;
+      const ry = -sg * 58 * Math.pow(a, 0.75);
+      const sc = (1 - 0.12 * a) * zoom;
+      it.mover.style.transform = `translateX(${(sg * E * a).toFixed(1)}px) perspective(800px) rotateZ(${it.th.toFixed(2)}deg) rotateY(${ry.toFixed(1)}deg) scale(${sc.toFixed(3)})`;
+      it.el.style.zIndex = elegido ? 200 : 100 - Math.round(Math.abs(d) * 10);
+    });
+    return c;
+  }
+
+  function cuadro(t) {
+    anim = 0;
+    const dt = Math.min(0.04, Math.max(0.001, (t - antes) / 1000));
+    antes = t;
+    const sl = pista.scrollLeft, v = (sl - scrollAntes) / dt;
+    scrollAntes = sl;
+    const nueva = vel * 0.6 + v * 0.4, acel = (nueva - vel) / dt;
+    vel = nueva;
+    // Si el riel acelera hacia un lado, la ropa se queda atrás y después vuelve, como en la tienda
+    const empuje = sinMovimiento ? 0 : Math.max(-900, Math.min(900, -0.06 * acel));
+    let sigue = Math.abs(v) > 2;
+    for (const it of items) {
+      if (sinMovimiento) { it.th = it.w = 0; continue; }
+      const alfa = -it.k * it.th - it.c * it.w + empuje * it.masa;
+      it.w += alfa * dt;
+      it.th = Math.max(-20, Math.min(20, it.th + it.w * dt));
+      if (Math.abs(it.th) > 0.04 || Math.abs(it.w) > 0.4) sigue = true;
+      if (!it.etiquetas) continue;
+      for (const et of it.etiquetas) {
+        // La etiqueta busca su posición de reposo aunque la prenda esté inclinada
+        const b = -K_ET * (et.th + it.th - et.reposo) - C_ET * et.w - alfa * 0.6;
+        et.w += b * dt;
+        et.th += et.w * dt;
+        et.el.style.transform = `rotate(${et.th.toFixed(2)}deg)`;
+        if (Math.abs(et.th + it.th - et.reposo) > 0.05 || Math.abs(et.w) > 0.5) sigue = true;
+      }
+    }
+    const meta = abierto ? 1 : 0;
+    if (zoomP !== meta) {
+      zoomP = sinMovimiento ? meta : zoomP + (meta - zoomP) * (1 - Math.exp(-dt * 6));
+      if (Math.abs(zoomP - meta) < 0.002) zoomP = meta;
+      sigue = true;
+    }
+    const c = pintar();
+    if (c !== centro) cambiarCentro(c);
+    if (sigue) anim = requestAnimationFrame(cuadro);
+  }
+  const arrancar = () => {
+    if (anim || !listo) return;
+    antes = performance.now();
+    anim = requestAnimationFrame(cuadro);
+  };
+
+  const ayuda = () => (matchMedia("(hover: hover)").matches ? "Pasa el mouse por la ropa y haz clic en la del medio 👆" : "Desliza el perchero y toca la prenda del medio 👆");
+  function pintarInfo() {
+    const it = items[centro];
+    if (!it) return;
+    info.innerHTML = `<p class="pi-nombre">${esc(it.p.nombre)}</p><p class="precio pi-precio">${precioHtml(it.p)}</p><p class="pi-pista">${ayuda()}</p>`;
+  }
+  function cambiarCentro(c) {
+    const habia = centro;
+    centro = c;
+    if (!items[c]) return;
+    items.forEach((it, i) => it.el.classList.toggle("centro", i === c));
+    if (abierto) return;
+    if (habia >= 0 && mostrado) sonidoGancho(0.8);
+    pintarInfo();
+  }
+
+  // Las etiquetas de la tienda cuelgan del hombro: la negra con el precio y la de cartón con las tallas
+  function colgarEtiquetas(it) {
+    const grupo = document.createElement("span");
+    grupo.className = "etiquetas";
+    grupo.style.cssText = `left:${(G * 0.34).toFixed(1)}px;top:${(GANCHO + it.alto * 0.08).toFixed(1)}px`;
+    const tallas = it.p.tallas.filter((t) => t.toLowerCase() !== "única");
+    grupo.innerHTML = `<span class="etiqueta negra"><i></i><span class="carton"><img src="img/logo-lobo-128.png" alt=""><b>${fmt(it.p.precio)}</b></span></span>` +
+      (tallas.length ? `<span class="etiqueta kraft"><i></i><span class="carton"><small>Tallas</small><b>${tallas.map(esc).join(" ")}</b></span></span>` : "");
+    it.llega.append(grupo);
+    // Cuelgan del mismo punto abiertas en abanico (reposo, en grados) y entran balanceándose
+    it.etiquetas = [...grupo.querySelectorAll(".etiqueta")].map((el, k) => ({ el, th: k ? -60 : -40, w: 0, reposo: k ? -22 : 16 }));
+    requestAnimationFrame(() => grupo.classList.add("visible"));
+  }
+
+  // Lo que tapan arriba la barra y la fila de categorías (las dos quedan pegadas al bajar)
+  const tapado = () => $(".barra").offsetHeight + ($(".categorias") ? $(".categorias").offsetHeight : 0);
+  function altoZoom() {
+    return Math.round(Math.max(altoRack + 80, Math.min(innerHeight - tapado(), altoRack * 1.75)));
+  }
+
+  async function abrir(it) {
+    if (abierto || !listo) return;
+    abierto = it;
+    sonidoTela();
+    const alto = altoZoom();
+    caja.style.height = alto + "px";
+    Z = Math.max(1.1, Math.min(1.8, (alto - RIEL - 215) / (GANCHO + it.alto)));
+    caja.classList.add("abierto");
+    it.el.classList.add("elegido");
+    info.innerHTML = `<p class="pi-nombre">${esc(it.p.nombre)}</p><p class="precio pi-precio">${precioHtml(it.p)}</p>
+      <div class="pi-lados" role="group" aria-label="Lado de la prenda" hidden>
+        <button data-lado="frente" aria-pressed="true">Frente</button><button data-lado="espalda" aria-pressed="false">Espalda</button>
+      </div>
+      <button class="ed-btn pi-comprar" data-comprar>Elegir talla y comprar</button>`;
+    colgarEtiquetas(it);
+    it.w += 70;
+    arrancar();
+    window.scrollTo({ top: caja.getBoundingClientRect().top + scrollY - tapado(), behavior: sinMovimiento ? "auto" : "smooth" });
+    // Cuando termina de acercarse: la foto en alta y la espalda (si la foto 2 se puede recortar)
+    await new Promise((ok) => setTimeout(ok, 700));
+    if (abierto !== it) return;
+    if (!it.alta) it.alta = await recortarPrenda(it.p.fotos[0], 1200);
+    if (abierto !== it) return;
+    if (it.alta && it.actual === it.frente) ponerLienzo(it, it.alta);
+    if (it.espalda === undefined) {
+      const rec = await recortarPrenda(it.p.fotos[1], 1200), base = it.alta || it.frente;
+      const prop = (x) => x.lienzo.height / x.lienzo.width;
+      it.espalda = rec && Math.abs(prop(rec) - prop(base)) < prop(base) * 0.25 ? rec : null;
+    }
+    if (abierto !== it) return;
+    const lados = $(".pi-lados", info);
+    if (lados && it.espalda) lados.hidden = false;
+  }
+
+  function cerrar() {
+    const it = abierto;
+    if (!it) return;
+    abierto = null;
+    caja.classList.remove("abierto");
+    it.el.classList.remove("elegido");
+    caja.style.height = altoRack + "px";
+    const grupo = it.llega.querySelector(".etiquetas");
+    if (grupo) { grupo.classList.remove("visible"); setTimeout(() => grupo.remove(), 350); }
+    it.etiquetas = null;
+    it.w -= 50;
+    sonidoGancho(0.7);
+    pintarInfo();
+    arrancar();
+    // Ya de vuelta en el riel, se suelta la foto en alta para no gastar memoria del teléfono
+    setTimeout(() => {
+      if (abierto === it) return;
+      if (it.actual !== it.frente) ponerLienzo(it, it.frente);
+      for (const r of [it.alta, it.espalda]) if (r) r.lienzo.width = 0;
+      it.alta = null;
+      it.espalda = undefined;
+    }, 700);
+  }
+
+  // Frente / Espalda: la prenda gira sobre la percha y a mitad de giro cambia de foto
+  async function girar(aEspalda) {
+    const it = abierto;
+    if (!it || girando) return;
+    const rec = aEspalda ? it.espalda : it.alta || it.frente;
+    if (!rec || rec === it.actual) return;
+    girando = true;
+    sonidoTela(0.5);
+    const media = "perspective(900px) rotateY(90deg)";
+    if (!sinMovimiento) await it.prenda.animate([{ transform: "perspective(900px) rotateY(0deg)" }, { transform: media }], { duration: 220, easing: "ease-in" }).finished.catch(() => {});
+    ponerLienzo(it, rec);
+    info.querySelectorAll("[data-lado]").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.lado === "espalda") === aEspalda)));
+    if (!sinMovimiento) await it.prenda.animate([{ transform: "perspective(900px) rotateY(-90deg)" }, { transform: "perspective(900px) rotateY(0deg)" }], { duration: 320, easing: "cubic-bezier(.2,.8,.3,1)" }).finished.catch(() => {});
+    it.w += aEspalda ? 40 : -40;
+    arrancar();
+    girando = false;
+  }
+
+  // Al llegar a la sección, la ropa se va colgando de a una con su tintineo
+  function entrada() {
+    if (mostrado || !listo) return;
+    mostrado = true;
+    caja.classList.remove("esperando");
+    if (sinMovimiento) return;
+    items.forEach((it, i) => {
+      const espera = i * 85;
+      it.llega.animate([
+        { transform: "translateY(-46px)", opacity: 0 },
+        { transform: "translateY(4px)", opacity: 1, offset: 0.7 },
+        { transform: "translateY(0)", opacity: 1 },
+      ], { duration: 520, delay: espera, easing: "cubic-bezier(.3,.6,.4,1)", fill: "backwards" });
+      setTimeout(() => {
+        it.w += (i % 2 ? 1 : -1) * (60 + Math.random() * 40);
+        if (Math.abs(i - centro) <= 2) sonidoGancho(0.45);
+        arrancar();
+      }, espera + 360);
+    });
+  }
+
+  async function colgarTodo() {
+    if (empezo) return;
+    empezo = true;
+    const fondos = [];
+    // Las fotos se descargan todas a la vez y se recortan de a una (deja respirar a la página entre foto y foto)
+    const cargas = candidatos.map((p) => cargarImagen(p.fotos[0]).catch(() => null));
+    for (const [k, p] of candidatos.entries()) {
+      const rec = await recortarPrenda(cargas[k], 640);
+      if (rec) { items.push(crearItem(p, rec)); fondos.push(rec.fondo); }
+      await new Promise((ok) => setTimeout(ok));
+    }
+    if (items.length < 3) { bloque.remove(); return; }
+    // La pared toma el mismo gris de las fotos: así cualquier borde del recorte queda invisible
+    const pared = [0, 1, 2].map((k) => Math.round(fondos.reduce((s, f) => s + f[k], 0) / fondos.length));
+    caja.style.setProperty("--pared", `rgb(${pared.join(",")})`);
+    pista.replaceChildren(...items.map((it) => it.el));
+    caja.classList.remove("cargando");
+    medidas();
+    listo = true;
+    // En el celular la segunda prenda queda al medio (como el carrusel); en el computador, la del medio
+    pista.scrollLeft = (caja.clientWidth < 700 ? 1 : Math.floor((items.length - 1) / 2)) * S;
+    scrollAntes = pista.scrollLeft;
+    cambiarCentro(pintar());
+    const r = caja.getBoundingClientRect();
+    if (r.top < innerHeight * 0.7 && r.bottom > innerHeight * 0.3) entrada();
+  }
+
+  pista.addEventListener("scroll", arrancar, { passive: true });
+  pista.addEventListener("click", (e) => {
+    const el = e.target.closest(".colgado");
+    if (abierto) {
+      if (e.target.closest(".etiquetas")) return;
+      // Tocar la prenda la gira; tocar fuera la devuelve al riel
+      if (el === abierto.el && e.target.closest(".prenda")) { if (abierto.espalda) girar(abierto.actual !== abierto.espalda); }
+      else cerrar();
+      return;
+    }
+    if (!el) return;
+    const i = items.findIndex((it) => it.el === el);
+    if (i === centro) abrir(items[i]);
+    else pista.scrollTo({ left: i * S, behavior: "smooth" });
+  });
+  // Con el teclado (Tab) la prenda elegida pasa al medio
+  pista.addEventListener("focusin", (e) => {
+    const i = items.findIndex((it) => it.el === e.target);
+    if (i >= 0 && i !== centro && !abierto && e.target.matches(":focus-visible")) pista.scrollTo({ left: i * S, behavior: "smooth" });
+  });
+  // Con mouse, pasar por encima mece la ropa, como pasar la mano por el perchero
+  pista.addEventListener("pointermove", (e) => {
+    if (e.pointerType !== "mouse" || abierto || sinMovimiento || !listo) return;
+    const el = e.target.closest(".colgado"), it = el && items.find((x) => x.el === el);
+    if (!it) return;
+    it.w = Math.max(-140, Math.min(140, it.w - e.movementX * 2.2));
+    arrancar();
+  });
+  caja.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-correr]");
+    if (b) pista.scrollBy({ left: Number(b.dataset.correr) * S, behavior: "smooth" });
+  });
+  $("#perchero-cerrar").addEventListener("click", cerrar);
+  info.addEventListener("click", (e) => {
+    const lado = e.target.closest("[data-lado]");
+    if (lado) { girar(lado.dataset.lado === "espalda"); return; }
+    if (e.target.closest("[data-comprar]") && abierto) {
+      const id = abierto.p.id;
+      cerrar();
+      location.hash = "producto=" + encodeURIComponent(id);
+    }
+  });
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && abierto && $("#modal").hidden) cerrar(); });
+
+  new ResizeObserver(() => {
+    if (!listo || caja.clientWidth === anchoAntes) return;
+    medidas();
+    pista.scrollLeft = Math.max(0, centro) * S;
+    pintar();
+  }).observe(caja);
+  // Se prepara un poco antes de llegar; al verse, la ropa se cuelga. Si se sale de la sección, la prenda vuelve al riel.
+  new IntersectionObserver(([e]) => { if (e.isIntersecting) colgarTodo(); }, { rootMargin: "1200px 0px" }).observe(bloque);
+  new IntersectionObserver(([e]) => {
+    caja.classList.toggle("fuera", !e.isIntersecting);
+    if (!e.isIntersecting) cerrar();
+    if (e.intersectionRatio >= 0.3) entrada();
+  }, { threshold: [0, 0.3] }).observe(caja);
+}
 
 // ---------- Lobo en moto que recorre los 4 pasos de "¿Cómo comprar?" ----------
 // Al llegar a esta parte la moto entra por la izquierda y para en cada paso (se ilumina su tarjeta);
