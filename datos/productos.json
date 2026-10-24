@@ -3,6 +3,26 @@
     {
       "perchero": false,
       "precio": 46000,
+      "nombre": "OFF WHITE",
+      "descripcion": ">100% algodón\n>cuello redondo\n>serigrafia al tacto\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261024-192412-ye6-1.jpg",
+        "img/productos/20261024-192421-5zu-2.jpg",
+        "img/productos/20261024-192429-yqe-3.jpg",
+        "img/productos/20261024-192436-wge-4.jpg"
+      ],
+      "colores": [
+        "negro"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "tallas": [
+        "L"
+      ]
+    },
+    {
+      "perchero": false,
+      "precio": 46000,
       "nombre": "SUPREME",
       "descripcion": ">100% algodón\n>cuello redondo\n>logo serigrafia al tacto\n>lavar a mano",
       "fotos": [
