@@ -48,6 +48,7 @@ const slug = (s) =>
           precioAntes: Number(p.precioAntes) > 0 ? Number(p.precioAntes) : null,
           etiqueta: p.etiqueta || "",
           disponible: p.disponible !== false,
+          perchero: p.perchero === true,
           descripcion: p.descripcion || "",
           tallas: lista(p.tallas).sort(ordenarTallas),
           colores: lista(p.colores),

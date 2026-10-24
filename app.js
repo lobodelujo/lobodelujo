@@ -1100,18 +1100,18 @@ function revisarHash() {
 window.addEventListener("hashchange", revisarHash);
 
 // ---------- El Perchero de Lobo ----------
-// Poleras y polerones colgados en un riel, como en la tienda. La página recorta sola cada prenda desde
-// su foto 1 (frente) y su foto 2 (espalda) cuando tienen fondo claro y liso, como las del prompt LDL-01.
-// Las fotos que no se pueden recortar limpio quedan fuera del perchero (igual se ven en el catálogo).
-// Al deslizar, la ropa se mece; al tocar la del medio viene al frente con sus etiquetas y se puede girar.
+// Prendas colgadas en un riel, vistas de lejos como en una foto de estudio (caben unas 5 a lo ancho).
+// En el panel, cada producto tiene la casilla "Colgar en El Perchero de Lobo": si hay alguno marcado se
+// cuelgan solo esos (en el orden de la lista); si no, se cuelgan solas las poleras y polerones.
+// La página recorta sola cada prenda desde su foto de la prenda sola (frente y espalda), cuando tiene fondo
+// claro y liso como las del prompt LDL-01; las que no se pueden recortar limpio quedan fuera (igual se ven
+// en el catálogo). Al tocar una prenda, corre por el riel al centro y se acerca grande, y se puede girar.
 const PERCHERO = ["Poleras", "Polerones"];
+const PERCHERO_NO_CUELGAN = ["Gorras", "Lentes", "Accesorios"];
+const PERCHERO_PINZAS = ["Pantalones", "Shorts"]; // estos van en percha de pinzas, tomados de la pretina
 const PERCHERO_MAX = 16;
 
 function percheroHtml() {
-  const frases = [`${TIENDA.frase || ""} ${TIENDA.fraseAbajo || ""}`.trim(), "Nuevos drops", TIENDA.envio || "Envíos a todo Chile", TIENDA.nombre]
-    .filter(Boolean)
-    .map((t) => `<span>${esc(t)}</span><span>✦</span>`)
-    .join("");
   return `<section class="ed-bloque perchero-bloque" id="perchero-bloque">
     <div class="ed-cab"><h2>El Perchero de Lobo</h2></div>
     <div class="perchero cargando esperando" id="perchero">
@@ -1132,13 +1132,13 @@ function percheroHtml() {
         </filter>
       </svg>
       <img class="perchero-logo" src="img/logo-lobo-128.png" alt="" width="128" height="128">
+      <div class="perchero-suelo" aria-hidden="true"></div>
       <div class="perchero-riel" aria-hidden="true"></div>
       <div class="perchero-pista" id="perchero-pista" aria-label="Prendas colgadas"></div>
-      <button class="flecha izq" data-correr="-1" aria-label="Prenda anterior">‹</button>
-      <button class="flecha der" data-correr="1" aria-label="Prenda siguiente">›</button>
+      <button class="flecha izq" data-correr="-1" aria-label="Prendas anteriores">‹</button>
+      <button class="flecha der" data-correr="1" aria-label="Prendas siguientes">›</button>
       <button class="perchero-cerrar" id="perchero-cerrar" aria-label="Volver al perchero">×</button>
       <div class="perchero-info" id="perchero-info" aria-live="polite"><p class="pi-pista">Colgando la ropa…</p></div>
-      <div class="perchero-cinta" aria-hidden="true"><div class="cinta-pista">${frases.repeat(6)}</div></div>
     </div>
   </section>`;
 }
@@ -1427,15 +1427,18 @@ function prepararPerchero() {
   const bloque = $("#perchero-bloque");
   if (!bloque) return;
   const caja = $("#perchero"), pista = $("#perchero-pista"), info = $("#perchero-info");
-  const candidatos = PRODUCTOS.filter((p) => PERCHERO.includes(p.categoria) && p.disponible && p.fotos.length).slice(0, PERCHERO_MAX);
-  if (candidatos.length < 3) { bloque.remove(); return; }
+  // Las que marcó en el panel (en el orden de su lista); si no marcó ninguna, las poleras y polerones
+  const cuelga = (p) => p.disponible && p.fotos.length && !PERCHERO_NO_CUELGAN.includes(p.categoria);
+  const marcados = PRODUCTOS.filter((p) => p.perchero && cuelga(p));
+  const candidatos = (marcados.length ? marcados : PRODUCTOS.filter((p) => PERCHERO.includes(p.categoria) && cuelga(p))).slice(0, PERCHERO_MAX);
+  if (candidatos.length < (marcados.length ? 1 : 3)) { bloque.remove(); return; }
 
-  const RIEL = 74; // distancia del riel al borde de arriba del panel
   // Física de la ropa colgada (resorte con roce) y de las etiquetas (más livianas, se mecen más)
   const K = 52, C = 2.6, K_ET = 95, C_ET = 1.8;
-  let items = [], G = 220, S = 92, E = 60, GANCHO = 38, altoRack = 560;
-  let centro = -1, abierto = null, zoomP = 0, Z = 1, anim = 0, antes = 0, scrollAntes = 0, vel = 0;
-  let empezo = false, listo = false, mostrado = false, girando = false, anchoAntes = 0;
+  const RIEL_CERCA = 26; // al acercar una prenda el riel sube, como si la cámara se acercara
+  let items = [], G = 150, S = 170, GANCHO = 28, RIEL = 150, altoRack = 560, relleno = 0, ancho = 0;
+  let centro = -1, abierto = null, foco = null, zoomP = 0, Z = 1, anim = 0, antes = 0, scrollAntes = 0, vel = 0;
+  let empezo = false, listo = false, mostrado = false, girando = false;
   const suave = (t) => t * t * (3 - 2 * t);
 
   // Percha de lujo de madera clara y hombros anchos (como las de las tiendas de marca): por la abertura del
@@ -1446,11 +1449,31 @@ function prepararPerchero() {
   // la barra no se ve y el bloque asoma desde dentro del cuello, por su lado sin grabado.
   // El (0,0) es donde el gancho toca el riel · e: escala de la foto · arriba: dónde empieza la foto
   let nPercha = 0;
+  const acero = (d, s) => `
+      <path d="${d}" fill="none" stroke="#6f737a" stroke-width="${2.8 * s}" stroke-linecap="round"/>
+      <path d="${d}" fill="none" stroke="#c3c7cd" stroke-width="${1.9 * s}" stroke-linecap="round"/>
+      <path d="${d}" fill="none" stroke="#f5f6f8" stroke-width="${0.6 * s}" stroke-linecap="round" transform="translate(${-0.45 * s} ${-0.3 * s})"/>`;
+  const curvaGancho = (yFin) => `M0 ${yFin} L0 8 C0 3 6.5 3 6.5 -2 C6.5 -7.5 2 -9.5 -2 -8 C-5 -6.8 -6 -4 -4.8 -1.6`;
   function pintarGancho(it, rec, e, arriba) {
-    const atras = rec === it.espalda;
+    const atras = rec === it.espalda && !it.pinzas;
     it.gancho.classList.toggle("detras", atras);
     const s = G / 230, n = rec.perfil.length - 1, alto = rec.lienzo.height * e, id = "percha" + ++nPercha;
     const yCuello = arriba + rec.gy * e;
+    // Pantalones y shorts: percha de pinzas. Barra de madera clara sobre la pretina con el lobo grabado y dos
+    // pinzas de acero que la toman (igual por delante y por detrás)
+    if (it.pinzas) {
+      const mitad = rec.lienzo.width * e * 0.44, alto = 6.5 * s, yB = yCuello - alto * 0.55, logoP = 9 * s;
+      const pinza = (x) => `
+        <rect x="${x - 3 * s}" y="${yB + alto * 0.6}" width="${6 * s}" height="${9 * s}" rx="${1.2 * s}" fill="#b9bdc3" stroke="#6f737a" stroke-width="${0.6 * s}"/>
+        <rect x="${x - 2 * s}" y="${yB + alto * 0.6 + 1.2 * s}" width="${1.2 * s}" height="${6.5 * s}" rx="${0.6 * s}" fill="#f5f6f8" opacity=".8"/>`;
+      it.gancho.innerHTML = `<svg width="1" height="1" overflow="visible" aria-hidden="true">${acero(curvaGancho(yB + s), s)}
+        <rect x="${-mitad}" y="${yB}" width="${mitad * 2}" height="${alto}" rx="${alto / 2}" fill="url(#perchero-madera)" stroke="#a37b4c" stroke-width="${0.6 * s}"/>
+        <rect x="${-mitad + alto * 0.4}" y="${yB + alto * 0.14}" width="${mitad * 2 - alto * 0.8}" height="${alto * 0.24}" rx="${alto * 0.12}" fill="#f6e6c6" opacity=".9"/>
+        ${pinza(-mitad * 0.72)}${pinza(mitad * 0.72)}
+        <image href="img/logo-lobo-128.png" x="${-logoP / 2}" y="${yB + alto / 2 - logoP / 2}" width="${logoP}" height="${logoP}" filter="url(#perchero-grabado)"/>
+      </svg>`;
+      return;
+    }
     // Capucha: junto al cuello (a un cuarto del ancho) la prenda queda mucho más abajo que al centro
     const yHombros = arriba + ((rec.perfil[Math.round(n * 0.25)][1] + rec.perfil[Math.round(n * 0.75)][1]) / 2) * e;
     const capucha = yHombros - yCuello > alto * 0.1;
@@ -1460,7 +1483,6 @@ function prepararPerchero() {
     const abajo = 15 * s, tope = 11 * s, altoB = 23 * s, yBase = yBarra + grosor * 0.35, yTope = capucha ? yCuello + 2 * s : yBase - altoB;
     const bloque = `M${-abajo} ${yBase} L${-tope} ${yTope + 1.5 * s} Q${-tope} ${yTope} ${-tope + 1.5 * s} ${yTope} L${tope - 1.5 * s} ${yTope} Q${tope} ${yTope} ${tope} ${yTope + 1.5 * s} L${abajo} ${yBase} Z`;
     const logo = 15.5 * s;
-    const gancho = `M0 ${yTope + s} L0 8 C0 3 6.5 3 6.5 -2 C6.5 -7.5 2 -9.5 -2 -8 C-5 -6.8 -6 -4 -4.8 -1.6`;
     // El bloque de madera con su veta y el canto de arriba más claro (se ve por delante y por detrás)
     const cuerpo = `
       <path d="${bloque}" fill="url(#perchero-madera)" stroke="#a37b4c" stroke-width="${0.6 * s}"/>
@@ -1489,15 +1511,13 @@ function prepararPerchero() {
         <path d="${barra}" fill="none" stroke="#b8925f" stroke-width="${grosor * 0.1}" stroke-dasharray="${13 * s} ${5 * s} ${4 * s} ${8 * s}" opacity=".6" transform="translate(0 ${grosor * 0.18})"/>
       </g>${cuerpo}
       <image href="img/logo-lobo-128.png" x="${-logo / 2}" y="${yBase - altoB * 0.5 - logo * 0.42}" width="${logo}" height="${logo}" filter="url(#perchero-grabado)"/>`;
-    it.gancho.innerHTML = `<svg width="1" height="1" overflow="visible" aria-hidden="true">
-      <path d="${gancho}" fill="none" stroke="#6f737a" stroke-width="${2.8 * s}" stroke-linecap="round"/>
-      <path d="${gancho}" fill="none" stroke="#c3c7cd" stroke-width="${1.9 * s}" stroke-linecap="round"/>
-      <path d="${gancho}" fill="none" stroke="#f5f6f8" stroke-width="${0.6 * s}" stroke-linecap="round" transform="translate(${-0.45 * s} ${-0.3 * s})"/>${madera}
+    it.gancho.innerHTML = `<svg width="1" height="1" overflow="visible" aria-hidden="true">${acero(curvaGancho(yTope + s), s)}${madera}
     </svg>`;
   }
 
-  // Una polera o polerón colgado nunca es mucho más alto que ancho: si lo es, la foto era de una persona
-  const esPrenda = (rec) => !!rec && rec.lienzo.height / rec.lienzo.width <= 1.45;
+  // Una polera o polerón colgado nunca es mucho más alto que ancho, y un pantalón no es tan largo como una
+  // persona: si lo es, la foto era de alguien puesto la prenda
+  const esPrenda = (rec, p) => !!rec && rec.lienzo.height / rec.lienzo.width <= (PERCHERO_PINZAS.includes(p.categoria) ? 3.1 : 1.45);
 
   // cual: el número de foto del producto que se usó para colgarlo (la de la prenda sola)
   function crearItem(p, rec, cual) {
@@ -1507,16 +1527,19 @@ function prepararPerchero() {
     // La percha va encima de la foto: se ve por la abertura del cuello, como en una polera colgada de verdad
     el.innerHTML = `<span class="colgado-mueve"><span class="colgado-llega"><span class="prenda"></span><span class="gancho"></span></span></span>`;
     // Cada prenda pesa y cuelga un poco distinto: así no se mecen todas iguales, como robots
+    const pinzas = PERCHERO_PINZAS.includes(p.categoria);
     return { p, el, mover: el.firstElementChild, llega: el.querySelector(".colgado-llega"), gancho: el.querySelector(".gancho"), prenda: el.querySelector(".prenda"),
-      cual, frente: rec, alta: null, espalda: undefined, actual: rec, alto: 0, th: 0, w: 0, etiquetas: null,
+      cual, pinzas, frente: rec, alta: null, espalda: undefined, actual: rec, ancho: 0, alto: 0, th: 0, w: 0, etiquetas: null,
       k: K * (0.8 + Math.random() * 0.4), c: C * (0.85 + Math.random() * 0.3), masa: 0.85 + Math.random() * 0.3 };
   }
 
-  // Pone una foto recortada en la percha: todas del mismo ancho y con el cuello justo bajo el gancho
+  // Pone una foto recortada en la percha con el cuello (o la pretina) justo bajo el gancho. Las poleras y
+  // polerones van todos del mismo ancho; pantalones y shorts más angostos, como se ven colgados de verdad.
   function ponerLienzo(it, rec) {
     it.actual = rec;
-    let e = G / rec.lienzo.width;
-    if (rec.lienzo.height * e > G * 1.3) e = (G * 1.3) / rec.lienzo.height;
+    const objetivo = G * (it.pinzas ? 0.62 : 1), largoMax = G * (it.pinzas ? 1.9 : 1.3);
+    let e = objetivo / rec.lienzo.width;
+    if (rec.lienzo.height * e > largoMax) e = largoMax / rec.lienzo.height;
     const s = it.prenda.style, arriba = GANCHO - rec.gy * e + 1;
     s.left = -rec.gx * e + "px";
     s.top = arriba + "px";
@@ -1524,37 +1547,49 @@ function prepararPerchero() {
     s.height = rec.lienzo.height * e + "px";
     s.transformOrigin = `${rec.gx * e}px 0`;
     if (rec.lienzo.parentNode !== it.prenda) it.prenda.replaceChildren(rec.lienzo);
+    it.ancho = rec.lienzo.width * e;
     it.alto = rec.lienzo.height * e;
     pintarGancho(it, rec, e, arriba);
   }
 
+  // Toma de lejos, como una foto de estudio: en el ancho de la "foto" caben unas 5 prendas, un poco separadas,
+  // con harta pared arriba y la sombra suave en el piso. En el computador la foto queda al centro.
   function medidas() {
-    const ancho = caja.clientWidth, movil = ancho < 700;
-    anchoAntes = ancho;
-    G = movil ? Math.min(270, ancho * 0.62) : 230;
-    S = G * (movil ? 0.55 : 0.58);
-    E = G * 0.14;
+    ancho = caja.clientWidth;
+    const escena = Math.min(ancho, 920);
+    S = escena / 5.2;
+    G = S * 0.86;
     GANCHO = Math.round(G * 0.19);
-    altoRack = Math.round(RIEL + GANCHO + G * 1.3 + 150);
+    altoRack = Math.round(Math.min(escena * 0.86, 600));
+    RIEL = Math.round(altoRack * 0.28);
+    const total = items.length * S;
+    // Si caben todas, quedan centradas; si son más, parten desde el borde de la foto y se deslizan
+    relleno = total <= ancho ? (ancho - total) / 2 : (ancho - escena) / 2 + S * 0.1;
+    caja.classList.toggle("desborda", total > ancho);
     caja.style.setProperty("--slot", S + "px");
-    caja.style.setProperty("--relleno", (ancho - S) / 2 + "px");
-    caja.style.setProperty("--flecha-y", RIEL + GANCHO + G * 0.55 + "px");
-    if (!abierto) caja.style.height = altoRack + "px";
+    caja.style.setProperty("--relleno", relleno + "px");
+    caja.style.setProperty("--suelo", Math.round(altoRack * 0.74) + "px");
+    caja.style.setProperty("--flecha-y", RIEL + GANCHO + G * 0.6 + "px");
+    if (!abierto) {
+      caja.style.height = altoRack + "px";
+      caja.style.setProperty("--riel", RIEL + "px");
+    }
     for (const it of items) ponerLienzo(it, it.actual);
   }
 
-  // Como en un perchero de verdad: todas las prendas cuelgan de frente, juntas y montadas por las mangas.
-  // La del medio se adelanta un poco más grande y las de al lado le hacen espacio.
+  // Todas cuelgan quietas en su lugar del riel. La prenda elegida corre por el riel hasta el centro y se
+  // acerca hasta quedar grande (y al cerrar vuelve a su lugar haciendo el camino al revés).
   function pintar() {
-    const pos = pista.scrollLeft / S;
-    let menor = Infinity, c = -1;
+    const c = Math.max(0, Math.min(items.length - 1, Math.round(pista.scrollLeft / S)));
     items.forEach((it, i) => {
-      const d = i - pos, a = Math.min(1, Math.abs(d)), sg = Math.sign(d), elegido = abierto === it;
-      if (Math.abs(d) < menor) { menor = Math.abs(d); c = i; }
-      const base = 1 + 0.1 * (1 - a);
-      const sc = elegido ? base + (Z - base) * suave(zoomP) : base;
-      it.mover.style.transform = `translateX(${(sg * E * a).toFixed(1)}px) rotateZ(${it.th.toFixed(2)}deg) scale(${sc.toFixed(3)})`;
-      it.el.style.zIndex = elegido ? 200 : 100 - Math.round(Math.abs(d) * 10);
+      let tx = 0, sc = 1;
+      if (foco === it) {
+        const p = suave(zoomP);
+        tx = (ancho / 2 - (relleno + i * S + S / 2 - pista.scrollLeft)) * p;
+        sc = 1 + (Z - 1) * p;
+      }
+      it.mover.style.transform = `translateX(${tx.toFixed(1)}px) rotateZ(${it.th.toFixed(2)}deg) scale(${sc.toFixed(3)})`;
+      it.el.style.zIndex = foco === it ? 200 : 100;
     });
     return c;
   }
@@ -1588,66 +1623,63 @@ function prepararPerchero() {
     }
     const meta = abierto ? 1 : 0;
     if (zoomP !== meta) {
-      zoomP = sinMovimiento ? meta : zoomP + (meta - zoomP) * (1 - Math.exp(-dt * 6));
+      zoomP = sinMovimiento ? meta : zoomP + (meta - zoomP) * (1 - Math.exp(-dt * 5));
       if (Math.abs(zoomP - meta) < 0.002) zoomP = meta;
       sigue = true;
     }
+    // Ya de vuelta en su lugar del riel
+    if (!abierto && zoomP === 0 && foco) { foco.el.classList.remove("elegido"); foco = null; }
     const c = pintar();
     if (c !== centro) cambiarCentro(c);
     if (sigue) anim = requestAnimationFrame(cuadro);
-    // Quieto: el navegador vuelve a dibujar las prendas nítidas a su tamaño final (sobre todo la acercada)
-    else caja.classList.add("quieto");
   }
   const arrancar = () => {
     if (anim || !listo) return;
-    caja.classList.remove("quieto");
     antes = performance.now();
     anim = requestAnimationFrame(cuadro);
   };
 
-  const ayuda = () => (matchMedia("(hover: hover)").matches ? "Pasa el mouse por la ropa y haz clic en la del medio 👆" : "Desliza el perchero y toca la prenda del medio 👆");
   function pintarInfo() {
-    const it = items[centro];
-    if (!it) return;
-    info.innerHTML = `<p class="pi-nombre">${esc(it.p.nombre)}</p><p class="precio pi-precio">${precioHtml(it.p)}</p><p class="pi-pista">${ayuda()}</p>`;
+    info.innerHTML = `<p class="pi-pista">${matchMedia("(hover: hover)").matches ? "Haz clic en una prenda para verla de cerca 👆" : "Toca una prenda para verla de cerca 👆"}</p>`;
   }
+  // Al deslizar el perchero, cada prenda que pasa hace tintinear su gancho
   function cambiarCentro(c) {
     const habia = centro;
     centro = c;
-    if (!items[c]) return;
-    items.forEach((it, i) => it.el.classList.toggle("centro", i === c));
-    if (abierto) return;
-    if (habia >= 0 && mostrado) sonidoGancho(0.8);
-    pintarInfo();
+    if (habia >= 0 && mostrado && !abierto) sonidoGancho(0.8);
   }
 
-  // Las etiquetas de la tienda cuelgan del hombro: la negra con el precio y la de cartón con las tallas
+  // La etiqueta de cartón con las tallas cuelga del hombro. Va dentro de la prenda (se mece con ella), así que
+  // se achica en la misma medida en que la prenda se agranda, para que se vea de su tamaño
   function colgarEtiquetas(it) {
+    const tallas = it.p.tallas.filter((t) => t.toLowerCase() !== "única");
+    if (!tallas.length) return;
     const grupo = document.createElement("span");
     grupo.className = "etiquetas";
-    grupo.style.cssText = `left:${(G * 0.34).toFixed(1)}px;top:${(GANCHO + it.alto * 0.08).toFixed(1)}px`;
-    const tallas = it.p.tallas.filter((t) => t.toLowerCase() !== "única");
-    grupo.innerHTML = `<span class="etiqueta negra"><i></i><span class="carton"><img src="img/logo-lobo-128.png" alt=""><b>${fmt(it.p.precio)}</b></span></span>` +
-      (tallas.length ? `<span class="etiqueta kraft"><i></i><span class="carton"><small>Tallas</small><b>${tallas.map(esc).join(" ")}</b></span></span>` : "");
+    grupo.style.cssText = `left:${(it.ancho * 0.34).toFixed(1)}px;top:${(GANCHO + it.alto * 0.08).toFixed(1)}px;transform:scale(${(1.35 / Z).toFixed(3)})`;
+    grupo.innerHTML = `<span class="etiqueta kraft"><i></i><span class="carton"><small>Tallas</small><b>${tallas.map(esc).join(" ")}</b></span></span>`;
     it.llega.append(grupo);
-    // Cuelgan del mismo punto abiertas en abanico (reposo, en grados) y entran balanceándose
-    it.etiquetas = [...grupo.querySelectorAll(".etiqueta")].map((el, k) => ({ el, th: k ? -60 : -40, w: 0, reposo: k ? -22 : 16 }));
+    // Entra balanceándose y queda un poco ladeada (reposo, en grados)
+    it.etiquetas = [...grupo.querySelectorAll(".etiqueta")].map((el) => ({ el, th: -50, w: 0, reposo: -12 }));
     requestAnimationFrame(() => grupo.classList.add("visible"));
   }
 
   // Lo que tapan arriba la barra y la fila de categorías (las dos quedan pegadas al bajar)
   const tapado = () => $(".barra").offsetHeight + ($(".categorias") ? $(".categorias").offsetHeight : 0);
-  function altoZoom() {
-    return Math.round(Math.max(altoRack + 80, Math.min(innerHeight - tapado(), altoRack * 1.75)));
-  }
+  const altoZoom = () => Math.round(Math.max(altoRack + 80, innerHeight - tapado()));
 
   async function abrir(it) {
     if (abierto || !listo) return;
-    abierto = it;
+    if (foco && foco !== it) { foco.el.classList.remove("elegido"); zoomP = 0; }
+    abierto = foco = it;
     sonidoTela();
     const alto = altoZoom();
     caja.style.height = alto + "px";
-    Z = Math.max(1.1, Math.min(1.8, (alto - RIEL - 205) / (GANCHO + it.alto)));
+    // Grande como las fotos del catálogo: casi todo el ancho, sin tapar el nombre y los botones de abajo
+    Z = Math.max(1.2, Math.min((ancho * 0.84) / it.ancho, (alto - RIEL_CERCA - 205) / (GANCHO + it.alto)));
+    // Si sobra alto, el riel baja un poco para que la prenda quede al medio entre arriba y el nombre
+    const sobra = alto - RIEL_CERCA - 205 - (GANCHO + it.alto) * Z;
+    caja.style.setProperty("--riel", Math.round(RIEL_CERCA + Math.max(0, sobra) * 0.5) + "px");
     caja.classList.add("abierto");
     it.el.classList.add("elegido");
     info.innerHTML = `<p class="pi-nombre">${esc(it.p.nombre)}</p><p class="precio pi-precio">${precioHtml(it.p)}</p>
@@ -1673,7 +1705,7 @@ function prepararPerchero() {
         if (f === it.cual) continue;
         const rec = await recortarPrenda(it.p.fotos[f], 1200);
         if (abierto !== it) return;
-        if (esPrenda(rec) && Math.abs(prop(rec) - prop(base)) < prop(base) * 0.25) it.espalda = rec;
+        if (esPrenda(rec, it.p) && Math.abs(prop(rec) - prop(base)) < prop(base) * 0.25) it.espalda = rec;
       }
     }
     if (abierto !== it) return;
@@ -1686,8 +1718,8 @@ function prepararPerchero() {
     if (!it) return;
     abierto = null;
     caja.classList.remove("abierto");
-    it.el.classList.remove("elegido");
     caja.style.height = altoRack + "px";
+    caja.style.setProperty("--riel", RIEL + "px");
     const grupo = it.llega.querySelector(".etiquetas");
     if (grupo) { grupo.classList.remove("visible"); setTimeout(() => grupo.remove(), 350); }
     it.etiquetas = null;
@@ -1697,12 +1729,12 @@ function prepararPerchero() {
     arrancar();
     // Ya de vuelta en el riel, se suelta la foto en alta para no gastar memoria del teléfono
     setTimeout(() => {
-      if (abierto === it) return;
+      if (abierto === it || foco === it) return;
       if (it.actual !== it.frente) ponerLienzo(it, it.frente);
       for (const r of [it.alta, it.espalda]) if (r) r.lienzo.width = 0;
       it.alta = null;
       it.espalda = undefined;
-    }, 700);
+    }, 1500);
   }
 
   // Frente / Espalda: la prenda gira sobre la percha y a mitad de giro cambia de foto
@@ -1755,13 +1787,13 @@ function prepararPerchero() {
       for (let f = 0; f < p.fotos.length; f++) {
         const rec = await recortarPrenda(f ? p.fotos[f] : cargas[k], 640);
         await new Promise((ok) => setTimeout(ok));
-        if (!esPrenda(rec)) continue;
+        if (!esPrenda(rec, p)) continue;
         items.push(crearItem(p, rec, f));
         fondos.push(rec.fondo);
         break;
       }
     }
-    if (items.length < 3) { bloque.remove(); return; }
+    if (!items.length) { bloque.remove(); return; }
     // La pared toma el mismo gris de las fotos: así cualquier borde del recorte queda invisible
     const pared = [0, 1, 2].map((k) => Math.round(fondos.reduce((s, f) => s + f[k], 0) / fondos.length));
     caja.style.setProperty("--pared", `rgb(${pared.join(",")})`);
@@ -1769,9 +1801,9 @@ function prepararPerchero() {
     caja.classList.remove("cargando");
     medidas();
     listo = true;
-    // En el celular la segunda prenda queda al medio (como el carrusel); en el computador, la del medio
-    pista.scrollLeft = (caja.clientWidth < 700 ? 1 : Math.floor((items.length - 1) / 2)) * S;
-    scrollAntes = pista.scrollLeft;
+    pista.scrollLeft = 0;
+    scrollAntes = 0;
+    pintarInfo();
     cambiarCentro(pintar());
     const r = caja.getBoundingClientRect();
     if (r.top < innerHeight * 0.7 && r.bottom > innerHeight * 0.3) entrada();
@@ -1787,15 +1819,13 @@ function prepararPerchero() {
       else cerrar();
       return;
     }
-    if (!el) return;
-    const i = items.findIndex((it) => it.el === el);
-    if (i === centro) abrir(items[i]);
-    else pista.scrollTo({ left: i * S, behavior: "smooth" });
+    // Cualquier prenda que toque se acerca
+    const it = el && items.find((x) => x.el === el);
+    if (it) abrir(it);
   });
-  // Con el teclado (Tab) la prenda elegida pasa al medio
+  // Con el teclado (Tab), la prenda elegida se asoma si estaba fuera de la vista
   pista.addEventListener("focusin", (e) => {
-    const i = items.findIndex((it) => it.el === e.target);
-    if (i >= 0 && i !== centro && !abierto && e.target.matches(":focus-visible")) pista.scrollTo({ left: i * S, behavior: "smooth" });
+    if (!abierto && e.target.matches(".colgado:focus-visible")) e.target.scrollIntoView({ inline: "nearest", block: "nearest", behavior: "smooth" });
   });
   // Con mouse, pasar por encima mece la ropa, como pasar la mano por el perchero
   pista.addEventListener("pointermove", (e) => {
@@ -1822,9 +1852,8 @@ function prepararPerchero() {
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && abierto && $("#modal").hidden) cerrar(); });
 
   new ResizeObserver(() => {
-    if (!listo || caja.clientWidth === anchoAntes) return;
+    if (!listo || caja.clientWidth === ancho) return;
     medidas();
-    pista.scrollLeft = Math.max(0, centro) * S;
     pintar();
   }).observe(caja);
   // Se prepara un poco antes de llegar; al verse, la ropa se cuelga. Si se sale de la sección, la prenda vuelve al riel.
