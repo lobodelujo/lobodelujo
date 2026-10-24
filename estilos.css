@@ -267,8 +267,9 @@ img.sin-foto {
 }
 .perchero-riel::before { left: 8px; }
 .perchero-riel::after { right: 8px; }
+/* Las prendas se ven dentro de la "foto" central (en el celular es todo el ancho) */
 .perchero-pista {
-  position: absolute; inset: 0; display: flex;
+  position: absolute; top: 0; bottom: 0; left: var(--escena-x, 0); right: var(--escena-x, 0); display: flex;
   overflow-x: auto; overflow-y: hidden; scroll-snap-type: x proximity; overscroll-behavior-x: contain;
   scrollbar-width: none; -webkit-overflow-scrolling: touch;
 }
@@ -292,8 +293,9 @@ img.sin-foto {
 .perchero.abierto .perchero-pista { overflow-x: hidden; }
 .perchero.cargando .perchero-pista { visibility: hidden; }
 .perchero .flecha { top: var(--flecha-y, 50%); z-index: 305; background: rgba(20, 20, 20, .78); color: #fff; transition: opacity .3s; }
-.perchero .flecha.izq { left: 16px; }
-.perchero .flecha.der { right: 16px; }
+/* Justo afuera de la "foto" cuando hay espacio (computador), si no, en su borde */
+.perchero .flecha.izq { left: max(8px, calc(var(--escena-x, 0px) - 54px)); }
+.perchero .flecha.der { right: max(8px, calc(var(--escena-x, 0px) - 54px)); }
 .perchero.abierto .flecha, .perchero.cargando .flecha { opacity: 0; pointer-events: none; }
 /* Las flechas solo salen con mouse y cuando hay más prendas de las que caben */
 .perchero:not(.desborda) .flecha { display: none; }

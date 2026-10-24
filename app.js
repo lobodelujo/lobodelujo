@@ -1436,7 +1436,7 @@ function prepararPerchero() {
   // Física de la ropa colgada (resorte con roce) y de las etiquetas (más livianas, se mecen más)
   const K = 52, C = 2.6, K_ET = 95, C_ET = 1.8;
   const RIEL_CERCA = 26; // al acercar una prenda el riel sube, como si la cámara se acercara
-  let items = [], G = 150, S = 170, GANCHO = 28, RIEL = 150, altoRack = 560, relleno = 0, ancho = 0;
+  let items = [], G = 150, S = 170, GANCHO = 28, RIEL = 150, altoRack = 560, relleno = 0, ancho = 0, escenaX = 0;
   let centro = -1, abierto = null, foco = null, zoomP = 0, Z = 1, anim = 0, antes = 0, scrollAntes = 0, vel = 0;
   let empezo = false, listo = false, mostrado = false, girando = false;
   const suave = (t) => t * t * (3 - 2 * t);
@@ -1479,7 +1479,8 @@ function prepararPerchero() {
     const yHombros = arriba + ((rec.perfil[Math.round(n * 0.25)][1] + rec.perfil[Math.round(n * 0.75)][1]) / 2) * e;
     const capucha = yHombros - yCuello > alto * 0.1;
     const grosor = 6 * s, mitad = g * 0.1, yBarra = yCuello + alto * 0.05, comba = 1.4 * s;
-    const barra = `M${-mitad} ${yBarra} Q0 ${yBarra - comba * 2} ${mitad} ${yBarra}`;
+    // La barra va un poco más larga que la abertura del cuello; lo que sobra queda recortado
+    const barra = `M${-mitad * 1.3} ${yBarra} Q0 ${yBarra - comba * 2} ${mitad * 1.3} ${yBarra}`;
     // Bloque central: trapecio más ancho abajo, con la cara de arriba más clara (como en la foto de referencia)
     const abajo = 15 * s, tope = 11 * s, altoB = 23 * s, yBase = yBarra + grosor * 0.35, yTope = capucha ? yCuello + 2 * s : yBase - altoB;
     const bloque = `M${-abajo} ${yBase} L${-tope} ${yTope + 1.5 * s} Q${-tope} ${yTope} ${-tope + 1.5 * s} ${yTope} L${tope - 1.5 * s} ${yTope} Q${tope} ${yTope} ${tope} ${yTope + 1.5 * s} L${abajo} ${yBase} Z`;
@@ -1494,18 +1495,14 @@ function prepararPerchero() {
         <path d="M${12.5 * s} ${yBase} C${11 * s} ${yBase - 7 * s} ${11.5 * s} ${yTope + 11 * s} ${9.5 * s} ${yTope + 3 * s}"/>
       </g>
       <rect x="${-tope + 1.2 * s}" y="${yTope + 0.4 * s}" width="${(tope - 1.2 * s) * 2}" height="${1.6 * s}" rx="${0.8 * s}" fill="#f6e6c6" opacity=".9"/>`;
+    // Por delante, la barra se ve solo dentro de la abertura del cuello: se corta limpia siguiendo su curva,
+    // como cuando el borde del cuello tapa la madera
     const madera = capucha ? "" : atras ? `<defs><clipPath id="${id}c"><path d="${bloque}"/></clipPath></defs>${cuerpo}` : `
       <defs>
-        <linearGradient id="${id}f" gradientUnits="userSpaceOnUse" x1="${-mitad}" x2="${mitad}" y1="0" y2="0">
-          <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".28" stop-color="#fff"/>
-          <stop offset=".72" stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
-        </linearGradient>
-        <mask id="${id}m" maskUnits="userSpaceOnUse" x="${-mitad - 10}" y="${yBarra - 20}" width="${mitad * 2 + 20}" height="40">
-          <rect x="${-mitad}" y="${yBarra - 20}" width="${mitad * 2}" height="40" fill="url(#${id}f)"/>
-        </mask>
+        <clipPath id="${id}a"><ellipse cx="0" cy="${yCuello + alto * 0.055}" rx="${mitad}" ry="${alto * 0.06}"/></clipPath>
         <clipPath id="${id}c"><path d="${bloque}"/></clipPath>
       </defs>
-      <g mask="url(#${id}m)">
+      <g clip-path="url(#${id}a)">
         <path d="${barra}" fill="none" stroke="#a37b4c" stroke-width="${grosor + 1}"/>
         <path d="${barra}" fill="none" stroke="#d6b383" stroke-width="${grosor}"/>
         <path d="${barra}" fill="none" stroke="#ebd2a8" stroke-width="${grosor * 0.45}" transform="translate(0 ${-grosor * 0.2})"/>
@@ -1564,29 +1561,35 @@ function prepararPerchero() {
     ponerLienzo(it, it.actual);
   }
 
-  // Toma de lejos, como una foto de estudio: en el ancho de la "foto" caben unas 5 prendas, un poco separadas,
-  // con harta pared arriba y la sombra suave en el piso. En el computador la foto queda al centro.
+  // Toma de lejos, como una foto de estudio: en el ancho de la "foto" caben 4 prendas, cerca una de otra,
+  // con pared arriba y la sombra suave en el piso. En el computador la foto queda al centro.
   function medidas() {
     ancho = caja.clientWidth;
     const escena = Math.min(ancho, 920);
-    S = escena / 5.2;
-    G = S * 0.86;
+    S = escena / 4.1;
+    G = S * 0.92;
     GANCHO = Math.round(G * 0.19);
-    altoRack = Math.round(Math.min(escena * 0.86, 600));
-    RIEL = Math.round(altoRack * 0.28);
+    for (const it of items) ponerLienzo(it, it.actual);
+    // El alto sale de la prenda más larga: riel, prendas, la sombra en el piso y el texto de abajo
+    const largo = Math.max(G * 1.1, ...items.map((it) => it.alto));
+    RIEL = Math.round(Math.max(64, escena * 0.17));
+    const suelo = Math.round(RIEL + GANCHO + largo + Math.max(28, G * 0.3));
+    altoRack = suelo + 64;
     const total = items.length * S;
-    // Si caben todas, quedan centradas; si son más, parten desde el borde de la foto y se deslizan
-    relleno = total <= ancho ? (ancho - total) / 2 : (ancho - escena) / 2 + S * 0.1;
-    caja.classList.toggle("desborda", total > ancho);
+    // Las prendas se ven solo dentro de la "foto" (en el computador queda al centro y el riel sigue de lado
+    // a lado). Si caben todas, quedan centradas; si son más, parten desde el borde y se deslizan.
+    escenaX = (ancho - escena) / 2;
+    relleno = total <= escena ? (escena - total) / 2 : S * 0.04;
+    caja.classList.toggle("desborda", total > escena);
+    caja.style.setProperty("--escena-x", escenaX + "px");
     caja.style.setProperty("--slot", S + "px");
     caja.style.setProperty("--relleno", relleno + "px");
-    caja.style.setProperty("--suelo", Math.round(altoRack * 0.74) + "px");
+    caja.style.setProperty("--suelo", suelo + "px");
     caja.style.setProperty("--flecha-y", RIEL + GANCHO + G * 0.6 + "px");
     if (!abierto) {
       caja.style.height = altoRack + "px";
       caja.style.setProperty("--riel", RIEL + "px");
     }
-    for (const it of items) ponerLienzo(it, it.actual);
   }
 
   // Todas cuelgan quietas en su lugar del riel. La prenda elegida corre por el riel hasta el centro y se
@@ -1597,7 +1600,7 @@ function prepararPerchero() {
       let tx = 0, sc = 1;
       if (foco === it) {
         const p = suave(zoomP);
-        tx = (ancho / 2 - (relleno + i * S + S / 2 - pista.scrollLeft)) * p;
+        tx = (ancho / 2 - (escenaX + relleno + i * S + S / 2 - pista.scrollLeft)) * p;
         sc = (1 + (Z - 1) * p) / (it.capa || 1);
       }
       it.mover.style.transform = `translateX(${tx.toFixed(1)}px) rotateZ(${it.th.toFixed(2)}deg) scale(${sc.toFixed(3)})`;
