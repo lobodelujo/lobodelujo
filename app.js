@@ -1116,9 +1116,38 @@ function percheroHtml() {
     <div class="ed-cab"><h2>El Perchero de Lobo</h2></div>
     <div class="perchero cargando esperando" id="perchero">
       <svg class="perchero-defs" width="0" height="0" aria-hidden="true">
-        <linearGradient id="perchero-madera" x1="0" x2="1" y1="0" y2="0">
-          <stop offset="0" stop-color="#efd8b0"/><stop offset=".45" stop-color="#ddbd8e"/><stop offset="1" stop-color="#c49d6a"/>
+        <!-- Cuero color suela: más claro arriba (le llega la luz) y más oscuro abajo -->
+        <linearGradient id="perchero-cuero" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stop-color="#d69a62"/><stop offset=".5" stop-color="#bb7a42"/><stop offset="1" stop-color="#9c5e2c"/>
         </linearGradient>
+        <linearGradient id="perchero-cuero-banda" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stop-color="#c98b52"/><stop offset="1" stop-color="#a5652f"/>
+        </linearGradient>
+        <!-- Volumen: los costados del cuero se oscurecen, como una pieza redondeada -->
+        <linearGradient id="perchero-cuero-lados" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0" stop-color="#2b1407" stop-opacity=".32"/><stop offset=".28" stop-color="#2b1407" stop-opacity="0"/>
+          <stop offset=".62" stop-color="#2b1407" stop-opacity="0"/><stop offset="1" stop-color="#2b1407" stop-opacity=".38"/>
+        </linearGradient>
+        <linearGradient id="perchero-acero" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0" stop-color="#8b9097"/><stop offset=".35" stop-color="#eef0f2"/><stop offset="1" stop-color="#7b8088"/>
+        </linearGradient>
+        <radialGradient id="perchero-bola" cx=".35" cy=".35" r=".75">
+          <stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#d2d5da"/><stop offset="1" stop-color="#6c7178"/>
+        </radialGradient>
+        <!-- Grano del cuero: puntitos irregulares apenas más oscuros -->
+        <filter id="perchero-grano" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency="1.15" numOctaves="2" seed="7" result="ruido"/>
+          <feColorMatrix in="ruido" type="matrix" values="0 0 0 0 .22  0 0 0 0 .11  0 0 0 0 .04  0 0 0 -.7 .4" result="grano"/>
+          <feComposite in="grano" in2="SourceAlpha" operator="in" result="granoDentro"/>
+          <feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="granoDentro"/></feMerge>
+        </filter>
+        <!-- Sombras suaves: la percha sobre la prenda y el gancho sobre la pared -->
+        <filter id="perchero-sombra" x="-30%" y="-30%" width="160%" height="180%">
+          <feDropShadow dx="0" dy="1.2" stdDeviation="1.2" flood-color="#000" flood-opacity=".35"/>
+        </filter>
+        <filter id="perchero-sombra-gancho" x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow dx="1" dy="1.6" stdDeviation="1.1" flood-color="#000" flood-opacity=".22"/>
+        </filter>
         <!-- Lobo grabado a fuego, como un grabado láser: las líneas oscuras del logo quedan bien quemadas,
              el relleno apenas tostado y un brillo fino abajo da la profundidad del grabado -->
         <filter id="perchero-grabado" x="-10%" y="-10%" width="120%" height="130%" color-interpolation-filters="sRGB">
@@ -1489,75 +1518,97 @@ function prepararPerchero() {
   let empezo = false, listo = false, mostrado = false, girando = false;
   const suave = (t) => t * t * (3 - 2 * t);
 
-  // Percha de lujo de madera clara y hombros anchos (como las de las tiendas de marca): por la abertura del
-  // cuello se ve la madera de los hombros (se pierde en la tela a los lados), sobre el cuello asoma el bloque
-  // central con el lobo grabado a fuego y de ahí sube el gancho de acero satinado al riel.
+  // Percha de lujo forrada en cuero color suela, como las de las tiendas de marca: por la abertura del cuello
+  // se ve el cuero de los hombros (lo tapa el borde del cuello a los lados), sobre el cuello asoma el centro
+  // con su banda de cuero cosida y el lobo marcado en bajorrelieve, y de ahí sube el gancho de acero
+  // cepillado con punta de bolita. Cuero con grano, volumen y sombra suave sobre la prenda.
   // En un polerón con capucha la percha queda escondida: solo asoma el gancho.
   // Vista de espalda: la percha queda detrás de la prenda (se ve el borde del cuello de la espalda entero),
-  // la barra no se ve y el bloque asoma desde dentro del cuello, por su lado sin grabado.
+  // la barra no se ve y el centro asoma desde dentro del cuello, sin el lobo.
   // El (0,0) es donde el gancho toca el riel · e: escala de la foto · arriba: dónde empieza la foto
   let nPercha = 0;
-  const acero = (d, s) => `
-      <path d="${d}" fill="none" stroke="#6f737a" stroke-width="${2.8 * s}" stroke-linecap="round"/>
-      <path d="${d}" fill="none" stroke="#c3c7cd" stroke-width="${1.9 * s}" stroke-linecap="round"/>
-      <path d="${d}" fill="none" stroke="#f5f6f8" stroke-width="${0.6 * s}" stroke-linecap="round" transform="translate(${-0.45 * s} ${-0.3 * s})"/>`;
-  const curvaGancho = (yFin) => `M0 ${yFin} L0 8 C0 3 6.5 3 6.5 -2 C6.5 -7.5 2 -9.5 -2 -8 C-5 -6.8 -6 -4 -4.8 -1.6`;
+  // Gancho de acero: una varilla redonda que sube, se curva sobre el riel y termina en una bolita.
+  // Crece con la prenda (como el de verdad) y su curva interior se apoya justo arriba del riel.
+  function ganchoAcero(yFin, s) {
+    const w = Math.min(4, Math.max(1.6, 2.4 * s)), r = Math.max(6, 9 * s), cy = r - 3.5 - w / 2;
+    const d = `M0 ${yFin} L0 ${cy + 1.7 * r} C0 ${cy + 0.9 * r} ${r} ${cy + 0.75 * r} ${r} ${cy} A${r} ${r} 0 1 0 ${-0.94 * r} ${cy + 0.34 * r}`;
+    return `<g filter="url(#perchero-sombra-gancho)">
+      <path d="${d}" fill="none" stroke="#767b83" stroke-width="${w}" stroke-linecap="round"/>
+      <path d="${d}" fill="none" stroke="#c6cad0" stroke-width="${w * 0.6}" stroke-linecap="round" transform="translate(${-w * 0.1} ${-w * 0.1})"/>
+      <path d="${d}" fill="none" stroke="#f4f5f7" stroke-width="${w * 0.2}" stroke-linecap="round" opacity=".9" transform="translate(${-w * 0.2} ${-w * 0.2})"/>
+      <circle cx="${-0.94 * r}" cy="${cy + 0.34 * r}" r="${w * 0.85}" fill="url(#perchero-bola)"/>
+    </g>`;
+  }
+  // Banda de cuero cosida (más oscura, con sus bordes, el pespunte y una sombrita a cada lado)
+  function bandaCuero(x0, y0, ancho, alto, s, clip) {
+    const p = 1.5 * s, puntada = `stroke="#ecd0aa" stroke-width="${0.38 * s}" stroke-dasharray="${1.5 * s} ${1.1 * s}" opacity=".75"`;
+    return `<g ${clip ? `clip-path="url(#${clip})"` : ""}>
+      <rect x="${x0 - 0.8 * s}" y="${y0}" width="${ancho + 1.6 * s}" height="${alto}" fill="#5a3015" opacity=".28"/>
+      <rect x="${x0}" y="${y0}" width="${ancho}" height="${alto}" fill="url(#perchero-cuero-banda)" filter="url(#perchero-grano)"/>
+      <rect x="${x0}" y="${y0}" width="${ancho}" height="${alto}" fill="url(#perchero-cuero-lados)"/>
+      <line x1="${x0 + p}" y1="${y0}" x2="${x0 + p}" y2="${y0 + alto}" ${puntada}/>
+      <line x1="${x0 + ancho - p}" y1="${y0}" x2="${x0 + ancho - p}" y2="${y0 + alto}" ${puntada}/>
+      <line x1="${x0}" y1="${y0}" x2="${x0}" y2="${y0 + alto}" stroke="#4a260f" stroke-width="${0.45 * s}" opacity=".6"/>
+      <line x1="${x0 + ancho}" y1="${y0}" x2="${x0 + ancho}" y2="${y0 + alto}" stroke="#4a260f" stroke-width="${0.45 * s}" opacity=".6"/>
+    </g>`;
+  }
   // g: ancho de una polera al tamaño en que se está dibujando (más grande cuando la prenda está acercada)
   function pintarGancho(it, rec, e, arriba, g) {
     const atras = rec === it.espalda && !it.pinzas;
     it.gancho.classList.toggle("detras", atras);
     const s = g / 230, n = rec.perfil.length - 1, alto = rec.lienzo.height * e, id = "percha" + ++nPercha;
     const yCuello = arriba + rec.gy * e;
-    // Pantalones y shorts: percha de pinzas. Barra de madera clara sobre la pretina con el lobo grabado y dos
+    // Pantalones y shorts: percha de pinzas. Barra de cuero sobre la pretina con su banda y el lobo, y dos
     // pinzas de acero que la toman (igual por delante y por detrás)
     if (it.pinzas) {
-      const mitad = rec.lienzo.width * e * 0.44, alto = 6.5 * s, yB = yCuello - alto * 0.55, logoP = 9 * s;
+      const mitad = rec.lienzo.width * e * 0.44, altoP = 7 * s, yB = yCuello - altoP * 0.55, logoP = 8 * s, banda = 12 * s;
       const pinza = (x) => `
-        <rect x="${x - 3 * s}" y="${yB + alto * 0.6}" width="${6 * s}" height="${9 * s}" rx="${1.2 * s}" fill="#b9bdc3" stroke="#6f737a" stroke-width="${0.6 * s}"/>
-        <rect x="${x - 2 * s}" y="${yB + alto * 0.6 + 1.2 * s}" width="${1.2 * s}" height="${6.5 * s}" rx="${0.6 * s}" fill="#f5f6f8" opacity=".8"/>`;
-      it.gancho.innerHTML = `<svg width="1" height="1" overflow="visible" aria-hidden="true">${acero(curvaGancho(yB + s), s)}
-        <rect x="${-mitad}" y="${yB}" width="${mitad * 2}" height="${alto}" rx="${alto / 2}" fill="url(#perchero-madera)" stroke="#a37b4c" stroke-width="${0.6 * s}"/>
-        <rect x="${-mitad + alto * 0.4}" y="${yB + alto * 0.14}" width="${mitad * 2 - alto * 0.8}" height="${alto * 0.24}" rx="${alto * 0.12}" fill="#f6e6c6" opacity=".9"/>
+        <rect x="${x - 3 * s}" y="${yB + altoP * 0.55}" width="${6 * s}" height="${10 * s}" rx="${1.2 * s}" fill="url(#perchero-acero)" stroke="#6f737a" stroke-width="${0.5 * s}"/>
+        <rect x="${x - 3 * s}" y="${yB + altoP * 0.55 + 6.5 * s}" width="${6 * s}" height="${0.8 * s}" fill="#6f737a" opacity=".7"/>`;
+      it.gancho.innerHTML = `<svg width="1" height="1" overflow="visible" aria-hidden="true">${ganchoAcero(yB + s, s)}
+        <g filter="url(#perchero-sombra)">
+          <rect x="${-mitad}" y="${yB}" width="${mitad * 2}" height="${altoP}" rx="${altoP / 2}" fill="url(#perchero-cuero)" filter="url(#perchero-grano)"/>
+          <rect x="${-mitad}" y="${yB}" width="${mitad * 2}" height="${altoP}" rx="${altoP / 2}" fill="none" stroke="#5a3015" stroke-width="${0.5 * s}" opacity=".7"/>
+          <rect x="${-mitad + altoP * 0.4}" y="${yB + altoP * 0.12}" width="${mitad * 2 - altoP * 0.8}" height="${altoP * 0.2}" rx="${altoP * 0.1}" fill="#f2c99c" opacity=".55"/>
+        </g>
+        ${bandaCuero(-banda / 2, yB, banda, altoP, s)}
         ${pinza(-mitad * 0.72)}${pinza(mitad * 0.72)}
-        <image href="img/logo-lobo-128.png" x="${-logoP / 2}" y="${yB + alto / 2 - logoP / 2}" width="${logoP}" height="${logoP}" filter="url(#perchero-grabado)"/>
+        <image href="img/logo-lobo-128.png" x="${-logoP / 2}" y="${yB + altoP / 2 - logoP / 2}" width="${logoP}" height="${logoP}" filter="url(#perchero-grabado)" opacity=".85"/>
       </svg>`;
       return;
     }
     // Capucha: junto al cuello (a un cuarto del ancho) la prenda queda mucho más abajo que al centro
     const yHombros = arriba + ((rec.perfil[Math.round(n * 0.25)][1] + rec.perfil[Math.round(n * 0.75)][1]) / 2) * e;
     const capucha = yHombros - yCuello > alto * 0.1;
-    const grosor = 6 * s, mitad = g * 0.1, yBarra = yCuello + alto * 0.05, comba = 1.4 * s;
-    // La barra va un poco más larga que la abertura del cuello; lo que sobra queda recortado
-    const barra = `M${-mitad * 1.3} ${yBarra} Q0 ${yBarra - comba * 2} ${mitad * 1.3} ${yBarra}`;
-    // Bloque central: trapecio más ancho abajo, con la cara de arriba más clara (como en la foto de referencia)
-    const abajo = 15 * s, tope = 11 * s, altoB = 23 * s, yBase = yBarra + grosor * 0.35, yTope = capucha ? yCuello + 2 * s : yBase - altoB;
-    const bloque = `M${-abajo} ${yBase} L${-tope} ${yTope + 1.5 * s} Q${-tope} ${yTope} ${-tope + 1.5 * s} ${yTope} L${tope - 1.5 * s} ${yTope} Q${tope} ${yTope} ${tope} ${yTope + 1.5 * s} L${abajo} ${yBase} Z`;
-    const logo = 15.5 * s;
-    // El bloque de madera con su veta y el canto de arriba más claro (se ve por delante y por detrás)
+    // Una sola pieza de cuero: cara de arriba plana sobre el cuello, y hacia abajo se abre en los hombros
+    // (que quedan dentro de la polera). Por delante se ve lo que asoma sobre el cuello y lo que se alcanza a
+    // ver por la abertura del cuello; el resto lo tapa la tela.
+    const tope = 10.5 * s, sobre = 15 * s, hombro = g * 0.17, yHom = yCuello + alto * 0.075, banda = 12 * s, logo = 9.5 * s;
+    const yTope = capucha ? yCuello + 2 * s : yCuello - sobre;
+    const pieza = `M${-tope} ${yTope + 1.5 * s} Q${-tope} ${yTope} ${-tope + 1.5 * s} ${yTope} L${tope - 1.5 * s} ${yTope} Q${tope} ${yTope} ${tope} ${yTope + 1.5 * s}
+      C${tope} ${yCuello} ${hombro * 0.55} ${yHom - 2 * s} ${hombro} ${yHom} L${hombro} ${yHom + 9 * s} L${-hombro} ${yHom + 9 * s} L${-hombro} ${yHom}
+      C${-hombro * 0.55} ${yHom - 2 * s} ${-tope} ${yCuello} ${-tope} ${yTope + 1.5 * s} Z`;
+    // El cuero con grano, volumen (más oscuro a los costados), su banda cosida y el canto de arriba con luz
     const cuerpo = `
-      <path d="${bloque}" fill="url(#perchero-madera)" stroke="#a37b4c" stroke-width="${0.6 * s}"/>
-      <g clip-path="url(#${id}c)" fill="none" stroke="#b8925f" stroke-width="${0.45 * s}" opacity=".55">
-        <path d="M${-8 * s} ${yBase} C${-7 * s} ${yBase - 9 * s} ${-9 * s} ${yTope + 8 * s} ${-6.5 * s} ${yTope}"/>
-        <path d="M${7 * s} ${yBase} C${8 * s} ${yBase - 10 * s} ${5.5 * s} ${yTope + 9 * s} ${7 * s} ${yTope}"/>
-        <path d="M${-12 * s} ${yBase} C${-11 * s} ${yBase - 6 * s} ${-11.5 * s} ${yTope + 12 * s} ${-9.5 * s} ${yTope + 3 * s}"/>
-        <path d="M${12.5 * s} ${yBase} C${11 * s} ${yBase - 7 * s} ${11.5 * s} ${yTope + 11 * s} ${9.5 * s} ${yTope + 3 * s}"/>
+      <g filter="url(#perchero-sombra)">
+        <path d="${pieza}" fill="url(#perchero-cuero)" filter="url(#perchero-grano)"/>
+        <path d="${pieza}" fill="url(#perchero-cuero-lados)"/>
+        <path d="${pieza}" fill="none" stroke="#5a3015" stroke-width="${0.5 * s}" opacity=".55"/>
       </g>
-      <rect x="${-tope + 1.2 * s}" y="${yTope + 0.4 * s}" width="${(tope - 1.2 * s) * 2}" height="${1.6 * s}" rx="${0.8 * s}" fill="#f6e6c6" opacity=".9"/>`;
-    // Por delante, la barra se ve solo dentro de la abertura del cuello: se corta limpia siguiendo su curva,
-    // como cuando el borde del cuello tapa la madera
-    const madera = capucha ? "" : atras ? `<defs><clipPath id="${id}c"><path d="${bloque}"/></clipPath></defs>${cuerpo}` : `
+      ${bandaCuero(-banda / 2, yTope, banda, yHom + 9 * s - yTope, s, id + "c")}
+      <rect x="${-tope + 1.4 * s}" y="${yTope + 0.35 * s}" width="${(tope - 1.4 * s) * 2}" height="${1.3 * s}" rx="${0.65 * s}" fill="#f6d2a6" opacity=".55"/>`;
+    // Por delante: visible sobre el cuello y dentro de la abertura del cuello (se corta siguiendo su curva)
+    const percha = capucha ? "" : atras ? `<defs><clipPath id="${id}c"><path d="${pieza}"/></clipPath></defs>${cuerpo}` : `
       <defs>
-        <clipPath id="${id}a"><ellipse cx="0" cy="${yCuello + alto * 0.055}" rx="${mitad}" ry="${alto * 0.06}"/></clipPath>
-        <clipPath id="${id}c"><path d="${bloque}"/></clipPath>
+        <clipPath id="${id}v">
+          <rect x="${-hombro - 20}" y="${yTope - 20}" width="${hombro * 2 + 40}" height="${yCuello + 1.5 * s - yTope + 20}"/>
+          <ellipse cx="0" cy="${yCuello + alto * 0.035}" rx="${g * 0.095}" ry="${alto * 0.045}"/>
+        </clipPath>
+        <clipPath id="${id}c"><path d="${pieza}"/></clipPath>
       </defs>
-      <g clip-path="url(#${id}a)">
-        <path d="${barra}" fill="none" stroke="#a37b4c" stroke-width="${grosor + 1}"/>
-        <path d="${barra}" fill="none" stroke="#d6b383" stroke-width="${grosor}"/>
-        <path d="${barra}" fill="none" stroke="#ebd2a8" stroke-width="${grosor * 0.45}" transform="translate(0 ${-grosor * 0.2})"/>
-        <path d="${barra}" fill="none" stroke="#b8925f" stroke-width="${grosor * 0.1}" stroke-dasharray="${13 * s} ${5 * s} ${4 * s} ${8 * s}" opacity=".6" transform="translate(0 ${grosor * 0.18})"/>
-      </g>${cuerpo}
-      <image href="img/logo-lobo-128.png" x="${-logo / 2}" y="${yBase - altoB * 0.5 - logo * 0.42}" width="${logo}" height="${logo}" filter="url(#perchero-grabado)"/>`;
-    it.gancho.innerHTML = `<svg width="1" height="1" overflow="visible" aria-hidden="true">${acero(curvaGancho(yTope + s), s)}${madera}
+      <g clip-path="url(#${id}v)">${cuerpo}</g>
+      <image href="img/logo-lobo-128.png" x="${-logo / 2}" y="${yTope + sobre * 0.5 - logo / 2}" width="${logo}" height="${logo}" filter="url(#perchero-grabado)" opacity=".85"/>`;
+    it.gancho.innerHTML = `<svg width="1" height="1" overflow="visible" aria-hidden="true">${ganchoAcero(yTope + s, s)}${percha}
     </svg>`;
   }
 
@@ -1743,7 +1794,8 @@ function prepararPerchero() {
 
   // Lo que tapan arriba la barra y la fila de categorías (las dos quedan pegadas al bajar)
   const tapado = () => $(".barra").offsetHeight + ($(".categorias") ? $(".categorias").offsetHeight : 0);
-  const altoZoom = () => Math.round(Math.max(altoRack + 80, innerHeight - tapado()));
+  // Al acercar, el panel ocupa justo la pantalla (bajo las barras de arriba)
+  const altoZoom = () => Math.round(Math.max(420, innerHeight - tapado()));
 
   async function abrir(it) {
     if (abierto || !listo) return;
@@ -1754,7 +1806,7 @@ function prepararPerchero() {
     const alto = altoZoom();
     caja.style.height = alto + "px";
     // Grande como las fotos del catálogo: casi todo el ancho, sin tapar el nombre y los botones de abajo
-    Z = Math.max(1.2, Math.min((ancho * 0.84) / it.ancho, (alto - RIEL_CERCA - 205) / (GANCHO + it.alto)));
+    Z = Math.max(1.2, Math.min((Math.min(ancho, 920) * 0.84) / it.ancho, (alto - RIEL_CERCA - 205) / (GANCHO + it.alto)));
     // Si sobra alto, el riel baja un poco para que la prenda quede al medio entre arriba y el nombre
     const sobra = alto - RIEL_CERCA - 205 - (GANCHO + it.alto) * Z;
     caja.style.setProperty("--riel", Math.round(RIEL_CERCA + Math.max(0, sobra) * 0.5) + "px");
