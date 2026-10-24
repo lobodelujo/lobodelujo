@@ -50,7 +50,9 @@ collections:
                 required: false
                 options: [Nuevo, Oferta, "Últimas unidades"]
               - { name: disponible, label: "¿Hay stock? (apágalo para mostrar AGOTADO)", widget: boolean, default: true }
-              - { name: perchero, label: "🐺 Colgar en El Perchero de Lobo (necesita una foto de la prenda sola con fondo claro; si no marcas ninguna, se cuelgan solas las poleras y polerones)", widget: boolean, default: false, required: false }
+              - { name: perchero, label: "🐺 Colgar en El Perchero de Lobo (solo salen las que marques)", widget: boolean, default: false, required: false }
+              - { name: fotoPerchero, label: "🐺 Foto para el perchero · frente (PNG sin fondo hecho en Canva; si no subes una, se recorta sola de tus fotos)", widget: image, required: false, choose_url: false }
+              - { name: fotoPercheroEspalda, label: "🐺 Foto para el perchero · espalda (PNG sin fondo, opcional)", widget: image, required: false, choose_url: false }
               - { name: descripcion, label: "Descripción corta", widget: text, required: false }
               - name: tallas
                 label: Tallas disponibles
