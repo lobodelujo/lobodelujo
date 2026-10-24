@@ -1425,14 +1425,18 @@ function prepararPerchero() {
     </svg>`;
   }
 
-  function crearItem(p, rec) {
+  // Una polera o polerón colgado nunca es mucho más alto que ancho: si lo es, la foto era de una persona
+  const esPrenda = (rec) => !!rec && rec.lienzo.height / rec.lienzo.width <= 1.45;
+
+  // cual: el número de foto del producto que se usó para colgarlo (la de la prenda sola)
+  function crearItem(p, rec, cual) {
     const el = document.createElement("button");
     el.className = "colgado";
     el.setAttribute("aria-label", `Ver ${p.nombre}`);
     el.innerHTML = `<span class="colgado-mueve"><span class="colgado-llega"><span class="gancho"></span><span class="prenda"></span></span></span>`;
     // Cada prenda pesa y cuelga un poco distinto: así no se mecen todas iguales, como robots
     return { p, el, mover: el.firstElementChild, llega: el.querySelector(".colgado-llega"), gancho: el.querySelector(".gancho"), prenda: el.querySelector(".prenda"),
-      frente: rec, alta: null, espalda: undefined, actual: rec, alto: 0, th: 0, w: 0, etiquetas: null,
+      cual, frente: rec, alta: null, espalda: undefined, actual: rec, alto: 0, th: 0, w: 0, etiquetas: null,
       k: K * (0.8 + Math.random() * 0.4), c: C * (0.85 + Math.random() * 0.3), masa: 0.85 + Math.random() * 0.3 };
   }
 
@@ -1580,16 +1584,22 @@ function prepararPerchero() {
     it.w += 70;
     arrancar();
     window.scrollTo({ top: caja.getBoundingClientRect().top + scrollY - tapado(), behavior: sinMovimiento ? "auto" : "smooth" });
-    // Cuando termina de acercarse: la foto en alta y la espalda (si la foto 2 se puede recortar)
+    // Cuando termina de acercarse: la foto en alta y la espalda (la siguiente foto del producto que
+    // también sea la prenda sola y de la misma forma)
     await new Promise((ok) => setTimeout(ok, 700));
     if (abierto !== it) return;
-    if (!it.alta) it.alta = await recortarPrenda(it.p.fotos[0], 1200);
+    if (!it.alta) it.alta = await recortarPrenda(it.p.fotos[it.cual], 1200);
     if (abierto !== it) return;
     if (it.alta && it.actual === it.frente) ponerLienzo(it, it.alta);
     if (it.espalda === undefined) {
-      const rec = await recortarPrenda(it.p.fotos[1], 1200), base = it.alta || it.frente;
-      const prop = (x) => x.lienzo.height / x.lienzo.width;
-      it.espalda = rec && Math.abs(prop(rec) - prop(base)) < prop(base) * 0.25 ? rec : null;
+      const base = it.alta || it.frente, prop = (x) => x.lienzo.height / x.lienzo.width;
+      it.espalda = null;
+      for (let f = 0; f < it.p.fotos.length && !it.espalda; f++) {
+        if (f === it.cual) continue;
+        const rec = await recortarPrenda(it.p.fotos[f], 1200);
+        if (abierto !== it) return;
+        if (esPrenda(rec) && Math.abs(prop(rec) - prop(base)) < prop(base) * 0.25) it.espalda = rec;
+      }
     }
     if (abierto !== it) return;
     const lados = $(".pi-lados", info);
@@ -1663,12 +1673,18 @@ function prepararPerchero() {
     if (empezo) return;
     empezo = true;
     const fondos = [];
-    // Las fotos se descargan todas a la vez y se recortan de a una (deja respirar a la página entre foto y foto)
+    // Las fotos 1 se descargan todas a la vez y se recortan de a una (deja respirar a la página entre foto y foto).
+    // Si la foto 1 no sirve (por ejemplo, es con modelo), se prueba con las demás fotos del producto.
     const cargas = candidatos.map((p) => cargarImagen(p.fotos[0]).catch(() => null));
     for (const [k, p] of candidatos.entries()) {
-      const rec = await recortarPrenda(cargas[k], 640);
-      if (rec) { items.push(crearItem(p, rec)); fondos.push(rec.fondo); }
-      await new Promise((ok) => setTimeout(ok));
+      for (let f = 0; f < p.fotos.length; f++) {
+        const rec = await recortarPrenda(f ? p.fotos[f] : cargas[k], 640);
+        await new Promise((ok) => setTimeout(ok));
+        if (!esPrenda(rec)) continue;
+        items.push(crearItem(p, rec, f));
+        fondos.push(rec.fondo);
+        break;
+      }
     }
     if (items.length < 3) { bloque.remove(); return; }
     // La pared toma el mismo gris de las fotos: así cualquier borde del recorte queda invisible
