@@ -3,6 +3,28 @@
     {
       "perchero": false,
       "precio": 46000,
+      "nombre": "REPRESENT",
+      "descripcion": ">100% algodón\n>cuello redondo\n>serigrafia alta densidad\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261024-191721-hgk-4.jpg",
+        "img/productos/20261024-191658-w4x-1.jpg",
+        "img/productos/20261024-191704-6hl-2.jpg",
+        "img/productos/20261024-191742-cct-3.jpg"
+      ],
+      "colores": [
+        "blanco"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "etiqueta": "Nuevo",
+      "tallas": [
+        "M",
+        "XL"
+      ]
+    },
+    {
+      "perchero": false,
+      "precio": 46000,
       "nombre": "GUCCI",
       "descripcion": ">100% algodón\n>cuello redondo\n>polera en hilo\n>logo bordado\n>lavar a mano",
       "precioAntes": 0,
