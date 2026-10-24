@@ -2,8 +2,28 @@
   "productos": [
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 43000,
       "nombre": "PALM ANGELS",
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo bordado sobre la tela\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261024-004428-ogr-4.jpg",
+        "img/productos/20261024-004449-glc-3.jpg",
+        "img/productos/20261024-004457-2wc-1.jpg",
+        "img/productos/20261024-004504-6zh-2.jpg"
+      ],
+      "colores": [
+        "beige"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "tallas": [
+        "M"
+      ]
+    },
+    {
+      "perchero": false,
+      "precio": 46000,
+      "nombre": "CHROME HEARTS",
       "descripcion": ">100% algodón\n>cuello redondo\n>logo bordado sobre la prenda adelante\n>costuras oscuras en la parte frontal\n>lavar a mano",
       "fotos": [
         "img/productos/20261024-003944-cz5-1.jpg",
