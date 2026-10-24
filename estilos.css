@@ -243,6 +243,7 @@ img.sin-foto {
   transition: height .55s cubic-bezier(.3, .7, .2, 1);
   -webkit-tap-highlight-color: transparent;
 }
+.perchero-defs { position: absolute; width: 0; height: 0; }
 .perchero-logo { position: absolute; top: 14px; left: 50%; z-index: 1; width: 36px; height: auto; transform: translateX(-50%); filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .15)); }
 .perchero-riel {
   position: absolute; left: 3%; right: 3%; top: calc(var(--riel) - 3.5px); z-index: 300; height: 7px; border-radius: 4px; pointer-events: none;
@@ -268,9 +269,11 @@ img.sin-foto {
 .colgado:focus-visible .prenda { outline: 2px solid var(--oro); outline-offset: 6px; border-radius: 6px; }
 /* El punto (0,0) es donde el gancho toca el riel: desde ahí se mece y se acerca */
 .colgado-mueve { position: absolute; left: 50%; top: var(--riel); width: 0; height: 0; transform-origin: 0 0; will-change: transform; }
+/* Sin movimiento se suelta will-change: así la prenda acercada se redibuja nítida y no estirada */
+.perchero.quieto .colgado-mueve { will-change: auto; }
 .colgado-llega { position: absolute; left: 0; top: 0; transition: opacity .5s, filter .5s; }
 .perchero.esperando .colgado-llega { opacity: 0; }
-.gancho { position: absolute; left: -13px; top: -9px; }
+.gancho { position: absolute; left: 0; top: 0; }
 .gancho svg { display: block; overflow: visible; }
 .prenda { position: absolute; display: block; filter: drop-shadow(0 10px 12px rgba(0, 0, 0, .14)); }
 .prenda canvas { display: block; width: 100%; height: 100%; }
