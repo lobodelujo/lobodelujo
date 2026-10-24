@@ -49,6 +49,7 @@ const slug = (s) =>
           etiqueta: p.etiqueta || "",
           disponible: p.disponible !== false,
           perchero: p.perchero === true,
+          fotoPercheroLado: p.fotoPercheroLado || "",
           fotoPerchero: p.fotoPerchero || "",
           fotoPercheroEspalda: p.fotoPercheroEspalda || "",
           descripcion: p.descripcion || "",

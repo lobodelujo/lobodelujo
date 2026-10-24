@@ -1100,12 +1100,14 @@ function revisarHash() {
 window.addEventListener("hashchange", revisarHash);
 
 // ---------- El Perchero de Lobo ----------
-// Prendas colgadas en un riel, vistas de lejos como en una foto de estudio (caben 4 a lo ancho).
+// Prendas colgadas DE LADO en un riel, como un perchero de tienda mirado de frente (caben unas 4 a lo ancho).
 // En el panel, cada producto tiene la casilla "Colgar en El Perchero de Lobo": se cuelgan solo los marcados
 // (en el orden de la lista). Si no hay ninguno marcado, la sección no aparece.
-// La página recorta sola cada prenda desde su foto de la prenda sola (frente y espalda), cuando tiene fondo
-// claro y liso como las del prompt LDL-01; las que no se pueden recortar limpio quedan fuera (igual se ven
-// en el catálogo). Al tocar una prenda, corre por el riel al centro y se acerca grande, y se puede girar.
+// Fotos: lo ideal son 3 PNG sin fondo con la prenda en su percha de madera (prompts LDL-P1, P2 y P3): de frente,
+// de lado (como cuelga en el riel) y de espalda. Al tocar una prenda, corre por el riel hasta el centro y se
+// da vuelta de frente (las de al lado le hacen espacio); al tocarla otra vez se acerca grande y se puede girar.
+// Sin foto de lado, cuelga de frente con una percha de nogal dibujada; sin ningún PNG, la página recorta sola
+// la foto de la prenda sola (fondo claro y liso, como las del prompt LDL-01).
 const PERCHERO = ["Poleras", "Polerones"]; // la sección va justo después de la primera de estas categorías
 const PERCHERO_NO_CUELGAN = ["Gorras", "Lentes", "Accesorios"];
 const PERCHERO_PINZAS = ["Pantalones", "Shorts"]; // estos van en percha de pinzas, tomados de la pretina
@@ -1116,46 +1118,44 @@ function percheroHtml() {
     <div class="ed-cab"><h2>El Perchero de Lobo</h2></div>
     <div class="perchero cargando esperando" id="perchero">
       <svg class="perchero-defs" width="0" height="0" aria-hidden="true">
-        <!-- Cuero color suela: más claro arriba (le llega la luz) y más oscuro abajo -->
-        <linearGradient id="perchero-cuero" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0" stop-color="#d69a62"/><stop offset=".5" stop-color="#bb7a42"/><stop offset="1" stop-color="#9c5e2c"/>
+        <!-- Nogal lacado: redondeado, con la luz al centro y los cantos más oscuros -->
+        <linearGradient id="perchero-nogal" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0" stop-color="#2e170a"/><stop offset=".3" stop-color="#6b3e1f"/><stop offset=".48" stop-color="#8d5732"/>
+          <stop offset=".75" stop-color="#55301a"/><stop offset="1" stop-color="#2a1408"/>
         </linearGradient>
-        <linearGradient id="perchero-cuero-banda" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0" stop-color="#c98b52"/><stop offset="1" stop-color="#a5652f"/>
-        </linearGradient>
-        <!-- Volumen: los costados del cuero se oscurecen, como una pieza redondeada -->
-        <linearGradient id="perchero-cuero-lados" x1="0" x2="1" y1="0" y2="0">
-          <stop offset="0" stop-color="#2b1407" stop-opacity=".32"/><stop offset=".28" stop-color="#2b1407" stop-opacity="0"/>
-          <stop offset=".62" stop-color="#2b1407" stop-opacity="0"/><stop offset="1" stop-color="#2b1407" stop-opacity=".38"/>
+        <linearGradient id="perchero-nogal-barra" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0" stop-color="#8d5732"/><stop offset=".45" stop-color="#6b3e1f"/><stop offset="1" stop-color="#2e170a"/>
         </linearGradient>
         <linearGradient id="perchero-acero" x1="0" x2="1" y1="0" y2="0">
-          <stop offset="0" stop-color="#8b9097"/><stop offset=".35" stop-color="#eef0f2"/><stop offset="1" stop-color="#7b8088"/>
+          <stop offset="0" stop-color="#7b8088"/><stop offset=".35" stop-color="#eef0f2"/><stop offset="1" stop-color="#6f747c"/>
         </linearGradient>
-        <radialGradient id="perchero-bola" cx=".35" cy=".35" r=".75">
-          <stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#d2d5da"/><stop offset="1" stop-color="#6c7178"/>
-        </radialGradient>
-        <!-- Grano del cuero: puntitos irregulares apenas más oscuros -->
-        <filter id="perchero-grano" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-          <feTurbulence type="fractalNoise" baseFrequency="1.15" numOctaves="2" seed="7" result="ruido"/>
-          <feColorMatrix in="ruido" type="matrix" values="0 0 0 0 .22  0 0 0 0 .11  0 0 0 0 .04  0 0 0 -.7 .4" result="grano"/>
-          <feComposite in="grano" in2="SourceAlpha" operator="in" result="granoDentro"/>
-          <feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="granoDentro"/></feMerge>
+        <!-- Vetas de la madera: líneas finas a lo largo de la pieza (verticales en el cuello, horizontales en la barra) -->
+        <filter id="perchero-veta" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency=".9 .035" numOctaves="2" seed="11" result="ruido"/>
+          <feColorMatrix in="ruido" type="matrix" values="0 0 0 0 .16  0 0 0 0 .08  0 0 0 0 .03  0 0 0 -1.1 .62" result="veta"/>
+          <feComposite in="veta" in2="SourceAlpha" operator="in" result="vetaDentro"/>
+          <feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="vetaDentro"/></feMerge>
         </filter>
-        <!-- Sombras suaves: la percha sobre la prenda y el gancho sobre la pared -->
+        <filter id="perchero-veta-h" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+          <feTurbulence type="fractalNoise" baseFrequency=".035 .9" numOctaves="2" seed="5" result="ruido"/>
+          <feColorMatrix in="ruido" type="matrix" values="0 0 0 0 .16  0 0 0 0 .08  0 0 0 0 .03  0 0 0 -1.1 .62" result="veta"/>
+          <feComposite in="veta" in2="SourceAlpha" operator="in" result="vetaDentro"/>
+          <feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="vetaDentro"/></feMerge>
+        </filter>
+        <!-- Sombras suaves: la madera sobre la prenda y el gancho sobre la pared -->
         <filter id="perchero-sombra" x="-30%" y="-30%" width="160%" height="180%">
           <feDropShadow dx="0" dy="1.2" stdDeviation="1.2" flood-color="#000" flood-opacity=".35"/>
         </filter>
-        <filter id="perchero-sombra-gancho" x="-50%" y="-50%" width="200%" height="200%">
-          <feDropShadow dx="1" dy="1.6" stdDeviation="1.1" flood-color="#000" flood-opacity=".22"/>
+        <filter id="perchero-sombra-gancho" x="-200%" y="-20%" width="500%" height="140%">
+          <feDropShadow dx="1.2" dy="1.6" stdDeviation="1.1" flood-color="#000" flood-opacity=".2"/>
         </filter>
-        <!-- Lobo grabado a fuego, como un grabado láser: las líneas oscuras del logo quedan bien quemadas,
-             el relleno apenas tostado y un brillo fino abajo da la profundidad del grabado -->
+        <!-- Lobo grabado a fuego en la barra de la percha de pinzas -->
         <filter id="perchero-grabado" x="-10%" y="-10%" width="120%" height="130%" color-interpolation-filters="sRGB">
-          <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 .3  0 0 0 0 .17  0 0 0 0 .08  -.3 -.59 -.11 0 1" result="lineas"/>
+          <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 .14  0 0 0 0 .07  0 0 0 0 .03  -.3 -.59 -.11 0 1" result="lineas"/>
           <feComposite in="lineas" in2="SourceAlpha" operator="in" result="lineasDentro"/>
-          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 .5  0 0 0 0 .32  0 0 0 0 .16  0 0 0 .32 0" result="tostado"/>
+          <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 .3  0 0 0 0 .17  0 0 0 0 .08  0 0 0 .3 0" result="tostado"/>
           <feOffset in="SourceAlpha" dy=".7" result="abajo"/>
-          <feColorMatrix in="abajo" type="matrix" values="0 0 0 0 1  0 0 0 0 .95  0 0 0 0 .84  0 0 0 .5 0" result="brillo"/>
+          <feColorMatrix in="abajo" type="matrix" values="0 0 0 0 1  0 0 0 0 .86  0 0 0 0 .7  0 0 0 .35 0" result="brillo"/>
           <feComposite in="brillo" in2="SourceAlpha" operator="out" result="borde"/>
           <feMerge><feMergeNode in="borde"/><feMergeNode in="tostado"/><feMergeNode in="lineasDentro"/></feMerge>
         </filter>
@@ -1501,6 +1501,59 @@ async function recortarPrenda(fuente, anchoMax) {
   return { lienzo, gx: cx - bx0 + m, gy: arriba - by0 + m, perfil, fondo: F[1][1] };
 }
 
+// Mira si la foto trae su propia percha (como las de los prompts LDL-P): arriba el gancho de metal, delgado, y
+// bajo él la madera. Si trae gancho se le saca (la página dibuja uno recto hasta el riel, igual en todas las
+// vistas) y la prenda se cuelga desde donde empieza la madera. esLado: es la foto de lado (esa siempre trae
+// percha). Devuelve el mismo rec con percha: true o false.
+function ajustarPercha(rec, esLado) {
+  if (!rec) return null;
+  const c = rec.lienzo, w = c.width, h = c.height;
+  let px;
+  try { px = c.getContext("2d").getImageData(0, 0, w, h).data; } catch { return { ...rec, percha: !!esLado }; }
+  // Los tramos llenos de una fila: cuántos hay, el más ancho y su centro
+  const fila = (y) => {
+    let tramos = 0, mejor = 0, centro = 0, largo = 0;
+    for (let x = 0, i = y * w * 4 + 3; x <= w; x++, i += 4) {
+      if (x < w && px[i] >= 128) { if (!largo) tramos++; largo++; continue; }
+      if (largo > mejor) { mejor = largo; centro = x - largo / 2; }
+      largo = 0;
+    }
+    return { tramos, mejor, centro };
+  };
+  let y0 = 0;
+  while (y0 < h - 1 && !fila(y0).mejor) y0++;
+  // Un gancho mide unos 4 mm y la madera de canto más de 1 cm (en una prenda de unos 70 cm de largo)
+  const alto = h - y0, fino = Math.max(2, alto * 0.012), firme = Math.max(3, Math.round(alto * 0.025));
+  let tope = y0, unTramo = 0;
+  for (let y = y0, seguidas = 0; y < y0 + alto * 0.35; y++) {
+    const f = fila(y);
+    if (f.mejor <= fino) { seguidas = 0; if (f.tramos === 1) unTramo++; continue; }
+    if (++seguidas >= firme) { tope = y - firme + 1; break; }
+  }
+  // Gancho: un alambre solo (no las dos puntas de los hombros de una polera estirada)
+  const gancho = tope - y0 > alto * 0.02 && unTramo > (tope - y0) * 0.6;
+  // Sin gancho, la madera se reconoce porque arriba hay un solo tramo angosto y al centro (sin percha, una
+  // polera arranca con los dos hombros y un polerón con la capucha, que es ancha)
+  const bajo = fila(Math.min(h - 1, tope + Math.round(alto * 0.03)));
+  const percha = !!esLado || gancho || (bajo.tramos === 1 && bajo.mejor < w * 0.14 && Math.abs(bajo.centro - w / 2) < w * 0.12);
+  if (!percha) return { ...rec, percha: false };
+  const gx = fila(Math.min(h - 1, tope + 1)).centro;
+  if (!gancho) return { ...rec, gx, gy: tope, percha: true };
+  // Se corta el gancho de la foto (desde 2 px sobre la madera)
+  const corte = Math.max(0, tope - 2), lienzo = document.createElement("canvas");
+  lienzo.width = w;
+  lienzo.height = h - corte;
+  lienzo.getContext("2d").drawImage(c, 0, -corte);
+  c.width = 0;
+  return { ...rec, lienzo, gx, gy: tope - corte, perfil: rec.perfil.map(([x, y]) => [x, Math.max(0, y - corte)]), percha: true };
+}
+
+// Foto del panel para el perchero: el PNG sin fondo tal cual (o recortada, si no es PNG) con su percha medida
+async function vistaPercha(src, anchoMax, esLado) {
+  if (!src) return null;
+  return ajustarPercha((await prendaSinFondo(src, anchoMax)) || (await recortarPrenda(src, anchoMax)), esLado);
+}
+
 function prepararPerchero() {
   const bloque = $("#perchero-bloque");
   if (!bloque) return;
@@ -1513,144 +1566,122 @@ function prepararPerchero() {
   // Física de la ropa colgada (resorte con roce) y de las etiquetas (más livianas, se mecen más)
   const K = 52, C = 2.6, K_ET = 95, C_ET = 1.8;
   const RIEL_CERCA = 26; // al acercar una prenda el riel sube, como si la cámara se acercara
-  let items = [], G = 150, S = 170, GANCHO = 28, RIEL = 150, altoRack = 560, relleno = 0, ancho = 0, escenaX = 0;
-  let centro = -1, abierto = null, foco = null, zoomP = 0, Z = 1, anim = 0, antes = 0, scrollAntes = 0, vel = 0;
+  let items = [], H = 240, S = 110, GANCHO = 24, RIEL = 64, altoRack = 560, relleno = 0, ancho = 0, escena = 0, escenaX = 0;
+  let centro = -1, abierto = null, foco = null, deFrente = null, pendiente = null, metaScroll = 0, quieto = 0, scrollGiro = 0;
+  let zoomP = 0, Z = 1, anim = 0, antes = 0, scrollAntes = 0, vel = 0;
   let empezo = false, listo = false, mostrado = false, girando = false;
   const suave = (t) => t * t * (3 - 2 * t);
+  // Largo de la prenda colgada, de la madera a la basta: poleras y polerones igual, pantalones más largos
+  const largoDe = (it) => H * (it.p.categoria === "Pantalones" ? 1.3 : it.p.categoria === "Shorts" ? 0.75 : 1);
 
-  // Percha de lujo forrada en cuero color suela, como las de las tiendas de marca: por la abertura del cuello
-  // se ve el cuero de los hombros (lo tapa el borde del cuello a los lados), sobre el cuello asoma el centro
-  // con su banda de cuero cosida y el lobo marcado en bajorrelieve, y de ahí sube el gancho de acero
-  // cepillado con punta de bolita. Cuero con grano, volumen y sombra suave sobre la prenda.
-  // En un polerón con capucha la percha queda escondida: solo asoma el gancho.
-  // Vista de espalda: la percha queda detrás de la prenda (se ve el borde del cuello de la espalda entero),
-  // la barra no se ve y el centro asoma desde dentro del cuello, sin el lobo.
-  // El (0,0) es donde el gancho toca el riel · e: escala de la foto · arriba: dónde empieza la foto
-  let nPercha = 0;
-  // Gancho de acero: una varilla redonda que sube, se curva sobre el riel y termina en una bolita.
-  // Crece con la prenda (como el de verdad) y su curva interior se apoya justo arriba del riel.
+  // Gancho de acero: una varilla recta que sube desde la madera y pasa por encima del riel (vista de canto, como
+  // se ve un gancho de verdad en un perchero mirado de frente), con su casquillo donde entra a la madera.
+  // El (0,0) es donde el gancho toca el riel · s: escala (crece con la prenda, como el de verdad)
   function ganchoAcero(yFin, s) {
-    const w = Math.min(4, Math.max(1.6, 2.4 * s)), r = Math.max(6, 9 * s), cy = r - 3.5 - w / 2;
-    const d = `M0 ${yFin} L0 ${cy + 1.7 * r} C0 ${cy + 0.9 * r} ${r} ${cy + 0.75 * r} ${r} ${cy} A${r} ${r} 0 1 0 ${-0.94 * r} ${cy + 0.34 * r}`;
+    const w = Math.max(1.3, Math.min(3.4, 1.8 * s)), yTop = -3.5 - w;
     return `<g filter="url(#perchero-sombra-gancho)">
-      <path d="${d}" fill="none" stroke="#767b83" stroke-width="${w}" stroke-linecap="round"/>
-      <path d="${d}" fill="none" stroke="#c6cad0" stroke-width="${w * 0.6}" stroke-linecap="round" transform="translate(${-w * 0.1} ${-w * 0.1})"/>
-      <path d="${d}" fill="none" stroke="#f4f5f7" stroke-width="${w * 0.2}" stroke-linecap="round" opacity=".9" transform="translate(${-w * 0.2} ${-w * 0.2})"/>
-      <circle cx="${-0.94 * r}" cy="${cy + 0.34 * r}" r="${w * 0.85}" fill="url(#perchero-bola)"/>
+      <rect x="${-w / 2}" y="${yTop}" width="${w}" height="${yFin - yTop}" rx="${w / 2}" fill="url(#perchero-acero)"/>
+      <rect x="${-w * 0.95}" y="${yFin - 2.6 * s}" width="${w * 1.9}" height="${3 * s}" rx="${0.6 * s}" fill="url(#perchero-acero)" stroke="#6f737a" stroke-width="${0.3 * s}"/>
     </g>`;
   }
-  // Banda de cuero cosida (más oscura, con sus bordes, el pespunte y una sombrita a cada lado)
-  function bandaCuero(x0, y0, ancho, alto, s, clip) {
-    const p = 1.5 * s, puntada = `stroke="#ecd0aa" stroke-width="${0.38 * s}" stroke-dasharray="${1.5 * s} ${1.1 * s}" opacity=".75"`;
-    return `<g ${clip ? `clip-path="url(#${clip})"` : ""}>
-      <rect x="${x0 - 0.8 * s}" y="${y0}" width="${ancho + 1.6 * s}" height="${alto}" fill="#5a3015" opacity=".28"/>
-      <rect x="${x0}" y="${y0}" width="${ancho}" height="${alto}" fill="url(#perchero-cuero-banda)" filter="url(#perchero-grano)"/>
-      <rect x="${x0}" y="${y0}" width="${ancho}" height="${alto}" fill="url(#perchero-cuero-lados)"/>
-      <line x1="${x0 + p}" y1="${y0}" x2="${x0 + p}" y2="${y0 + alto}" ${puntada}/>
-      <line x1="${x0 + ancho - p}" y1="${y0}" x2="${x0 + ancho - p}" y2="${y0 + alto}" ${puntada}/>
-      <line x1="${x0}" y1="${y0}" x2="${x0}" y2="${y0 + alto}" stroke="#4a260f" stroke-width="${0.45 * s}" opacity=".6"/>
-      <line x1="${x0 + ancho}" y1="${y0}" x2="${x0 + ancho}" y2="${y0 + alto}" stroke="#4a260f" stroke-width="${0.45 * s}" opacity=".6"/>
-    </g>`;
-  }
-  // g: ancho de una polera al tamaño en que se está dibujando (más grande cuando la prenda está acercada)
-  function pintarGancho(it, rec, e, arriba, g) {
-    const atras = rec === it.espalda && !it.pinzas;
-    it.gancho.classList.toggle("detras", atras);
-    const s = g / 230, n = rec.perfil.length - 1, alto = rec.lienzo.height * e, id = "percha" + ++nPercha;
-    const yCuello = arriba + rec.gy * e;
-    // Pantalones y shorts: percha de pinzas. Barra de cuero sobre la pretina con su banda y el lobo, y dos
-    // pinzas de acero que la toman (igual por delante y por detrás)
-    if (it.pinzas) {
-      const mitad = rec.lienzo.width * e * 0.44, altoP = 7 * s, yB = yCuello - altoP * 0.55, logoP = 8 * s, banda = 12 * s;
-      const pinza = (x) => `
-        <rect x="${x - 3 * s}" y="${yB + altoP * 0.55}" width="${6 * s}" height="${10 * s}" rx="${1.2 * s}" fill="url(#perchero-acero)" stroke="#6f737a" stroke-width="${0.5 * s}"/>
-        <rect x="${x - 3 * s}" y="${yB + altoP * 0.55 + 6.5 * s}" width="${6 * s}" height="${0.8 * s}" fill="#6f737a" opacity=".7"/>`;
-      it.gancho.innerHTML = `<svg width="1" height="1" overflow="visible" aria-hidden="true">${ganchoAcero(yB + s, s)}
-        <g filter="url(#perchero-sombra)">
-          <rect x="${-mitad}" y="${yB}" width="${mitad * 2}" height="${altoP}" rx="${altoP / 2}" fill="url(#perchero-cuero)" filter="url(#perchero-grano)"/>
-          <rect x="${-mitad}" y="${yB}" width="${mitad * 2}" height="${altoP}" rx="${altoP / 2}" fill="none" stroke="#5a3015" stroke-width="${0.5 * s}" opacity=".7"/>
-          <rect x="${-mitad + altoP * 0.4}" y="${yB + altoP * 0.12}" width="${mitad * 2 - altoP * 0.8}" height="${altoP * 0.2}" rx="${altoP * 0.1}" fill="#f2c99c" opacity=".55"/>
-        </g>
-        ${bandaCuero(-banda / 2, yB, banda, altoP, s)}
-        ${pinza(-mitad * 0.72)}${pinza(mitad * 0.72)}
-        <image href="img/logo-lobo-128.png" x="${-logoP / 2}" y="${yB + altoP / 2 - logoP / 2}" width="${logoP}" height="${logoP}" filter="url(#perchero-grabado)" opacity=".85"/>
-      </svg>`;
-      return;
-    }
-    // Capucha: junto al cuello (a un cuarto del ancho) la prenda queda mucho más abajo que al centro
-    const yHombros = arriba + ((rec.perfil[Math.round(n * 0.25)][1] + rec.perfil[Math.round(n * 0.75)][1]) / 2) * e;
-    const capucha = yHombros - yCuello > alto * 0.1;
-    // Una sola pieza de cuero: cara de arriba plana sobre el cuello, y hacia abajo se abre en los hombros
-    // (que quedan dentro de la polera). Por delante se ve lo que asoma sobre el cuello y lo que se alcanza a
-    // ver por la abertura del cuello; el resto lo tapa la tela.
-    const tope = 10.5 * s, sobre = 15 * s, hombro = g * 0.17, yHom = yCuello + alto * 0.075, banda = 12 * s, logo = 9.5 * s;
-    const yTope = capucha ? yCuello + 2 * s : yCuello - sobre;
-    const pieza = `M${-tope} ${yTope + 1.5 * s} Q${-tope} ${yTope} ${-tope + 1.5 * s} ${yTope} L${tope - 1.5 * s} ${yTope} Q${tope} ${yTope} ${tope} ${yTope + 1.5 * s}
-      C${tope} ${yCuello} ${hombro * 0.55} ${yHom - 2 * s} ${hombro} ${yHom} L${hombro} ${yHom + 9 * s} L${-hombro} ${yHom + 9 * s} L${-hombro} ${yHom}
-      C${-hombro * 0.55} ${yHom - 2 * s} ${-tope} ${yCuello} ${-tope} ${yTope + 1.5 * s} Z`;
-    // El cuero con grano, volumen (más oscuro a los costados), su banda cosida y el canto de arriba con luz
-    const cuerpo = `
+  // Percha de nogal dibujada (cuando la foto no trae la suya): va DENTRO de la prenda, así que la tela la tapa
+  // y solo asoma su cuello de madera sobre el cuello de la polera. En un polerón con capucha queda escondida.
+  function perchaNogal(yC, alto, s, capucha) {
+    if (capucha) return ganchoAcero(yC + 1.5 * s, s);
+    const a = 5.2 * s, yT = yC - Math.max(8 * s, alto * 0.05), yB = yC + alto * 0.06;
+    const cuello = `M${-a} ${yB} L${-a} ${yT + a} Q${-a} ${yT} 0 ${yT} Q${a} ${yT} ${a} ${yT + a} L${a} ${yB} Z`;
+    return `${ganchoAcero(yT + 1.2 * s, s)}
       <g filter="url(#perchero-sombra)">
-        <path d="${pieza}" fill="url(#perchero-cuero)" filter="url(#perchero-grano)"/>
-        <path d="${pieza}" fill="url(#perchero-cuero-lados)"/>
-        <path d="${pieza}" fill="none" stroke="#5a3015" stroke-width="${0.5 * s}" opacity=".55"/>
+        <path d="${cuello}" fill="url(#perchero-nogal)" filter="url(#perchero-veta)"/>
+        <path d="M${-a * 0.35} ${yT + a * 0.7} L${-a * 0.35} ${yB}" stroke="#e2b58a" stroke-width="${0.7 * s}" opacity=".35"/>
+      </g>`;
+  }
+  // Pantalones y shorts sin foto en percha: percha de pinzas de nogal con el lobo grabado, tomada de la pretina
+  function perchaPinzas(yP, anchoPrenda, s) {
+    const mitad = anchoPrenda * 0.44, altoP = 7 * s, yB = yP - altoP * 0.55, logo = 8 * s;
+    const pinza = (x) => `
+      <rect x="${x - 3 * s}" y="${yB + altoP * 0.55}" width="${6 * s}" height="${10 * s}" rx="${1.2 * s}" fill="url(#perchero-acero)" stroke="#6f737a" stroke-width="${0.5 * s}"/>
+      <rect x="${x - 3 * s}" y="${yB + altoP * 0.55 + 6.5 * s}" width="${6 * s}" height="${0.8 * s}" fill="#6f737a" opacity=".7"/>`;
+    return `${ganchoAcero(yB + s, s)}
+      <g filter="url(#perchero-sombra)">
+        <rect x="${-mitad}" y="${yB}" width="${mitad * 2}" height="${altoP}" rx="${altoP / 2}" fill="url(#perchero-nogal-barra)" filter="url(#perchero-veta-h)"/>
+        <rect x="${-mitad + altoP * 0.4}" y="${yB + altoP * 0.14}" width="${mitad * 2 - altoP * 0.8}" height="${altoP * 0.18}" rx="${altoP * 0.09}" fill="#e2b58a" opacity=".4"/>
       </g>
-      ${bandaCuero(-banda / 2, yTope, banda, yHom + 9 * s - yTope, s, id + "c")}
-      <rect x="${-tope + 1.4 * s}" y="${yTope + 0.35 * s}" width="${(tope - 1.4 * s) * 2}" height="${1.3 * s}" rx="${0.65 * s}" fill="#f6d2a6" opacity=".55"/>`;
-    // Por delante: visible sobre el cuello y dentro de la abertura del cuello (se corta siguiendo su curva)
-    const percha = capucha ? "" : atras ? `<defs><clipPath id="${id}c"><path d="${pieza}"/></clipPath></defs>${cuerpo}` : `
-      <defs>
-        <clipPath id="${id}v">
-          <rect x="${-hombro - 20}" y="${yTope - 20}" width="${hombro * 2 + 40}" height="${yCuello + 1.5 * s - yTope + 20}"/>
-          <ellipse cx="0" cy="${yCuello + alto * 0.035}" rx="${g * 0.095}" ry="${alto * 0.045}"/>
-        </clipPath>
-        <clipPath id="${id}c"><path d="${pieza}"/></clipPath>
-      </defs>
-      <g clip-path="url(#${id}v)">${cuerpo}</g>
-      <image href="img/logo-lobo-128.png" x="${-logo / 2}" y="${yTope + sobre * 0.5 - logo / 2}" width="${logo}" height="${logo}" filter="url(#perchero-grabado)" opacity=".85"/>`;
-    it.gancho.innerHTML = `<svg width="1" height="1" overflow="visible" aria-hidden="true">${ganchoAcero(yTope + s, s)}${percha}
-    </svg>`;
+      ${pinza(-mitad * 0.72)}${pinza(mitad * 0.72)}
+      <image href="img/logo-lobo-128.png" x="${-logo / 2}" y="${yB + altoP / 2 - logo / 2}" width="${logo}" height="${logo}" filter="url(#perchero-grabado)" opacity=".9"/>`;
+  }
+  // m: cómo quedó puesta la foto (escala e y dónde empieza)
+  function pintarGancho(it, rec, m) {
+    const capa = it.capa || 1, s = (H / 240) * capa, yC = m.arriba + rec.gy * m.e;
+    // La percha va detrás de la prenda (dentro de ella); solo las pinzas toman la pretina por delante
+    it.gancho.classList.toggle("delante", it.pinzas && !rec.percha);
+    let dibujo;
+    if (rec.percha) dibujo = ganchoAcero(yC + 1.5 * s, s);
+    else if (it.pinzas) dibujo = perchaPinzas(yC, rec.lienzo.width * m.e, s);
+    else {
+      // Capucha: junto al cuello (a un cuarto del ancho) la prenda queda mucho más abajo que al centro
+      const n = rec.perfil.length - 1, alto = rec.lienzo.height * m.e;
+      const yHombros = m.arriba + ((rec.perfil[Math.round(n * 0.25)][1] + rec.perfil[Math.round(n * 0.75)][1]) / 2) * m.e;
+      dibujo = perchaNogal(yC, alto, s, yHombros - yC > alto * 0.1);
+    }
+    it.gancho.innerHTML = `<svg width="1" height="1" overflow="visible" aria-hidden="true">${dibujo}</svg>`;
   }
 
-  // Una polera o polerón colgado nunca es mucho más alto que ancho, y un pantalón no es tan largo como una
+  // Una polera o polerón estirado nunca es mucho más alto que ancho, y un pantalón no es tan largo como una
   // persona: si lo es, la foto era de alguien puesto la prenda
   const esPrenda = (rec, p) => !!rec && rec.lienzo.height / rec.lienzo.width <= (PERCHERO_PINZAS.includes(p.categoria) ? 3.1 : 1.45);
 
-  // cual: el número de foto del producto que se usó para colgarlo (la de la prenda sola)
-  function crearItem(p, rec, cual) {
+  // cual: de dónde salió la foto de frente (-1: PNG de frente del panel, -2: solo hay PNG de lado, 0 o más: el
+  // número de foto del producto que se recortó) · lado: la foto de lado (o null si no hay)
+  function crearItem(p, rec, cual, lado) {
     const el = document.createElement("button");
     el.className = "colgado";
     el.setAttribute("aria-label", `Ver ${p.nombre}`);
-    // La percha va encima de la foto: se ve por la abertura del cuello, como en una polera colgada de verdad
-    el.innerHTML = `<span class="colgado-mueve"><span class="colgado-llega"><span class="prenda"></span><span class="gancho"></span></span></span>`;
+    el.innerHTML = `<span class="colgado-mueve"><span class="colgado-llega"><span class="gancho"></span><span class="prenda p-lado"></span><span class="prenda p-frente"></span></span></span>`;
+    const q = (s) => el.querySelector(s);
     // Cada prenda pesa y cuelga un poco distinto: así no se mecen todas iguales, como robots
-    const pinzas = PERCHERO_PINZAS.includes(p.categoria);
-    return { p, el, mover: el.firstElementChild, llega: el.querySelector(".colgado-llega"), gancho: el.querySelector(".gancho"), prenda: el.querySelector(".prenda"),
-      cual, pinzas, frente: rec, alta: null, espalda: undefined, actual: rec, ancho: 0, alto: 0, th: 0, w: 0, etiquetas: null,
+    return { p, el, mover: el.firstElementChild, llega: q(".colgado-llega"), gancho: q(".gancho"), vLado: q(".p-lado"), vFrente: q(".p-frente"),
+      cual, pinzas: PERCHERO_PINZAS.includes(p.categoria), frente: rec, recLado: lado, alta: null, altaP: null, espalda: undefined, actual: rec,
+      giro: lado ? 0 : 1, giroPintado: -1, corre: 0, aparta: 0, mF: null, mL: null, vistaGancho: null, i: 0, th: 0, w: 0,
+      etiquetas: null, grupoEt: null, escalaEt: "",
       k: K * (0.8 + Math.random() * 0.4), c: C * (0.85 + Math.random() * 0.3), masa: 0.85 + Math.random() * 0.3 };
   }
 
-  // Pone una foto recortada en la percha con el cuello (o la pretina) justo bajo el gancho. Las poleras y
-  // polerones van todos del mismo ancho; pantalones y shorts más angostos, como se ven colgados de verdad.
+  // Tamaño de la foto: con percha propia, todas del mismo largo (de la madera a la basta), así la de lado, la de
+  // frente y la de espalda calzan. Sin percha (prenda estirada), todas del mismo ancho; pantalones más angostos.
   // capa: tamaño al que se dibuja (1 en el riel; al terminar de acercarse se dibuja de verdad en grande,
-  // porque agrandar con zoom una imagen chica se ve borroso en el celular)
-  function ponerLienzo(it, rec) {
-    it.actual = rec;
-    const capa = it.capa || 1, g = G * capa;
-    const objetivo = g * (it.pinzas ? 0.62 : 1), largoMax = g * (it.pinzas ? 1.9 : 1.3);
-    let e = objetivo / rec.lienzo.width;
-    if (rec.lienzo.height * e > largoMax) e = largoMax / rec.lienzo.height;
-    const s = it.prenda.style, arriba = GANCHO * capa - rec.gy * e + 1;
+  // porque agrandar con zoom una imagen chica se ve borrosa en el celular)
+  function escalaDe(it, rec) {
+    const capa = it.capa || 1;
+    if (rec.percha) return (largoDe(it) * capa) / Math.max(1, rec.lienzo.height - rec.gy);
+    const g = H * 0.56 * capa, objetivo = g * (it.pinzas ? 0.62 : 1), largoMax = g * (it.pinzas ? 1.9 : 1.3);
+    return Math.min(objetivo / rec.lienzo.width, largoMax / rec.lienzo.height);
+  }
+  // Pone una foto con la madera (o el cuello, o la pretina) justo donde llega el gancho
+  function ponerVista(it, hueco, rec) {
+    const capa = it.capa || 1, e = escalaDe(it, rec), arriba = GANCHO * capa - rec.gy * e + 1, s = hueco.style;
     s.left = -rec.gx * e + "px";
     s.top = arriba + "px";
     s.width = rec.lienzo.width * e + "px";
     s.height = rec.lienzo.height * e + "px";
     s.transformOrigin = `${rec.gx * e}px 0`;
-    if (rec.lienzo.parentNode !== it.prenda) it.prenda.replaceChildren(rec.lienzo);
-    it.ancho = rec.lienzo.width * e / capa;
-    it.alto = rec.lienzo.height * e / capa;
-    pintarGancho(it, rec, e, arriba, g);
+    if (rec.lienzo.parentNode !== hueco) hueco.replaceChildren(rec.lienzo);
+    return { e, arriba, ancho: (rec.lienzo.width * e) / capa, alto: (rec.lienzo.height * e) / capa, izq: (rec.gx * e) / capa };
+  }
+  function ponerLienzo(it, rec) {
+    it.actual = rec;
+    it.mF = ponerVista(it, it.vFrente, rec);
+    if (it.recLado) it.mL = ponerVista(it, it.vLado, it.recLado);
+    it.vistaGancho = null;
+    pintarVistaGancho(it);
     colocarEtiquetas(it);
+  }
+  // El gancho sigue a la foto que se está viendo (de lado o de frente)
+  function pintarVistaGancho(it) {
+    const deLado = it.recLado && it.giro < 0.45, rec = deLado ? it.recLado : it.actual;
+    if (it.vistaGancho === rec) return;
+    it.vistaGancho = rec;
+    pintarGancho(it, rec, deLado ? it.mL : it.mF);
   }
 
   // Cambia el tamaño al que se dibuja la prenda (sin que se note: la escala de la animación lo compensa)
@@ -1660,52 +1691,83 @@ function prepararPerchero() {
     ponerLienzo(it, it.actual);
   }
 
-  // Toma de lejos, como una foto de estudio: en el ancho de la "foto" caben 4 prendas grandes, tan juntas que
-  // las mangas se montan sobre la de al lado (como en un perchero lleno), con pared arriba y la sombra en el
-  // piso. En el computador la foto queda al centro.
+  // Toma de lejos, como una foto de estudio: en el ancho de la "foto" caben unas 4 prendas de lado, grandes,
+  // con pared arriba y la sombra en el piso. En el computador la foto queda al centro.
   function medidas() {
     ancho = caja.clientWidth;
-    const escena = Math.min(ancho, 920);
-    S = escena / 4.1;
-    G = S * 1.25;
-    GANCHO = Math.round(G * 0.19);
+    escena = Math.min(ancho, 920);
+    H = Math.round(Math.min(escena * 0.6, 420));
+    S = H * 0.46;
+    GANCHO = Math.round(H * 0.1);
     for (const it of items) ponerLienzo(it, it.actual);
     // El alto sale de la prenda más larga: riel, prendas, la sombra en el piso y el texto de abajo
-    const largo = Math.max(G * 1.1, ...items.map((it) => it.alto));
-    RIEL = Math.round(Math.max(64, escena * 0.17));
-    const suelo = Math.round(RIEL + GANCHO + largo + Math.max(28, G * 0.3));
-    altoRack = suelo + 64;
+    const largo = Math.max(H, ...items.map((it) => Math.max(it.mF.alto, it.mL ? it.mL.alto : 0)));
+    RIEL = Math.round(Math.max(72, escena * 0.13));
+    const suelo = Math.round(RIEL + GANCHO + largo + Math.max(22, H * 0.08));
+    altoRack = suelo + 76;
     const total = items.length * S;
     // Las prendas se ven solo dentro de la "foto" (en el computador queda al centro y el riel sigue de lado
     // a lado). Si caben todas, quedan centradas; si son más, parten desde el borde y se deslizan.
     escenaX = (ancho - escena) / 2;
-    relleno = total <= escena ? (escena - total) / 2 : S * 0.04;
+    relleno = total <= escena ? (escena - total) / 2 : S * 0.1;
     caja.classList.toggle("desborda", total > escena);
     caja.style.setProperty("--escena-x", escenaX + "px");
     caja.style.setProperty("--slot", S + "px");
     caja.style.setProperty("--relleno", relleno + "px");
     caja.style.setProperty("--suelo", suelo + "px");
-    caja.style.setProperty("--flecha-y", RIEL + GANCHO + G * 0.6 + "px");
+    caja.style.setProperty("--flecha-y", RIEL + GANCHO + H * 0.45 + "px");
+    if (deFrente) medirGiro(deFrente);
     if (!abierto) {
       caja.style.height = altoRack + "px";
       caja.style.setProperty("--riel", RIEL + "px");
     }
   }
 
-  // Todas cuelgan quietas en su lugar del riel. La prenda elegida corre por el riel hasta el centro y se
-  // acerca hasta quedar grande (y al cerrar vuelve a su lugar haciendo el camino al revés).
+  // Cuánto se corre cada prenda: las de al lado de la que está de frente le hacen espacio (y si quedó pegada
+  // a un borde, se corre todo el perchero para que se vea entera)
+  function corrimiento(i) {
+    let d = 0;
+    for (const j of items) {
+      if (!j.recLado || !j.giro) continue;
+      d += (j.corre + (i < j.i ? -j.aparta : i > j.i ? j.aparta : 0)) * suave(Math.min(1, j.giro * 1.5));
+    }
+    return d;
+  }
+  function medirGiro(it) {
+    const m = it.mF, x = escenaX + relleno + it.i * S + S / 2 - pista.scrollLeft;
+    const izq = m.izq + 10, der = m.ancho - m.izq + 10;
+    it.corre = x - izq < escenaX ? escenaX + izq - x : x + der > escenaX + escena ? escenaX + escena - der - x : 0;
+    it.aparta = Math.max(0, m.ancho / 2 + H * 0.1 - (S - (it.mL ? it.mL.ancho : S) / 2));
+  }
+  // Darse vuelta, como en el video: la foto de lado se angosta (está girando) y se abre la de frente
+  function pintarGiro(it) {
+    if (it.giroPintado === it.giro) return;
+    it.giroPintado = it.giro;
+    const a = Math.min(1, it.giro / 0.45), b = Math.max(0, (it.giro - 0.4) / 0.6), L = it.vLado.style, F = it.vFrente.style;
+    L.transform = `scaleX(${(1 - 0.94 * a * a).toFixed(3)})`;
+    L.visibility = a < 1 ? "visible" : "hidden";
+    F.transform = b < 1 ? `scaleX(${(0.2 + 0.8 * (1 - (1 - b) * (1 - b))).toFixed(3)})` : "";
+    F.opacity = Math.min(1, b * 2.5).toFixed(2);
+    F.visibility = b > 0 ? "visible" : "hidden";
+    pintarVistaGancho(it);
+  }
+
+  // Todas cuelgan en su lugar del riel. La elegida corre por el riel hasta el centro, se da vuelta y, al
+  // tocarla otra vez, se acerca hasta quedar grande (y al cerrar vuelve a su lugar haciendo el camino al revés).
   function pintar() {
-    const c = Math.max(0, Math.min(items.length - 1, Math.round(pista.scrollLeft / S)));
-    items.forEach((it, i) => {
-      let tx = 0, sc = 1;
+    const c = Math.max(0, Math.min(items.length - 1, Math.round((pista.scrollLeft + escena / 2 - relleno - S / 2) / S)));
+    const p = suave(zoomP);
+    for (const it of items) {
+      let tx = corrimiento(it.i), sc = 1;
       if (foco === it) {
-        const p = suave(zoomP);
-        tx = (ancho / 2 - (escenaX + relleno + i * S + S / 2 - pista.scrollLeft)) * p;
+        tx += (ancho / 2 - (escenaX + relleno + it.i * S + S / 2 - pista.scrollLeft + tx)) * p;
         sc = (1 + (Z - 1) * p) / (it.capa || 1);
       }
       it.mover.style.transform = `translateX(${tx.toFixed(1)}px) rotateZ(${it.th.toFixed(2)}deg) scale(${sc.toFixed(3)})`;
-      it.el.style.zIndex = foco === it ? 200 : 100;
-    });
+      it.el.style.zIndex = foco === it ? 200 : it.recLado && it.giro > 0 ? 150 : 100;
+      if (it.recLado) pintarGiro(it);
+      escalarEtiqueta(it, p);
+    }
     return c;
   }
 
@@ -1736,6 +1798,20 @@ function prepararPerchero() {
         if (Math.abs(et.th + it.th - et.reposo) > 0.05 || Math.abs(et.w) > 0.5) sigue = true;
       }
     }
+    // La que se da vuelta de frente (o vuelve a quedar de lado)
+    for (const it of items) {
+      if (!it.recLado) continue;
+      const meta = it === deFrente ? 1 : 0;
+      if (it.giro === meta) continue;
+      it.giro = sinMovimiento ? meta : meta ? Math.min(1, it.giro + dt / 0.55) : Math.max(0, it.giro - dt / 0.45);
+      sigue = true;
+    }
+    // La prenda tocada se da vuelta cuando llega al centro del riel (o cuando el riel ya no puede correr más)
+    if (pendiente) {
+      quieto = Math.abs(v) < 6 ? quieto + dt : 0;
+      if (Math.abs(sl - metaScroll) < 2 || quieto > 0.18) darVuelta(pendiente);
+      sigue = true;
+    } else if (deFrente && !abierto && Math.abs(sl - scrollGiro) > S * 0.45) soltarFrente();
     const meta = abierto ? 1 : 0;
     if (zoomP !== meta) {
       zoomP = sinMovimiento ? meta : zoomP + (meta - zoomP) * (1 - Math.exp(-dt * 5));
@@ -1760,7 +1836,14 @@ function prepararPerchero() {
   };
 
   function pintarInfo() {
-    info.innerHTML = `<p class="pi-pista">${matchMedia("(hover: hover)").matches ? "Haz clic en una prenda para verla de cerca 👆" : "Toca una prenda para verla de cerca 👆"}</p>`;
+    const clic = matchMedia("(hover: hover)").matches;
+    if (deFrente) {
+      info.innerHTML = `<p class="pi-nombre">${esc(deFrente.p.nombre)}</p><p class="precio pi-precio">${precioHtml(deFrente.p)}</p>
+        <p class="pi-pista">${clic ? "Haz clic en" : "Toca"} la prenda otra vez para verla de cerca</p>`;
+      return;
+    }
+    const deLado = items.some((it) => it.recLado);
+    info.innerHTML = `<p class="pi-pista">${clic ? "Haz clic en" : "Toca"} una prenda para verla ${deLado ? "de frente" : "de cerca"} 👆</p>`;
   }
   // Al deslizar el perchero, cada prenda que pasa hace tintinear su gancho
   function cambiarCentro(c) {
@@ -1769,27 +1852,86 @@ function prepararPerchero() {
     if (habia >= 0 && mostrado && !abierto) sonidoGancho(0.8);
   }
 
-  // La etiqueta de cartón con las tallas cuelga del hombro. Va dentro de la prenda (se mece con ella), así que
-  // se ajusta a la escala de la prenda para que siempre se vea de su tamaño
+  // La etiqueta de cartón con las tallas cuelga del gancho, delante de la prenda, y se mece con ella
+  const tamEtiqueta = () => Math.max(0.7, Math.min(1.05, H / 300));
   function colocarEtiquetas(it) {
-    const grupo = it.llega.querySelector(".etiquetas");
-    if (!grupo) return;
-    const capa = it.capa || 1;
-    grupo.style.left = (it.ancho * capa * 0.34).toFixed(1) + "px";
-    grupo.style.top = ((GANCHO + it.alto * 0.08) * capa).toFixed(1) + "px";
-    grupo.style.transform = `scale(${((1.35 * capa) / Z).toFixed(3)})`;
+    if (!it.grupoEt) return;
+    it.grupoEt.style.top = (GANCHO * (it.capa || 1) * 0.42).toFixed(1) + "px";
+    it.escalaEt = "";
+  }
+  // En pantalla se ve chica en el riel y un poco más grande con la prenda acercada
+  function escalarEtiqueta(it, p) {
+    if (!it.grupoEt) return;
+    const pf = foco === it ? p : 0, base = tamEtiqueta(), pantalla = base + (1.3 - base) * pf;
+    const t = `scale(${((pantalla * (it.capa || 1)) / (1 + (Z - 1) * pf)).toFixed(3)})`;
+    if (t === it.escalaEt) return;
+    it.grupoEt.style.transform = t;
+    it.escalaEt = t;
   }
   function colgarEtiquetas(it) {
     const tallas = it.p.tallas.filter((t) => t.toLowerCase() !== "única");
     if (!tallas.length) return;
     const grupo = document.createElement("span");
-    grupo.className = "etiquetas";
+    grupo.className = "etiquetas visible";
     grupo.innerHTML = `<span class="etiqueta kraft"><i></i><span class="carton"><small>Tallas</small><b>${tallas.map(esc).join(" ")}</b></span></span>`;
     it.llega.append(grupo);
+    it.grupoEt = grupo;
     colocarEtiquetas(it);
-    // Entra balanceándose y queda un poco ladeada (reposo, en grados)
-    it.etiquetas = [...grupo.querySelectorAll(".etiqueta")].map((el) => ({ el, th: -50, w: 0, reposo: -12 }));
-    requestAnimationFrame(() => grupo.classList.add("visible"));
+    escalarEtiqueta(it, 0);
+    // Queda un poco ladeada (reposo, en grados), como la del video
+    it.etiquetas = [...grupo.querySelectorAll(".etiqueta")].map((el) => ({ el, th: -12, w: 0, reposo: -12 }));
+  }
+
+  // La foto de frente en alta (para verla de cerca): el PNG del panel, o la foto del producto recortada en alta
+  function cargarAlta(it) {
+    if (!it.altaP) {
+      it.altaP = (it.cual < 0
+        ? vistaPercha(it.cual === -1 ? it.p.fotoPerchero : it.p.fotoPercheroLado, 1600, it.cual === -2)
+        : recortarPrenda(it.p.fotos[it.cual], 1200).then((r) => ajustarPercha(r, false))
+      ).then((r) => (it.alta = r));
+    }
+    return it.altaP;
+  }
+  // Ya de vuelta en el riel (y de lado), se suelta lo que se cargó en alta para no gastar memoria del teléfono
+  function liberar(it) {
+    if (abierto === it || foco === it) return;
+    if (it.actual !== it.frente) ponerLienzo(it, it.frente);
+    if (deFrente === it || pendiente === it) return;
+    for (const r of [it.alta, it.espalda]) if (r) r.lienzo.width = 0;
+    it.alta = it.altaP = null;
+    it.espalda = undefined;
+  }
+
+  // Tocar una prenda de lado: corre por el riel hasta el centro y ahí se da vuelta
+  function llamar(it) {
+    if (!listo) return;
+    soltarFrente(true);
+    pendiente = it;
+    quieto = 0;
+    metaScroll = Math.max(0, Math.min(pista.scrollWidth - pista.clientWidth, relleno + it.i * S + S / 2 - pista.clientWidth / 2));
+    if (Math.abs(pista.scrollLeft - metaScroll) > 2) pista.scrollTo({ left: metaScroll, behavior: sinMovimiento ? "auto" : "smooth" });
+    arrancar();
+  }
+  function darVuelta(it) {
+    pendiente = null;
+    deFrente = it;
+    scrollGiro = pista.scrollLeft;
+    medirGiro(it);
+    sonidoTela(0.45);
+    it.w += 30;
+    pintarInfo();
+    arrancar();
+    // Se deja lista la foto de frente en alta, para que al acercarla se vea nítida al tiro
+    cargarAlta(it);
+  }
+  function soltarFrente(callado) {
+    pendiente = null;
+    const it = deFrente;
+    if (!it) return;
+    deFrente = null;
+    if (!callado) pintarInfo();
+    arrancar();
+    setTimeout(() => liberar(it), 1500);
   }
 
   // Lo que tapan arriba la barra y la fila de categorías (las dos quedan pegadas al bajar)
@@ -1799,45 +1941,45 @@ function prepararPerchero() {
 
   async function abrir(it) {
     if (abierto || !listo) return;
+    pendiente = null;
     if (foco && foco !== it) { cambiarCapa(foco, 1); foco.el.classList.remove("elegido"); zoomP = 0; }
     cambiarCapa(it, 1);
     abierto = foco = it;
     sonidoTela();
-    const alto = altoZoom();
+    const alto = altoZoom(), m = it.mF;
     caja.style.height = alto + "px";
     // Grande como las fotos del catálogo: casi todo el ancho, sin tapar el nombre y los botones de abajo
-    Z = Math.max(1.2, Math.min((Math.min(ancho, 920) * 0.84) / it.ancho, (alto - RIEL_CERCA - 205) / (GANCHO + it.alto)));
+    Z = Math.max(1.2, Math.min((escena * 0.84) / m.ancho, (alto - RIEL_CERCA - 205) / (GANCHO + m.alto)));
     // Si sobra alto, el riel baja un poco para que la prenda quede al medio entre arriba y el nombre
-    const sobra = alto - RIEL_CERCA - 205 - (GANCHO + it.alto) * Z;
+    const sobra = alto - RIEL_CERCA - 205 - (GANCHO + m.alto) * Z;
     caja.style.setProperty("--riel", Math.round(RIEL_CERCA + Math.max(0, sobra) * 0.5) + "px");
     caja.classList.add("abierto");
     it.el.classList.add("elegido");
+    // De cerca, la etiqueta queda apoyada en el hombro para no tapar el cuello ni el diseño
+    if (it.etiquetas) for (const et of it.etiquetas) et.reposo = -32;
     info.innerHTML = `<p class="pi-nombre">${esc(it.p.nombre)}</p><p class="precio pi-precio">${precioHtml(it.p)}</p>
       <div class="pi-lados" role="group" aria-label="Lado de la prenda" hidden>
         <button data-lado="frente" aria-pressed="true">Frente</button><button data-lado="espalda" aria-pressed="false">Espalda</button>
       </div>
       <button class="ed-btn pi-comprar" data-comprar>Elegir talla y comprar</button>`;
-    colgarEtiquetas(it);
-    it.w += 70;
+    it.w += 50;
     arrancar();
     window.scrollTo({ top: caja.getBoundingClientRect().top + scrollY - tapado(), behavior: sinMovimiento ? "auto" : "smooth" });
-    // Cuando termina de acercarse: la foto en alta y la espalda (la siguiente foto del producto que
-    // también sea la prenda sola y de la misma forma)
+    // Cuando termina de acercarse: la foto en alta y la espalda
     await new Promise((ok) => setTimeout(ok, 700));
     if (abierto !== it) return;
-    // Con PNG sin fondo del panel se usa ese en alta; si no, se recorta en alta la foto que se colgó
-    const png = (src) => prendaSinFondo(src, 1200).then((r) => r || recortarPrenda(src, 1200));
-    if (!it.alta) it.alta = it.cual < 0 ? await png(it.p.fotoPerchero) : await recortarPrenda(it.p.fotos[it.cual], 1200);
+    await cargarAlta(it);
     if (abierto !== it) return;
     if (it.alta && it.actual === it.frente) ponerLienzo(it, it.alta);
     if (it.espalda === undefined) {
       const base = it.alta || it.frente, prop = (x) => x.lienzo.height / x.lienzo.width;
-      it.espalda = it.p.fotoPercheroEspalda ? await png(it.p.fotoPercheroEspalda) : null;
+      it.espalda = it.p.fotoPercheroEspalda ? await vistaPercha(it.p.fotoPercheroEspalda, 1600, false) : null;
       if (abierto !== it) return;
-      // Sin PNG de espalda: la siguiente foto del producto que sea la prenda sola y de la misma forma
-      for (let f = 0; f < it.p.fotos.length && !it.espalda; f++) {
+      // Sin PNG de espalda (y si la prenda no cuelga con fotos en percha): la siguiente foto del producto que
+      // sea la prenda sola y de la misma forma
+      for (let f = 0; f < it.p.fotos.length && !it.espalda && !it.recLado; f++) {
         if (f === it.cual) continue;
-        const rec = await recortarPrenda(it.p.fotos[f], 1200);
+        const rec = ajustarPercha(await recortarPrenda(it.p.fotos[f], 1200), false);
         if (abierto !== it) return;
         if (esPrenda(rec, it.p) && Math.abs(prop(rec) - prop(base)) < prop(base) * 0.25) it.espalda = rec;
       }
@@ -1854,24 +1996,17 @@ function prepararPerchero() {
     caja.classList.remove("abierto");
     caja.style.height = altoRack + "px";
     caja.style.setProperty("--riel", RIEL + "px");
-    const grupo = it.llega.querySelector(".etiquetas");
-    if (grupo) { grupo.classList.remove("visible"); setTimeout(() => grupo.remove(), 350); }
-    it.etiquetas = null;
+    if (it.etiquetas) for (const et of it.etiquetas) et.reposo = -12;
     it.w -= 50;
     sonidoGancho(0.7);
+    scrollGiro = pista.scrollLeft;
     pintarInfo();
     arrancar();
-    // Ya de vuelta en el riel, se suelta la foto en alta para no gastar memoria del teléfono
-    setTimeout(() => {
-      if (abierto === it || foco === it) return;
-      if (it.actual !== it.frente) ponerLienzo(it, it.frente);
-      for (const r of [it.alta, it.espalda]) if (r) r.lienzo.width = 0;
-      it.alta = null;
-      it.espalda = undefined;
-    }, 1500);
+    setTimeout(() => liberar(it), 1500);
   }
 
-  // Frente / Espalda: la prenda gira sobre la percha y a mitad de giro cambia de foto
+  // Frente / Espalda: la prenda se da vuelta en la percha, como en el riel: se angosta, cambia de foto y se
+  // vuelve a abrir (las dos fotos en alta, así no pierde calidad)
   async function girar(aEspalda) {
     const it = abierto;
     if (!it || girando) return;
@@ -1879,12 +2014,15 @@ function prepararPerchero() {
     if (!rec || rec === it.actual) return;
     girando = true;
     sonidoTela(0.5);
-    const media = "perspective(900px) rotateY(90deg)";
-    if (!sinMovimiento) await it.prenda.animate([{ transform: "perspective(900px) rotateY(0deg)" }, { transform: media }], { duration: 220, easing: "ease-in" }).finished.catch(() => {});
+    const v = it.vFrente;
+    const ida = sinMovimiento ? null : v.animate([{ transform: "scaleX(1)" }, { transform: "scaleX(.05)" }], { duration: 210, easing: "cubic-bezier(.55,0,.9,.5)", fill: "forwards" });
+    if (ida) await ida.finished.catch(() => {});
     ponerLienzo(it, rec);
     info.querySelectorAll("[data-lado]").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.lado === "espalda") === aEspalda)));
-    if (!sinMovimiento) await it.prenda.animate([{ transform: "perspective(900px) rotateY(-90deg)" }, { transform: "perspective(900px) rotateY(0deg)" }], { duration: 320, easing: "cubic-bezier(.2,.8,.3,1)" }).finished.catch(() => {});
-    it.w += aEspalda ? 40 : -40;
+    const vuelta = sinMovimiento ? null : v.animate([{ transform: "scaleX(.2)", opacity: 0.4 }, { transform: "scaleX(1)", opacity: 1 }], { duration: 330, easing: "cubic-bezier(.2,.8,.3,1)" });
+    if (ida) ida.cancel();
+    if (vuelta) await vuelta.finished.catch(() => {});
+    it.w += aEspalda ? 30 : -30;
     arrancar();
     girando = false;
   }
@@ -1914,30 +2052,31 @@ function prepararPerchero() {
     if (empezo) return;
     empezo = true;
     const fondos = [];
-    // Las fotos 1 se descargan todas a la vez y se recortan de a una (deja respirar a la página entre foto y foto).
-    // Si la foto 1 no sirve (por ejemplo, es con modelo), se prueba con las demás fotos del producto.
-    const cargas = candidatos.map((p) => (p.fotoPerchero ? null : cargarImagen(p.fotos[0]).catch(() => null)));
+    // Las fotos 1 se descargan todas a la vez y se recortan de a una (deja respirar a la página entre foto y foto)
+    const cargas = candidatos.map((p) => (p.fotoPerchero || p.fotoPercheroLado ? null : cargarImagen(p.fotos[0]).catch(() => null)));
     for (const [k, p] of candidatos.entries()) {
-      // Si subió en el panel la foto para el perchero (PNG sin fondo), se usa esa (cual = -1)
-      if (p.fotoPerchero) {
-        const rec = (await prendaSinFondo(p.fotoPerchero, 640)) || (await recortarPrenda(p.fotoPerchero, 640));
-        await new Promise((ok) => setTimeout(ok));
-        if (rec) {
-          items.push(crearItem(p, rec, -1));
-          if (rec.fondo) fondos.push(rec.fondo);
-          continue;
-        }
+      // Las fotos del panel para el perchero (PNG sin fondo en su percha): de lado y de frente
+      let lado = p.fotoPercheroLado ? await vistaPercha(p.fotoPercheroLado, 900, true) : null;
+      let frente = p.fotoPerchero ? await vistaPercha(p.fotoPerchero, lado ? 800 : 640, false) : null, cual = -1;
+      await new Promise((ok) => setTimeout(ok));
+      if (!frente && lado) { frente = lado; lado = null; cual = -2; }
+      if (frente) {
+        items.push(crearItem(p, frente, cual, lado));
+        if (frente.fondo) fondos.push(frente.fondo);
+        continue;
       }
+      // Sin fotos del panel: se recorta la foto de la prenda sola (si la 1 es con modelo, se prueba con las demás)
       for (let f = 0; f < p.fotos.length; f++) {
-        const rec = await recortarPrenda(f ? p.fotos[f] : cargas[k], 640);
+        const rec = ajustarPercha(await recortarPrenda(f ? p.fotos[f] : cargas[k] || p.fotos[0], 640), false);
         await new Promise((ok) => setTimeout(ok));
         if (!esPrenda(rec, p)) continue;
-        items.push(crearItem(p, rec, f));
+        items.push(crearItem(p, rec, f, null));
         fondos.push(rec.fondo);
         break;
       }
     }
     if (!items.length) { bloque.remove(); return; }
+    items.forEach((it, i) => (it.i = i));
     // La pared toma el mismo gris de las fotos recortadas: así cualquier borde del recorte queda invisible
     if (fondos.length) {
       const pared = [0, 1, 2].map((k) => Math.round(fondos.reduce((s, f) => s + f[k], 0) / fondos.length));
@@ -1946,6 +2085,7 @@ function prepararPerchero() {
     pista.replaceChildren(...items.map((it) => it.el));
     caja.classList.remove("cargando");
     medidas();
+    for (const it of items) colgarEtiquetas(it);
     listo = true;
     pista.scrollLeft = 0;
     scrollAntes = 0;
@@ -1965,9 +2105,12 @@ function prepararPerchero() {
       else cerrar();
       return;
     }
-    // Cualquier prenda que toque se acerca
     const it = el && items.find((x) => x.el === el);
-    if (it) abrir(it);
+    if (!it) { soltarFrente(); return; }
+    // De lado: corre al centro y se da vuelta. De frente: se acerca.
+    if (!it.recLado) abrir(it);
+    else if (it !== deFrente) llamar(it);
+    else if (it.giro > 0.6) abrir(it);
   });
   // Con el teclado (Tab), la prenda elegida se asoma si estaba fuera de la vista
   pista.addEventListener("focusin", (e) => {
@@ -1995,18 +2138,22 @@ function prepararPerchero() {
       location.hash = "producto=" + encodeURIComponent(id);
     }
   });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && abierto && $("#modal").hidden) cerrar(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape" || !$("#modal").hidden) return;
+    if (abierto) cerrar();
+    else soltarFrente();
+  });
 
   new ResizeObserver(() => {
     if (!listo || caja.clientWidth === ancho) return;
     medidas();
     pintar();
   }).observe(caja);
-  // Se prepara un poco antes de llegar; al verse, la ropa se cuelga. Si se sale de la sección, la prenda vuelve al riel.
+  // Se prepara un poco antes de llegar; al verse, la ropa se cuelga. Si se sale de la sección, todo vuelve al riel.
   new IntersectionObserver(([e]) => { if (e.isIntersecting) colgarTodo(); }, { rootMargin: "1200px 0px" }).observe(bloque);
   new IntersectionObserver(([e]) => {
     caja.classList.toggle("fuera", !e.isIntersecting);
-    if (!e.isIntersecting) cerrar();
+    if (!e.isIntersecting) { cerrar(); soltarFrente(); }
     if (e.intersectionRatio >= 0.3) entrada();
   }, { threshold: [0, 0.3] }).observe(caja);
 }

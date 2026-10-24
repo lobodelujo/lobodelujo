@@ -246,9 +246,10 @@ img.sin-foto {
 .perchero-defs { position: absolute; width: 0; height: 0; }
 .perchero-logo { position: absolute; top: 14px; left: 50%; z-index: 1; width: 36px; height: auto; transform: translateX(-50%); filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .15)); transition: opacity .4s; }
 .perchero.abierto .perchero-logo { opacity: 0; }
-/* Al acercar una prenda el riel sube (como si la cámara se acercara) y vuelve al cerrar */
+/* Al acercar una prenda el riel sube (como si la cámara se acercara) y vuelve al cerrar.
+   Va detrás de la ropa: los ganchos pasan por encima de él, como en un perchero de verdad. */
 .perchero-riel {
-  position: absolute; left: 3%; right: 3%; top: calc(var(--riel) - 3.5px); z-index: 300; height: 7px; border-radius: 4px; pointer-events: none;
+  position: absolute; left: 3%; right: 3%; top: calc(var(--riel) - 3.5px); z-index: 0; height: 7px; border-radius: 4px; pointer-events: none;
   background: linear-gradient(180deg, #fdfdfd 0%, #d6d6d8 34%, #8e8e94 62%, #cbcbce 100%);
   box-shadow: 0 5px 9px rgba(0, 0, 0, .14);
   transition: top .55s cubic-bezier(.3, .7, .2, 1);
@@ -269,7 +270,7 @@ img.sin-foto {
 .perchero-riel::after { right: 8px; }
 /* Las prendas se ven dentro de la "foto" central (en el celular es todo el ancho) */
 .perchero-pista {
-  position: absolute; top: 0; bottom: 0; left: var(--escena-x, 0); right: var(--escena-x, 0); display: flex;
+  position: absolute; top: 0; bottom: 0; left: var(--escena-x, 0); right: var(--escena-x, 0); z-index: 1; display: flex;
   overflow-x: auto; overflow-y: hidden; scroll-snap-type: x proximity; overscroll-behavior-x: contain;
   scrollbar-width: none; -webkit-overflow-scrolling: touch;
 }
@@ -282,11 +283,14 @@ img.sin-foto {
 .colgado-mueve { position: absolute; left: 50%; top: var(--riel); width: 0; height: 0; transform-origin: 0 0; transition: top .55s cubic-bezier(.3, .7, .2, 1); }
 .colgado-llega { position: absolute; left: 0; top: 0; transition: opacity .5s, filter .5s; }
 .perchero.esperando .colgado-llega { opacity: 0; }
-/* La percha va delante de la prenda (se ve por la abertura del cuello); de espalda, detrás */
-.gancho { position: absolute; left: 0; top: 0; z-index: 2; }
-.gancho.detras { z-index: 0; }
+/* La percha va dentro de la prenda (detrás de la tela): solo asoman el gancho y la madera sobre el cuello.
+   La de pinzas toma la pretina por delante. */
+.gancho { position: absolute; left: 0; top: 0; z-index: 0; }
+.gancho.delante { z-index: 2; }
 .gancho svg { display: block; overflow: visible; }
+/* Cada prenda tiene su foto de lado y la de frente (una encima de la otra; app.js las da vuelta) */
 .prenda { position: absolute; z-index: 1; display: block; filter: drop-shadow(0 10px 12px rgba(0, 0, 0, .14)); }
+.prenda:empty { display: none; }
 .prenda canvas { display: block; width: 100%; height: 100%; }
 /* Prenda acercada: el resto del perchero queda desenfocado atrás */
 .perchero.abierto .colgado:not(.elegido) .colgado-llega { opacity: .45; filter: blur(6px); }
@@ -319,8 +323,8 @@ img.sin-foto {
 .pi-lados button { padding: 6px 16px; border-radius: 999px; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: rgba(20, 20, 20, .6); transition: background .2s, color .2s; }
 .pi-lados button[aria-pressed="true"] { background: #141414; color: #fff; }
 .pi-comprar { margin-top: 8px; }
-/* Etiqueta de cartón con las tallas colgando del hombro (se mece con la prenda) */
-.etiquetas { position: absolute; z-index: 3; width: 0; height: 0; opacity: 0; transform-origin: 0 0; transition: opacity .35s; pointer-events: none; }
+/* Etiqueta de cartón con las tallas colgando del gancho, delante de la prenda (se mece con ella) */
+.etiquetas { position: absolute; left: 0; z-index: 3; width: 0; height: 0; opacity: 0; transform-origin: 0 0; transition: opacity .35s; pointer-events: none; }
 .etiquetas.visible { opacity: 1; }
 .etiquetas::before { content: ""; position: absolute; left: -2px; top: -2px; width: 5px; height: 5px; border-radius: 50%; background: #1c1c1e; }
 /* Cada etiqueta gira desde la punta de su hilo */
