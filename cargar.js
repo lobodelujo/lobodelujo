@@ -49,6 +49,8 @@ const slug = (s) =>
           etiqueta: p.etiqueta || "",
           disponible: p.disponible !== false,
           perchero: p.perchero === true,
+          fotoPerchero: p.fotoPerchero || "",
+          fotoPercheroEspalda: p.fotoPercheroEspalda || "",
           descripcion: p.descripcion || "",
           tallas: lista(p.tallas).sort(ordenarTallas),
           colores: lista(p.colores),

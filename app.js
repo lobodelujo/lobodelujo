@@ -1100,13 +1100,13 @@ function revisarHash() {
 window.addEventListener("hashchange", revisarHash);
 
 // ---------- El Perchero de Lobo ----------
-// Prendas colgadas en un riel, vistas de lejos como en una foto de estudio (caben unas 5 a lo ancho).
-// En el panel, cada producto tiene la casilla "Colgar en El Perchero de Lobo": si hay alguno marcado se
-// cuelgan solo esos (en el orden de la lista); si no, se cuelgan solas las poleras y polerones.
+// Prendas colgadas en un riel, vistas de lejos como en una foto de estudio (caben 4 a lo ancho).
+// En el panel, cada producto tiene la casilla "Colgar en El Perchero de Lobo": se cuelgan solo los marcados
+// (en el orden de la lista). Si no hay ninguno marcado, la sección no aparece.
 // La página recorta sola cada prenda desde su foto de la prenda sola (frente y espalda), cuando tiene fondo
 // claro y liso como las del prompt LDL-01; las que no se pueden recortar limpio quedan fuera (igual se ven
 // en el catálogo). Al tocar una prenda, corre por el riel al centro y se acerca grande, y se puede girar.
-const PERCHERO = ["Poleras", "Polerones"];
+const PERCHERO = ["Poleras", "Polerones"]; // la sección va justo después de la primera de estas categorías
 const PERCHERO_NO_CUELGAN = ["Gorras", "Lentes", "Accesorios"];
 const PERCHERO_PINZAS = ["Pantalones", "Shorts"]; // estos van en percha de pinzas, tomados de la pretina
 const PERCHERO_MAX = 16;
@@ -1150,6 +1150,55 @@ const cargarImagen = (src) => new Promise((ok, mal) => {
   i.onerror = mal;
   i.src = foto(src, 1200);
 });
+
+// Foto que la tienda ya subió sin fondo (PNG hecho en Canva): se usa tal cual, solo se le mide dónde va el
+// gancho y la forma de los hombros. Devuelve lo mismo que recortarPrenda, o null si la foto no tiene fondo
+// transparente (en ese caso se recorta como cualquier otra foto).
+async function prendaSinFondo(src, anchoMax) {
+  if (!src) return null;
+  let img;
+  try { img = await cargarImagen(src); } catch { return null; }
+  const k = Math.min(1, anchoMax / img.naturalWidth);
+  const w = Math.round(img.naturalWidth * k), h = Math.round(img.naturalHeight * k), n = w * h;
+  if (w < 60 || h < 60) return null;
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  const g = c.getContext("2d", { willReadFrequently: true });
+  g.drawImage(img, 0, 0, w, h);
+  let px;
+  try { px = g.getImageData(0, 0, w, h).data; } catch { return null; }
+  let transparentes = 0, bx0 = w, bx1 = 0, by0 = h, by1 = 0;
+  for (let i = 0; i < n; i++) {
+    const a = px[i * 4 + 3];
+    if (a < 20) { transparentes++; continue; }
+    if (a < 128) continue;
+    const x = i % w, y = (i - x) / w;
+    if (x < bx0) bx0 = x;
+    if (x > bx1) bx1 = x;
+    if (y < by0) by0 = y;
+    if (y > by1) by1 = y;
+  }
+  if (transparentes < n * 0.05 || bx1 <= bx0 || by1 <= by0) return null;
+  const lleno = (x, y) => px[(y * w + x) * 4 + 3] >= 128;
+  const cx = Math.round((bx0 + bx1) / 2), r = Math.max(2, Math.round((bx1 - bx0) * 0.04));
+  let arriba = by1;
+  for (let x = cx - r; x <= cx + r; x++) for (let y = by0; y < arriba; y++) if (lleno(x, y)) { arriba = y; break; }
+  const m = 2, cw = bx1 - bx0 + 1 + m * 2, ch = by1 - by0 + 1 + m * 2;
+  const perfil = [];
+  for (let j = 0; j <= 20; j++) {
+    const x = Math.round(bx0 + ((bx1 - bx0) * j) / 20);
+    let y = by0;
+    while (y < by1 && !lleno(x, y)) y++;
+    perfil.push([x - bx0 + m, y - by0 + m]);
+  }
+  const lienzo = document.createElement("canvas");
+  lienzo.width = cw;
+  lienzo.height = ch;
+  lienzo.getContext("2d").drawImage(c, bx0 - m, by0 - m, cw, ch, 0, 0, cw, ch);
+  c.width = 0;
+  return { lienzo, gx: cx - bx0 + m, gy: arriba - by0 + m, perfil, fondo: null };
+}
 
 // Recorta la prenda de una foto con fondo claro y liso (fuente: la ruta de la foto o la foto ya cargándose).
 // Devuelve { lienzo, gx, gy, fondo } (gx, gy: dónde entra el gancho, en px del lienzo) o null si la foto no sirve.
@@ -1427,11 +1476,10 @@ function prepararPerchero() {
   const bloque = $("#perchero-bloque");
   if (!bloque) return;
   const caja = $("#perchero"), pista = $("#perchero-pista"), info = $("#perchero-info");
-  // Las que marcó en el panel (en el orden de su lista); si no marcó ninguna, las poleras y polerones
+  // Solo las que la tienda marcó en el panel, en el orden de su lista. Si no marcó ninguna, no hay perchero.
   const cuelga = (p) => p.disponible && p.fotos.length && !PERCHERO_NO_CUELGAN.includes(p.categoria);
-  const marcados = PRODUCTOS.filter((p) => p.perchero && cuelga(p));
-  const candidatos = (marcados.length ? marcados : PRODUCTOS.filter((p) => PERCHERO.includes(p.categoria) && cuelga(p))).slice(0, PERCHERO_MAX);
-  if (candidatos.length < (marcados.length ? 1 : 3)) { bloque.remove(); return; }
+  const candidatos = PRODUCTOS.filter((p) => p.perchero && cuelga(p)).slice(0, PERCHERO_MAX);
+  if (!candidatos.length) { bloque.remove(); return; }
 
   // Física de la ropa colgada (resorte con roce) y de las etiquetas (más livianas, se mecen más)
   const K = 52, C = 2.6, K_ET = 95, C_ET = 1.8;
@@ -1725,12 +1773,16 @@ function prepararPerchero() {
     // también sea la prenda sola y de la misma forma)
     await new Promise((ok) => setTimeout(ok, 700));
     if (abierto !== it) return;
-    if (!it.alta) it.alta = await recortarPrenda(it.p.fotos[it.cual], 1200);
+    // Con PNG sin fondo del panel se usa ese en alta; si no, se recorta en alta la foto que se colgó
+    const png = (src) => prendaSinFondo(src, 1200).then((r) => r || recortarPrenda(src, 1200));
+    if (!it.alta) it.alta = it.cual < 0 ? await png(it.p.fotoPerchero) : await recortarPrenda(it.p.fotos[it.cual], 1200);
     if (abierto !== it) return;
     if (it.alta && it.actual === it.frente) ponerLienzo(it, it.alta);
     if (it.espalda === undefined) {
       const base = it.alta || it.frente, prop = (x) => x.lienzo.height / x.lienzo.width;
-      it.espalda = null;
+      it.espalda = it.p.fotoPercheroEspalda ? await png(it.p.fotoPercheroEspalda) : null;
+      if (abierto !== it) return;
+      // Sin PNG de espalda: la siguiente foto del producto que sea la prenda sola y de la misma forma
       for (let f = 0; f < it.p.fotos.length && !it.espalda; f++) {
         if (f === it.cual) continue;
         const rec = await recortarPrenda(it.p.fotos[f], 1200);
@@ -1812,8 +1864,18 @@ function prepararPerchero() {
     const fondos = [];
     // Las fotos 1 se descargan todas a la vez y se recortan de a una (deja respirar a la página entre foto y foto).
     // Si la foto 1 no sirve (por ejemplo, es con modelo), se prueba con las demás fotos del producto.
-    const cargas = candidatos.map((p) => cargarImagen(p.fotos[0]).catch(() => null));
+    const cargas = candidatos.map((p) => (p.fotoPerchero ? null : cargarImagen(p.fotos[0]).catch(() => null)));
     for (const [k, p] of candidatos.entries()) {
+      // Si subió en el panel la foto para el perchero (PNG sin fondo), se usa esa (cual = -1)
+      if (p.fotoPerchero) {
+        const rec = (await prendaSinFondo(p.fotoPerchero, 640)) || (await recortarPrenda(p.fotoPerchero, 640));
+        await new Promise((ok) => setTimeout(ok));
+        if (rec) {
+          items.push(crearItem(p, rec, -1));
+          if (rec.fondo) fondos.push(rec.fondo);
+          continue;
+        }
+      }
       for (let f = 0; f < p.fotos.length; f++) {
         const rec = await recortarPrenda(f ? p.fotos[f] : cargas[k], 640);
         await new Promise((ok) => setTimeout(ok));
@@ -1824,9 +1886,11 @@ function prepararPerchero() {
       }
     }
     if (!items.length) { bloque.remove(); return; }
-    // La pared toma el mismo gris de las fotos: así cualquier borde del recorte queda invisible
-    const pared = [0, 1, 2].map((k) => Math.round(fondos.reduce((s, f) => s + f[k], 0) / fondos.length));
-    caja.style.setProperty("--pared", `rgb(${pared.join(",")})`);
+    // La pared toma el mismo gris de las fotos recortadas: así cualquier borde del recorte queda invisible
+    if (fondos.length) {
+      const pared = [0, 1, 2].map((k) => Math.round(fondos.reduce((s, f) => s + f[k], 0) / fondos.length));
+      caja.style.setProperty("--pared", `rgb(${pared.join(",")})`);
+    }
     pista.replaceChildren(...items.map((it) => it.el));
     caja.classList.remove("cargando");
     medidas();
