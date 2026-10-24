@@ -1,6 +1,27 @@
 {
   "productos": [
     {
+      "perchero": false,
+      "precio": 46000,
+      "nombre": "PALM ANGELS",
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo bordado sobre la prenda adelante\n>costuras oscuras en la parte frontal\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261024-003944-cz5-1.jpg",
+        "img/productos/20261024-003953-4mm-2.jpg",
+        "img/productos/20261024-004005-mva-3.jpg",
+        "img/productos/20261024-004015-460-4.jpg"
+      ],
+      "colores": [
+        "crema"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "etiqueta": "Nuevo",
+      "tallas": [
+        "M"
+      ]
+    },
+    {
       "precio": 43000,
       "nombre": "LOUIS VUITTON",
       "descripcion": ">100% algodón\n>cuello redondo\n>logo estampado\n>atrás bordado con hilo\n>lavar a mano",
