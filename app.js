@@ -1561,13 +1561,14 @@ function prepararPerchero() {
     ponerLienzo(it, it.actual);
   }
 
-  // Toma de lejos, como una foto de estudio: en el ancho de la "foto" caben 4 prendas, cerca una de otra,
-  // con pared arriba y la sombra suave en el piso. En el computador la foto queda al centro.
+  // Toma de lejos, como una foto de estudio: en el ancho de la "foto" caben 4 prendas grandes, tan juntas que
+  // las mangas se montan sobre la de al lado (como en un perchero lleno), con pared arriba y la sombra en el
+  // piso. En el computador la foto queda al centro.
   function medidas() {
     ancho = caja.clientWidth;
     const escena = Math.min(ancho, 920);
     S = escena / 4.1;
-    G = S * 0.92;
+    G = S * 1.25;
     GANCHO = Math.round(G * 0.19);
     for (const it of items) ponerLienzo(it, it.actual);
     // El alto sale de la prenda más larga: riel, prendas, la sombra en el piso y el texto de abajo
