@@ -3,6 +3,28 @@
     {
       "perchero": false,
       "precio": 46000,
+      "nombre": "DIOR",
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo doble capa alta densidad efecto flock\n>atrás logo del nombre en alta densidad\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261026-110008-rox-1.jpg",
+        "img/productos/20261026-110017-o5h-3.jpg",
+        "img/productos/20261026-110059-6is-2.jpg",
+        "img/productos/20261026-110234-iiq-4.jpg"
+      ],
+      "colores": [
+        "blanco"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "etiqueta": "Nuevo",
+      "tallas": [
+        "M",
+        "L"
+      ]
+    },
+    {
+      "perchero": false,
+      "precio": 46000,
       "nombre": "OFF NEGRA",
       "descripcion": ">100% algodón\n>cuello redondo\n>logo al tacto en serigrafía\n>lavar a mano",
       "precioAntes": "",
