@@ -346,7 +346,7 @@ img.sin-foto {
   .perchero, .colgado-llega, .colgado-mueve, .perchero-riel { transition: none; }
 }
 
-/* ---------- La vitrina que gira (Accesorios): estudio claro y cálido, como el video de referencia ----------
+/* ---------- La Vitrina de Lobo (accesorios girando): estudio claro y cálido, como el video de referencia ----------
    Los accesorios flotan en círculo sobre su propia sombra; app.js los mueve y los acerca. */
 .vitrina {
   --tinta: #161616;

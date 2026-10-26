@@ -2263,12 +2263,12 @@ function prepararPerchero() {
   }, { threshold: [0, 0.3] }).observe(caja);
 }
 
-// ---------- La vitrina que gira (Accesorios) ----------
+// ---------- La Vitrina de Lobo (accesorios girando, en el lugar de Accesorios) ----------
 // Los accesorios (gorras, relojes, cinturones, calcetines…) flotan en un círculo que gira lento, como una vitrina
 // giratoria mirada un poco desde arriba: el de adelante se ve grande y los de atrás más chicos y más arriba.
 // Se gira con el dedo (o el mouse) y siempre queda uno al frente; tocar uno de atrás lo trae adelante y tocar el
 // de adelante lo acerca grande, con su nombre, precio y colores (como en el video de referencia).
-// En el panel, cada producto tiene la casilla "Girar en la vitrina de Accesorios": salen solo los marcados (en el
+// En el panel, cada producto tiene la casilla "Girar en La Vitrina de Lobo": salen solo los marcados (en el
 // orden de la lista) con su foto PNG sin fondo de Canva. Sin PNG se intenta recortar sola su foto (fondo claro y
 // liso); si no se puede, ese no sale. Si no hay ninguno marcado, la sección no aparece.
 const VITRINA_CATEGORIA = "Accesorios";
@@ -2296,12 +2296,12 @@ function colorCss(nombre) {
 function vitrinaHtml() {
   const verTodo = PRODUCTOS.some((p) => p.categoria === VITRINA_CATEGORIA);
   return `<section class="ed-bloque vitrina-bloque" id="vitrina-bloque">
-    <div class="ed-cab"><h2>${esc(VITRINA_CATEGORIA)}</h2></div>
+    <div class="ed-cab"><h2>La Vitrina de Lobo</h2></div>
     <div class="vitrina cargando" id="vitrina">
       <p class="vitrina-palabra" id="vitrina-palabra" aria-hidden="true"></p>
       <div class="vitrina-piso" aria-hidden="true"></div>
       <div class="vitrina-sombras" id="vitrina-sombras" aria-hidden="true"></div>
-      <div class="vitrina-escena" id="vitrina-escena" role="group" aria-label="Accesorios en la vitrina"></div>
+      <div class="vitrina-escena" id="vitrina-escena" role="group" aria-label="Accesorios en La Vitrina de Lobo"></div>
       <button class="flecha izq" data-girar="1" aria-label="Traer el accesorio de la izquierda">‹</button>
       <button class="flecha der" data-girar="-1" aria-label="Traer el accesorio de la derecha">›</button>
       <div class="vitrina-pie">
