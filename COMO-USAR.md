@@ -69,9 +69,18 @@ El video suena al 35% del volumen y el sonido parte con el primer toque del clie
 - **Foto grande:** horizontal, ideal **1920 × 1080**.
 - **Foto para celular:** vertical **1080 × 1350** (opcional).
 - Si una categoría no tiene foto, se usa la del primer producto de esa categoría.
-- **Accesorios** no lleva foto grande: se muestra con 6 fotos chicas.
+- **Accesorios** no lleva foto grande: en su lugar va la vitrina que gira (abajo).
 
-*Prompts para crear fotos de portada: PORTADA WEB · COMPUTADOR, PORTADA WEB · CELULAR y PORTADA · VARIAS PRENDAS del manual.*
+## 💫 La vitrina de Accesorios (accesorios girando en círculo)
+En el inicio, en el lugar de Accesorios, los accesorios flotan en un círculo que gira solo. El cliente la gira con el dedo, toca uno para traerlo adelante y lo toca otra vez para verlo grande con su nombre, precio, colores y el botón **Ver y comprar**.
+1. Abre el producto (gorra, reloj, cinturón, calcetines, lo que sea) en **🛍️ Productos**.
+2. Enciende **💫 Girar en la vitrina de Accesorios**.
+3. En **💫 Vitrina · foto SIN FONDO** sube el PNG del accesorio solo, de frente, con el fondo quitado en Canva.
+4. **Publicar**.
+- Salen solo los que marques, en el orden de tu lista (máximo 12). Si no marcas ninguno, la vitrina no aparece.
+- Sin PNG, la página intenta recortar sola tu foto 1 (fondo claro y liso). Si no puede, ese accesorio no sale.
+- Los agotados no salen en la vitrina.
+- Los **colores** del producto salen como puntitos en la ficha grande (Negro, Blanco, Azul marino, Café, Dorado, Plateado…).
 
 ---
 

@@ -59,11 +59,15 @@ $("#anio").textContent = new Date().getFullYear();
 // con ese primer toque queda lista la tarjeta de sonido para el toque en fotos y la moto.
 let ctxAudio = null, toque = null;
 const audio = () => {
-  ctxAudio = ctxAudio || new (window.AudioContext || window.webkitAudioContext)();
+  if (!ctxAudio) {
+    ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
+    // Si la moto ya estaba andando cuando la persona tocó la pantalla, el motor encendido parte ahí
+    ctxAudio.addEventListener("statechange", retomarRalenti);
+  }
   if (ctxAudio.state === "suspended") ctxAudio.resume();
   return ctxAudio;
 };
-for (const t of ["pointerup", "touchend", "keydown"]) addEventListener(t, () => { try { audio(); } catch {} }, { capture: true, once: true });
+for (const t of ["pointerup", "touchend", "keydown"]) addEventListener(t, () => { try { audio(); retomarRalenti(); } catch {} }, { capture: true, once: true });
 // Solo para sonidos que no vienen de un toque (la moto): si todavía no se puede, no suena
 const audioListo = () => (ctxAudio && ctxAudio.state === "running" ? ctxAudio : null);
 // Ruido blanco corto (escape del motor, cartón)
@@ -150,6 +154,75 @@ function sonidoMotor(dur) {
     for (const f of fuentes) { f.start(t); f.stop(fin); }
   } catch {}
 }
+
+// Motor encendido (ralentí): sonidos/motor-encendido.wav, grabado de una moto de verdad y repetido en bucle
+// sin corte. Suena todo el rato que la moto está en "¿Cómo comprar?": parada en cada paso mientras se lee la
+// tarjeta, andando (más bajito, debajo de la acelerada) y después de dejar el paquete. Se apaga al salir de
+// la sección, al abrir el carrito o una prenda, o al cambiar de pestaña.
+const VOL_RALENTI = 0.18; // un poco más bajo que la acelerada (el ralentí suena parejo y lleno, se oye igual)
+let ralentiGrabado = null, ralenti = null, ralentiQuiere = false;
+fetch("sonidos/motor-encendido.wav")
+  .then((r) => r.arrayBuffer())
+  .then((b) => new OfflineAudioContext(1, 1, 22050).decodeAudioData(b))
+  .then((b) => { ralentiGrabado = b; retomarRalenti(); })
+  .catch(() => {});
+const ralentiCallado = () => document.hidden || document.body.classList.contains("bloqueado");
+function retomarRalenti() {
+  const ctx = audioListo();
+  if (!ctx || !ralentiQuiere || !ralentiGrabado) return;
+  try {
+    const t = ctx.currentTime, vol = ralentiCallado() ? 0.0001 : VOL_RALENTI;
+    if (ralenti) {
+      ralenti.vol.gain.cancelScheduledValues(t);
+      ralenti.vol.gain.setTargetAtTime(vol, t, 0.15);
+      return;
+    }
+    const s = ctx.createBufferSource(), g = ctx.createGain();
+    s.buffer = ralentiGrabado;
+    s.loop = true;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.setTargetAtTime(vol, t, 0.15);
+    s.connect(g).connect(ctx.destination);
+    // Parte en un punto al azar del bucle, para que no suene idéntico cada vez
+    s.start(t, Math.random() * ralentiGrabado.duration);
+    ralenti = { s, vol: g };
+  } catch {}
+}
+function encenderMotor() {
+  ralentiQuiere = true;
+  retomarRalenti();
+}
+function apagarMotor() {
+  ralentiQuiere = false;
+  const r = ralenti;
+  if (!r) return;
+  ralenti = null;
+  try {
+    const t = r.s.context.currentTime;
+    r.vol.gain.cancelScheduledValues(t);
+    r.vol.gain.setTargetAtTime(0.0001, t, 0.18);
+    r.s.stop(t + 1);
+  } catch {}
+}
+// Mientras anda, el ralentí queda debajo de la acelerada y sube un poco de tono, como al dar gas
+function ralentiAndando(dur) {
+  const ctx = audioListo();
+  if (!ctx || !ralenti || ralentiCallado()) return;
+  try {
+    const t = ctx.currentTime, g = ralenti.vol.gain, r = ralenti.s.playbackRate;
+    g.cancelScheduledValues(t);
+    g.setTargetAtTime(VOL_RALENTI * 0.35, t, 0.06);
+    g.setTargetAtTime(VOL_RALENTI, t + dur * 0.85, 0.12);
+    r.cancelScheduledValues(t);
+    r.setValueAtTime(r.value, t);
+    r.linearRampToValueAtTime(1.18, t + dur * 0.6);
+    r.linearRampToValueAtTime(1, t + dur);
+  } catch {}
+}
+// Con el carrito o una prenda abiertos, o en otra pestaña, el motor se calla; al volver, sigue
+const ajustarRalenti = () => { if (ralenti) retomarRalenti(); };
+document.addEventListener("visibilitychange", ajustarRalenti);
+new MutationObserver(ajustarRalenti).observe(document.body, { attributes: true, attributeFilter: ["class"] });
 
 // Chirrido corto y suave de freno
 function sonidoFreno() {
@@ -255,6 +328,49 @@ function sonidoGancho(fuerza = 1) {
       clic.connect(f).connect(gc).connect(salida);
       clic.start(t);
     }
+  } catch {}
+}
+
+// Vitrina: "tic" suave cada vez que un accesorio pasa adelante al girarla con el dedo (como la perilla de un reloj)
+function sonidoTic(fuerza = 1) {
+  const ctx = audioListo();
+  if (!ctx) return;
+  try {
+    const t = ctx.currentTime, s = ruido(ctx, 0.03), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    f.type = "bandpass";
+    f.frequency.value = 3200 * (0.95 + Math.random() * 0.1);
+    f.Q.value = 3;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.2 * fuerza, t + 0.002);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.03);
+    s.connect(f).connect(g).connect(ctx.destination);
+    s.start(t);
+    s.stop(t + 0.04);
+    const o = ctx.createOscillator(), go = ctx.createGain();
+    o.frequency.value = 1900;
+    go.gain.setValueAtTime(0.0001, t);
+    go.gain.exponentialRampToValueAtTime(0.03 * fuerza, t + 0.003);
+    go.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
+    o.connect(go).connect(ctx.destination);
+    o.start(t);
+    o.stop(t + 0.07);
+  } catch {}
+}
+
+// Vitrina: soplido de aire al acercar un accesorio (sube) o al devolverlo a la vitrina (baja)
+function sonidoAire(fuerza = 1, sube = true) {
+  try {
+    const ctx = audio(), t = ctx.currentTime, s = ruido(ctx, 0.6), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    f.type = "bandpass";
+    f.Q.value = 1.1;
+    f.frequency.setValueAtTime(sube ? 380 : 1700, t);
+    f.frequency.exponentialRampToValueAtTime(sube ? 1900 : 420, t + 0.42);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.38 * fuerza, t + 0.12);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 0.55);
+    s.connect(f).connect(g).connect(ctx.destination);
+    s.start(t);
+    s.stop(t + 0.6);
   } catch {}
 }
 
@@ -397,9 +513,6 @@ function tarjetaChica(p) {
   </a>`;
 }
 
-// Esta categoría no lleva foto grande: se muestra como 6 fotos chicas (3 por fila)
-const CATEGORIA_SEIS = "Accesorios";
-
 // Recién llegados: primero los que tienen etiqueta "Nuevo" y se completa con los últimos agregados
 // (los primeros del panel), para que la fila de 3 siempre se llene y se pueda deslizar
 function recienLlegados() {
@@ -413,24 +526,15 @@ function pintarEditorial() {
   const nuevos = recienLlegados();
   // El Perchero de Lobo va justo después de la primera categoría que se cuelga (Poleras)
   const anclaPerchero = categorias().find((c) => PERCHERO.includes(c) && PRODUCTOS.some((p) => p.categoria === c));
+  // La vitrina que gira va en el lugar de Accesorios (si esa categoría no está en la lista, al final)
+  const conVitrina = vitrinaProductos().length > 0;
+  const vitrinaAlFinal = conVitrina && !categorias().includes(VITRINA_CATEGORIA);
   $("#editorial").innerHTML = categorias()
     .map((cat) => {
+      if (cat === VITRINA_CATEGORIA) return conVitrina ? vitrinaHtml() : "";
       const prods = PRODUCTOS.filter((p) => p.categoria === cat);
       if (!prods.length) return "";
       const perchero = cat === anclaPerchero ? percheroHtml() : "";
-      if (cat === CATEGORIA_SEIS) {
-        n++;
-        // Siempre se ven las 6 casillas: las que faltan muestran "Próximamente" hasta que se agreguen productos
-        const vacias = `<div class="ed-prod ed-vacio" aria-hidden="true">
-            <span class="card-media"><img class="sin-foto" src="img/logo-lobo-128.png" alt=""></span>
-            <span class="ed-prod-info"><span class="ed-prod-nombre">Próximamente</span></span>
-          </div>`.repeat(Math.max(0, 6 - prods.length));
-        return `<section class="ed-bloque">
-          <div class="ed-cab"><h2>${esc(cat)}</h2></div>
-          <div class="ed-seis">${prods.slice(0, 6).map(tarjetaChica).join("")}${vacias}</div>
-          <a class="ed-btn ed-btn-solo" href="#catalogo" data-ver-cat="${esc(cat)}">Ver todo</a>
-        </section>${perchero}`;
-      }
       // La foto grande se sube en el panel; si no hay, se usa la del primer producto (y ese no se repite abajo)
       const portada = (TIENDA.portadasCategorias || []).find((c) => c && c.categoria === cat && c.foto);
       const grande = portada ? portada.foto : (prods[0].fotos || [])[0];
@@ -447,7 +551,7 @@ function pintarEditorial() {
         ${chicas.length ? `<div class="ed-chicas">${chicas.map(tarjetaChica).join("")}</div>` : ""}
       </section>${perchero}`;
     })
-    .join("") + (nuevos.length ? `
+    .join("") + (vitrinaAlFinal ? vitrinaHtml() : "") + (nuevos.length ? `
     <section class="ed-bloque">
       <div class="ed-cab"><h2>Recién llegados</h2></div>
       <div class="carrusel" id="carrusel">
@@ -459,6 +563,7 @@ function pintarEditorial() {
     </section>` : "");
   prepararCarrusel();
   prepararPerchero();
+  prepararVitrina();
   animarTitulos($("#editorial"));
 }
 
@@ -2158,6 +2263,469 @@ function prepararPerchero() {
   }, { threshold: [0, 0.3] }).observe(caja);
 }
 
+// ---------- La vitrina que gira (Accesorios) ----------
+// Los accesorios (gorras, relojes, cinturones, calcetines…) flotan en un círculo que gira lento, como una vitrina
+// giratoria mirada un poco desde arriba: el de adelante se ve grande y los de atrás más chicos y más arriba.
+// Se gira con el dedo (o el mouse) y siempre queda uno al frente; tocar uno de atrás lo trae adelante y tocar el
+// de adelante lo acerca grande, con su nombre, precio y colores (como en el video de referencia).
+// En el panel, cada producto tiene la casilla "Girar en la vitrina de Accesorios": salen solo los marcados (en el
+// orden de la lista) con su foto PNG sin fondo de Canva. Sin PNG se intenta recortar sola su foto (fondo claro y
+// liso); si no se puede, ese no sale. Si no hay ninguno marcado, la sección no aparece.
+const VITRINA_CATEGORIA = "Accesorios";
+const VITRINA_MAX = 12;
+const vitrinaProductos = () =>
+  PRODUCTOS.filter((p) => p.vitrina && p.disponible && (p.fotoVitrina || p.fotos.length)).slice(0, VITRINA_MAX);
+
+// Colores escritos en el panel → color del puntito (si no se conoce, se muestra solo el nombre)
+const COLORES_CSS = {
+  negro: "#151515", blanco: "#f6f5f1", gris: "#8b8b8d", plomo: "#6c6f73", grafito: "#3c3d40", beige: "#d9c8a9",
+  crema: "#efe5cf", hueso: "#ece6d6", arena: "#cdb895", cafe: "#6b4a30", marron: "#6b4a30", chocolate: "#4a2f1e",
+  camel: "#b4874f", azul: "#25407a", marino: "#1c2a46", celeste: "#9fc8ea", rojo: "#b5242c", burdeo: "#6a1a28",
+  vino: "#5c1725", verde: "#3d6b3c", oliva: "#6b6a3a", militar: "#545a3a", menta: "#a8d8c0", amarillo: "#fad02c",
+  mostaza: "#c99a2e", naranjo: "#e3762c", naranja: "#e3762c", rosado: "#f0b4c4", rosa: "#f0b4c4", fucsia: "#d6307a",
+  morado: "#5d3a7d", lila: "#b9a2d6", dorado: "#c9a54a", oro: "#c9a54a", plateado: "#c3c7cc", plata: "#c3c7cc",
+  acero: "#9aa0a6", cobre: "#b06b3c", bronce: "#8c6239",
+};
+// "Azul marino" → marino · "Negro mate" → negro (manda la última palabra conocida)
+function colorCss(nombre) {
+  const n = String(nombre).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  for (const palabra of n.split(/[^a-z]+/).reverse()) if (COLORES_CSS[palabra]) return COLORES_CSS[palabra];
+  return null;
+}
+
+function vitrinaHtml() {
+  const verTodo = PRODUCTOS.some((p) => p.categoria === VITRINA_CATEGORIA);
+  return `<section class="ed-bloque vitrina-bloque" id="vitrina-bloque">
+    <div class="ed-cab"><h2>${esc(VITRINA_CATEGORIA)}</h2></div>
+    <div class="vitrina cargando" id="vitrina">
+      <p class="vitrina-palabra" id="vitrina-palabra" aria-hidden="true"></p>
+      <div class="vitrina-piso" aria-hidden="true"></div>
+      <div class="vitrina-sombras" id="vitrina-sombras" aria-hidden="true"></div>
+      <div class="vitrina-escena" id="vitrina-escena" role="group" aria-label="Accesorios en la vitrina"></div>
+      <button class="flecha izq" data-girar="1" aria-label="Traer el accesorio de la izquierda">‹</button>
+      <button class="flecha der" data-girar="-1" aria-label="Traer el accesorio de la derecha">›</button>
+      <div class="vitrina-pie">
+        <p class="vitrina-cuenta"><b id="vitrina-num">01</b><small id="vitrina-total"></small><span id="vitrina-nombre"></span></p>
+        <div class="vitrina-puntos" id="vitrina-puntos" role="group" aria-label="Elegir accesorio"></div>
+        <p class="vitrina-pista" id="vitrina-pista">Armando la vitrina…</p>
+      </div>
+      <div class="vitrina-ficha" id="vitrina-ficha" aria-live="polite"></div>
+      <button class="vitrina-cerrar" id="vitrina-cerrar" aria-label="Volver a la vitrina">×</button>
+    </div>
+    ${verTodo ? `<a class="ed-btn ed-btn-solo" href="#catalogo" data-ver-cat="${esc(VITRINA_CATEGORIA)}">Ver todo</a>` : ""}
+  </section>`;
+}
+
+// Mapa chico de lo que es accesorio y lo que es aire en cada foto: así un toque en el hueco de unos lentes o
+// de una cadena le llega al de atrás, como pasaría de verdad
+function mapaAlfa(lienzo) {
+  const w = 48, h = Math.max(1, Math.round((48 * lienzo.height) / lienzo.width));
+  const c = document.createElement("canvas");
+  c.width = w;
+  c.height = h;
+  const g = c.getContext("2d", { willReadFrequently: true });
+  g.drawImage(lienzo, 0, 0, w, h);
+  const d = g.getImageData(0, 0, w, h).data, a = new Uint8Array(w * h);
+  for (let i = 0; i < a.length; i++) a[i] = d[i * 4 + 3];
+  c.width = 0;
+  return { w, h, a };
+}
+
+function prepararVitrina() {
+  const bloque = $("#vitrina-bloque");
+  if (!bloque) return;
+  const caja = $("#vitrina"), escena = $("#vitrina-escena"), sombras = $("#vitrina-sombras"), ficha = $("#vitrina-ficha");
+  const palabra = $("#vitrina-palabra"), puntos = $("#vitrina-puntos"), pista = $("#vitrina-pista");
+  const candidatos = vitrinaProductos();
+  if (!candidatos.length) { bloque.remove(); return; }
+
+  const AUTO = 0.32;        // accesorios por segundo cuando gira sola (uno nuevo adelante cada ~3 s, como en el video)
+  const ESPERA_AUTO = 3500; // después de moverla con el dedo, vuelve a girar sola a los 3,5 s
+  let items = [], N = 0;
+  // pos: qué accesorio está adelante (con decimales mientras gira: 2,5 = entre el 2 y el 3)
+  // modo: "auto" (gira sola) · "arrastre" (con el dedo) · "inercia" (sigue sola al soltar) · "meta" (va a uno) · "quieto"
+  let pos = 0, vel = 0, meta = 0, modo = "quieto", adelante = -1, quietoDesde = 0;
+  let W = 0, H = 0, B = 0, RX = 0, PROF = 0, PISO = 0, movil = false;
+  let anim = 0, antes = 0, reloj = 0, entradaT = null, listo = false, empezo = false, visible = false, mostrado = false;
+  let arrastre = null, rueda = 0, abierto = null, foco = null, zoomP = 0;
+  const suave = (t) => t * t * (3 - 2 * t);
+  const limitar = (v, a, b) => Math.max(a, Math.min(b, v));
+  const pxPorItem = () => (RX * Math.PI * 2) / Math.max(1, N);
+  // Distancia más corta (en accesorios, con signo) desde lo que se ve adelante hasta el accesorio i
+  const distancia = (i) => { let d = (((i - pos) % N) + N) % N; if (d > N / 2) d -= N; return d; };
+  const clic = () => matchMedia("(hover: hover)").matches;
+  // Lo que tapan arriba la barra y la fila de categorías (las dos quedan pegadas al bajar)
+  const tapado = () => $(".barra").offsetHeight + ($(".categorias") ? $(".categorias").offsetHeight : 0);
+
+  // Escenario: en el celular más alto que ancho; el de adelante ocupa casi la mitad del ancho
+  function medidas() {
+    W = caja.clientWidth;
+    movil = W < 700;
+    H = Math.round(movil ? limitar(W * 1.25, 460, 600) : limitar(W * 0.5, 520, 640));
+    caja.style.height = H + "px";
+    B = movil ? W * 0.5 : Math.min(W * 0.25, 320);
+    // Bien juntos, montados unos sobre otros como en el video; con muchos accesorios el círculo se abre un poco
+    RX = B * (movil ? 0.58 : 0.8) * (1 + Math.max(0, N - 6) * 0.05);
+    // Mirada un poco desde arriba: los de atrás quedan bastante más arriba que el de adelante
+    PROF = H * 0.25;
+    PISO = H * (movil ? 0.7 : 0.74);
+    caja.style.setProperty("--piso-y", (PISO - PROF * 0.5).toFixed(0) + "px");
+    caja.style.setProperty("--piso-w", (RX * 2 + B * 1.3).toFixed(0) + "px");
+    for (const it of items) dimensionar(it);
+  }
+  // Todos se ven de un tamaño parecido (un reloj chico y un cinturón largo pesan lo mismo a la vista). La caja
+  // de cada uno mide lo que mide acercado: en la vitrina se achica, así al acercarlo se ve nítido.
+  function dimensionar(it) {
+    const w = it.rec.lienzo.width, h = it.rec.lienzo.height;
+    const k = Math.min((B * 0.82) / Math.sqrt(w * h), (B * 1.25) / w, (B * 1.3) / h);
+    it.dw = w * k;
+    it.dh = h * k;
+    it.Z = Math.max(1, Math.min((movil ? H * 0.42 : H * 0.64) / it.dh, (movil ? W * 0.72 : W * 0.38) / it.dw));
+    it.bw = it.dw * it.Z;
+    it.bh = it.dh * it.Z;
+    it.el.style.width = it.bw + "px";
+    it.el.style.height = it.bh + "px";
+    it.sw = it.dw * 0.92;
+    it.sh = Math.max(14, it.dw * 0.16);
+    it.sombra.style.width = it.sw + "px";
+    it.sombra.style.height = it.sh + "px";
+  }
+
+  function pintar() {
+    const p = suave(zoomP);
+    for (const it of items) {
+      // Ángulo en el círculo (0 = adelante al centro): los que vienen entran por la izquierda, como en el video
+      const a = (distancia(it.i) / N) * Math.PI * 2, prof = (1 + Math.cos(a)) / 2; // prof: 1 adelante, 0 atrás
+      let s = 0.5 + 0.5 * Math.pow(prof, 1.4);
+      let x = W / 2 - RX * Math.sin(a);
+      let piso = PISO - PROF * (1 - prof);
+      // Flota: sube y baja suave, cada uno a su ritmo (la sombra se achica cuando sube)
+      const flota = sinMovimiento ? 0 : Math.sin(reloj * 1.25 + it.fase);
+      let alto = B * (0.08 + flota * 0.018) * s;
+      let opac = 1, inclina = sinMovimiento ? 0 : limitar(-vel * 2.6, -5, 5) * prof;
+      // Al aparecer la sección suben desde abajo de a uno
+      let llega = 1;
+      if (entradaT === null) llega = 0;
+      else if (!sinMovimiento) llega = 1 - Math.pow(1 - limitar((reloj - entradaT - it.i * 0.09) / 0.8, 0, 1), 3);
+      if (p > 0) {
+        if (it === foco) {
+          // El elegido se acerca: a la izquierda en el computador, arriba al centro en el celular
+          x += ((movil ? W / 2 : W * 0.33) - x) * p;
+          piso += ((movil ? H * 0.54 : H * 0.82) - piso) * p;
+          s += (it.Z - s) * p;
+          alto *= 1 - p * 0.35;
+          inclina *= 1 - p;
+        } else {
+          // Los demás se abren hacia afuera y se desvanecen
+          x = W / 2 + (x - W / 2) * (1 + p * 0.9);
+          piso -= p * H * 0.06;
+          opac = 1 - p;
+        }
+      }
+      const y = piso - alto + (1 - llega) * 70;
+      it.el.style.transform = `translate3d(${(x - it.bw / 2).toFixed(1)}px, ${(y - it.bh).toFixed(1)}px, 0) rotate(${inclina.toFixed(2)}deg) scale(${(s / it.Z).toFixed(4)})`;
+      it.el.style.opacity = (opac * llega).toFixed(3);
+      it.z = it === foco && p > 0 ? 500 : Math.round(prof * 100) + 1;
+      it.el.style.zIndex = it.z;
+      it.sombra.style.transform = `translate3d(${(x - it.sw / 2).toFixed(1)}px, ${(piso - it.sh / 2).toFixed(1)}px, 0) scale(${(s * (1 - flota * 0.05)).toFixed(3)})`;
+      it.sombra.style.opacity = ((0.5 + 0.5 * prof) * (1 - flota * 0.12) * opac * llega).toFixed(3);
+      // Los de más atrás quedan un poquito desenfocados, como en una foto con poca profundidad de campo
+      const lejos = prof < 0.28 && it !== foco;
+      if (lejos !== it.lejos) { it.lejos = lejos; it.el.classList.toggle("lejos", lejos); }
+    }
+  }
+
+  function cuadro(t) {
+    anim = 0;
+    const dt = Math.min(0.05, Math.max(0.001, (t - antes) / 1000));
+    antes = t;
+    reloj += dt;
+    if (N > 1) {
+      // Acercado, la vitrina no gira (solo termina de dejarlo justo adelante)
+      if (abierto && modo !== "meta") modo = "quieto";
+      if (modo === "quieto" && !abierto && !sinMovimiento && performance.now() - quietoDesde > ESPERA_AUTO) modo = "auto";
+      if (modo === "auto") {
+        vel += (AUTO - vel) * (1 - Math.exp(-dt * 1.4));
+        pos += vel * dt;
+      } else if (modo === "inercia") {
+        vel *= Math.exp(-dt * 2.4);
+        pos += vel * dt;
+        if (Math.abs(vel) < 0.7) { modo = "meta"; meta = Math.round(pos + vel * 0.25); }
+      } else if (modo === "meta") {
+        const d = meta - pos;
+        vel = d * 7;
+        pos += d * (1 - Math.exp(-dt * 7));
+        if (Math.abs(d) < 0.002) { pos = meta; vel = 0; modo = "quieto"; quietoDesde = performance.now(); }
+      } else if (modo === "quieto") vel = 0;
+    }
+    // Acercar o devolver a la vitrina
+    const metaZoom = abierto ? 1 : 0;
+    if (zoomP !== metaZoom) {
+      zoomP = sinMovimiento ? metaZoom : zoomP + (metaZoom - zoomP) * (1 - Math.exp(-dt * 5.5));
+      if (Math.abs(zoomP - metaZoom) < 0.002) zoomP = metaZoom;
+    }
+    if (!abierto && zoomP === 0) foco = null;
+    pintar();
+    const f = ((Math.round(pos) % N) + N) % N;
+    if (f !== adelante) cambiarAdelante(f);
+    if (visible || zoomP !== metaZoom) anim = requestAnimationFrame(cuadro);
+  }
+  const arrancar = () => {
+    if (anim || !listo) return;
+    antes = performance.now();
+    anim = requestAnimationFrame(cuadro);
+  };
+
+  // Número, nombre y puntito del que quedó adelante. Al girarla con el dedo, cada uno que pasa hace "tic".
+  function cambiarAdelante(f) {
+    const habia = adelante;
+    adelante = f;
+    const it = items[f];
+    $("#vitrina-num").textContent = String(f + 1).padStart(2, "0");
+    $("#vitrina-nombre").textContent = it.p.nombre;
+    puntos.querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-current", String(i === f)));
+    if (habia >= 0 && mostrado && modo !== "auto") sonidoTic(0.8);
+  }
+
+  // Gira hasta dejar adelante el accesorio i (por el camino más corto)
+  function irA(i) {
+    if (N < 2 || abierto) return;
+    modo = "meta";
+    meta = Math.round(pos + distancia(i));
+    arrancar();
+  }
+  function girarUno(dir) {
+    if (N < 2 || abierto) return;
+    meta = (modo === "meta" ? meta : Math.round(pos)) + dir;
+    modo = "meta";
+    arrancar();
+  }
+
+  const fichaHtml = (p) => {
+    const colores = p.colores.map((c) => {
+      const css = colorCss(c);
+      return `<li>${css ? `<i style="background:${css}"></i>` : ""}${esc(c)}</li>`;
+    }).join("");
+    const tallas = p.tallas.filter((t) => t.toLowerCase() !== "única");
+    return `<p class="vf-cat">${esc(p.categoria)}</p>
+      <h3 class="vf-nombre">${esc(p.nombre)}</h3>
+      <p class="precio vf-precio">${precioHtml(p)}</p>
+      ${colores ? `<ul class="vf-colores" aria-label="Colores">${colores}</ul>` : ""}
+      ${tallas.length ? `<p class="vf-tallas">Tallas: ${tallas.map(esc).join(" · ")}</p>` : ""}
+      <button class="ed-btn vf-comprar" data-comprar>Ver y comprar</button>`;
+  };
+
+  // El de adelante se acerca grande y aparece su ficha; detrás, el nombre de su categoría en letras gigantes
+  function abrir(it) {
+    if (abierto || !listo) return;
+    if (N > 1) { meta = Math.round(pos + distancia(it.i)); modo = "meta"; }
+    abierto = foco = it;
+    palabra.textContent = it.p.categoria;
+    ficha.innerHTML = fichaHtml(it.p);
+    caja.classList.add("abierto");
+    sonidoAire(0.9, true);
+    const r = caja.getBoundingClientRect();
+    if (r.top < tapado() || r.bottom > innerHeight)
+      window.scrollTo({ top: r.top + scrollY - tapado() - Math.max(0, (innerHeight - tapado() - H) / 2), behavior: sinMovimiento ? "auto" : "smooth" });
+    arrancar();
+  }
+  function cerrar(callado) {
+    if (!abierto) return;
+    abierto = null;
+    caja.classList.remove("abierto");
+    if (!callado) sonidoAire(0.6, false);
+    quietoDesde = performance.now();
+    arrancar();
+  }
+
+  // El accesorio que de verdad está bajo el dedo: el de adelante responde en todo su contorno (también en el
+  // hueco de un cinturón enrollado); los de atrás, solo donde tienen algo pintado, así un toque en el aire
+  // entre dos accesorios le llega al que se ve ahí
+  function itemEn(cx, cy) {
+    for (const it of [...items].sort((a, b) => b.z - a.z)) {
+      if (Number(it.el.style.opacity) < 0.3) continue;
+      const r = it.rec.lienzo.getBoundingClientRect(), m = it.alfa;
+      if (cx < r.left || cx > r.right || cy < r.top || cy > r.bottom) continue;
+      if (it === abierto || Math.abs(distancia(it.i)) < 0.5) return it;
+      const gx = Math.floor(((cx - r.left) / r.width) * m.w), gy = Math.floor(((cy - r.top) / r.height) * m.h);
+      // Con un margen de dos cuadritos: así es fácil tocar las cosas finas (una cadena, unos lentes)
+      for (let y = gy - 2; y <= gy + 2; y++)
+        for (let x = gx - 2; x <= gx + 2; x++)
+          if (x >= 0 && y >= 0 && x < m.w && y < m.h && m.a[y * m.w + x] > 60) return it;
+    }
+    return null;
+  }
+  function tocar(it) {
+    if (abierto) { if (it !== abierto) cerrar(); return; }
+    if (!it) return;
+    // El que está adelante (aunque la vitrina vaya girando) se acerca; uno de atrás viene adelante primero
+    if (N < 2 || Math.abs(distancia(it.i)) < 0.5) abrir(it);
+    else { sonidoToque(); irA(it.i); }
+  }
+
+  function crearItem(p, rec) {
+    const el = document.createElement("button");
+    el.type = "button";
+    el.className = "giro";
+    el.setAttribute("aria-label", `Ver ${p.nombre}`);
+    rec.lienzo.className = "giro-foto";
+    el.append(rec.lienzo);
+    const sombra = document.createElement("span");
+    sombra.className = "giro-sombra";
+    return { p, rec, el, sombra, alfa: mapaAlfa(rec.lienzo), fase: Math.random() * Math.PI * 2, i: 0, z: 0, lejos: false };
+  }
+
+  async function armar() {
+    if (empezo) return;
+    empezo = true;
+    for (const p of candidatos) {
+      // La foto sin fondo del panel; si no hay (o no es PNG sin fondo), se recorta sola la que haya
+      let rec = p.fotoVitrina ? await prendaSinFondo(p.fotoVitrina, 800) : null;
+      for (const src of [p.fotoVitrina, ...p.fotos.slice(0, 3)]) {
+        if (rec) break;
+        if (src) rec = await recortarPrenda(src, 800);
+      }
+      await new Promise((ok) => setTimeout(ok));
+      if (rec) items.push(crearItem(p, rec));
+    }
+    if (!items.length) { bloque.remove(); return; }
+    N = items.length;
+    items.forEach((it, i) => (it.i = i));
+    escena.replaceChildren(...items.map((it) => it.el));
+    sombras.replaceChildren(...items.map((it) => it.sombra));
+    puntos.innerHTML = items.map((it, i) => `<button data-punto="${i}" aria-label="${esc(it.p.nombre)}"></button>`).join("");
+    $("#vitrina-total").textContent = "/" + String(N).padStart(2, "0");
+    caja.classList.toggle("solo", N < 2);
+    medidas();
+    listo = true;
+    caja.classList.remove("cargando");
+    pista.textContent = N < 2 ? `${clic() ? "Haz clic" : "Toca"} para verlo de cerca` : `${clic() ? "Arrastra" : "Desliza"} para girar · ${clic() ? "haz clic en" : "toca"} uno para verlo`;
+    cambiarAdelante(0);
+    pintar();
+    const r = caja.getBoundingClientRect();
+    visible = r.bottom > 0 && r.top < innerHeight;
+    if (r.top < innerHeight * 0.7 && r.bottom > innerHeight * 0.3) entrada();
+    arrancar();
+  }
+
+  // Al llegar a la sección: los accesorios suben de a uno mientras la vitrina parte girando rápido y frena
+  function entrada() {
+    if (mostrado || !listo) return;
+    mostrado = true;
+    entradaT = reloj;
+    if (sinMovimiento || N < 2) return;
+    pos = -1.6;
+    vel = 2.2;
+    modo = "auto";
+    arrancar();
+  }
+
+  // Con el dedo o el mouse: deslizar de lado la gira (con inercia al soltar); deslizar hacia arriba o abajo
+  // sigue moviendo la página. Un toque sin deslizar trae ese accesorio adelante o lo acerca.
+  escena.addEventListener("pointerdown", (e) => {
+    if (!listo || e.button > 0) return;
+    arrastre = { id: e.pointerId, x: e.clientX, y: e.clientY, pos0: pos, mueve: false, muestras: [[e.timeStamp, e.clientX]] };
+  });
+  escena.addEventListener("pointermove", (e) => {
+    const a = arrastre;
+    if (!a || a.id !== e.pointerId) return;
+    const dx = e.clientX - a.x, dy = e.clientY - a.y;
+    if (!a.mueve) {
+      if (Math.abs(dx) < 8 || abierto || N < 2) return;
+      if (Math.abs(dy) > Math.abs(dx)) { arrastre = null; return; }
+      a.mueve = true;
+      a.x = e.clientX;
+      a.pos0 = pos;
+      modo = "arrastre";
+      vel = 0;
+      caja.classList.add("arrastrando");
+      try { escena.setPointerCapture(e.pointerId); } catch {}
+    }
+    pos = a.pos0 + (e.clientX - a.x) / pxPorItem();
+    a.muestras.push([e.timeStamp, e.clientX]);
+    if (a.muestras.length > 6) a.muestras.shift();
+    const [t0, x0] = a.muestras[0];
+    vel = e.timeStamp > t0 ? (e.clientX - x0) / pxPorItem() / ((e.timeStamp - t0) / 1000) : 0;
+    arrancar();
+  });
+  const soltar = (e) => {
+    const a = arrastre;
+    if (!a || a.id !== e.pointerId) return;
+    arrastre = null;
+    caja.classList.remove("arrastrando");
+    if (!a.mueve) {
+      if (e.type === "pointerup") tocar(itemEn(e.clientX, e.clientY));
+      return;
+    }
+    // Si soltó con el dedo ya quieto, no hay impulso
+    const ultima = a.muestras[a.muestras.length - 1][0];
+    if (e.timeStamp - ultima > 90) vel = 0;
+    vel = limitar(vel, -6, 6);
+    if (Math.abs(vel) > 0.7) {
+      modo = "inercia";
+      if (Math.abs(vel) > 1.6) sonidoAire(Math.min(0.55, Math.abs(vel) * 0.09), vel > 0);
+    } else {
+      modo = "meta";
+      meta = Math.round(pos);
+    }
+    arrancar();
+  };
+  escena.addEventListener("pointerup", soltar);
+  escena.addEventListener("pointercancel", soltar);
+  // Con el teclado (Tab + Enter) se elige el accesorio enfocado
+  escena.addEventListener("click", (e) => {
+    if (e.detail !== 0) return;
+    const el = e.target.closest(".giro");
+    tocar(el ? items.find((it) => it.el === el) : null);
+  });
+  // Trackpad del computador: deslizar con dos dedos de lado la gira
+  escena.addEventListener("wheel", (e) => {
+    if (!listo || abierto || N < 2 || Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+    e.preventDefault();
+    modo = "arrastre";
+    pos -= e.deltaX / pxPorItem();
+    vel = limitar(-e.deltaX / pxPorItem() / 0.016, -6, 6);
+    clearTimeout(rueda);
+    rueda = setTimeout(() => { modo = "meta"; meta = Math.round(pos); arrancar(); }, 140);
+    arrancar();
+  }, { passive: false });
+  caja.addEventListener("click", (e) => {
+    const g = e.target.closest("[data-girar]");
+    if (g) { girarUno(Number(g.dataset.girar)); return; }
+    const p = e.target.closest("[data-punto]");
+    if (p) irA(Number(p.dataset.punto));
+  });
+  caja.addEventListener("keydown", (e) => {
+    if (abierto || !listo || !e.target.closest(".vitrina-escena")) return;
+    if (e.key === "ArrowLeft") { e.preventDefault(); girarUno(1); }
+    if (e.key === "ArrowRight") { e.preventDefault(); girarUno(-1); }
+  });
+  $("#vitrina-cerrar").addEventListener("click", () => cerrar());
+  ficha.addEventListener("click", (e) => {
+    if (!e.target.closest("[data-comprar]") || !abierto) return;
+    const id = abierto.p.id;
+    cerrar(true);
+    location.hash = "producto=" + encodeURIComponent(id);
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && abierto && $("#modal").hidden) cerrar();
+  });
+
+  new ResizeObserver(() => {
+    if (!listo || caja.clientWidth === W) return;
+    medidas();
+    pintar();
+  }).observe(caja);
+  // Se prepara un poco antes de llegar; mientras no se ve, no gira (ahorra batería)
+  new IntersectionObserver(([e]) => { if (e.isIntersecting) armar(); }, { rootMargin: "1200px 0px" }).observe(bloque);
+  new IntersectionObserver(([e]) => {
+    visible = e.isIntersecting;
+    if (!visible) cerrar(true);
+    if (e.intersectionRatio >= 0.3) entrada();
+    arrancar();
+  }, { threshold: [0, 0.3] }).observe(caja);
+}
+
 // ---------- Lobo en moto que recorre los 4 pasos de "¿Cómo comprar?" ----------
 // Al llegar a esta parte la moto entra por la izquierda y para en cada paso (se ilumina su tarjeta);
 // en el último deja el paquete. Si se sale de la sección y se vuelve, se repite.
@@ -2182,6 +2750,7 @@ function prepararRuta() {
     const chirrido = setTimeout(() => { if (mi === turno) sonidoFreno(); }, Math.max(0, dur - 230));
     const anim = moto.animate([{ transform: `translateX(${desde}px)` }, { transform: `translateX(${nx}px)` }], { duration: dur, easing: "cubic-bezier(.45,0,.3,1)" });
     sonidoMotor(dur / 1000);
+    ralentiAndando(dur / 1000);
     try { await anim.finished; } catch { clearTimeout(chirrido); return false; } finally { clearTimeout(frenar); }
     moto.classList.remove("andando", "acelera", "frena");
     return mi === turno;
@@ -2208,6 +2777,7 @@ function prepararRuta() {
     turno++;
     corriendo = false;
     ultima = -1;
+    apagarMotor();
     moto.getAnimations().forEach((a) => a.cancel());
     moto.classList.remove("andando", "acelera", "frena");
     poner(-ruta.getBoundingClientRect().left - moto.offsetWidth - 20);
@@ -2220,6 +2790,8 @@ function prepararRuta() {
     if (corriendo || ultima >= 0) return;
     corriendo = true;
     const mi = ++turno;
+    // El motor queda encendido todo el recorrido, en las paradas y después de dejar el paquete
+    encenderMotor();
     for (let i = 0; i < paradas.length; i++) {
       if (!(await ir(centro(i), mi))) return;
       ultima = i;

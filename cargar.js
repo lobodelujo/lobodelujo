@@ -52,6 +52,8 @@ const slug = (s) =>
           fotoPercheroLado: p.fotoPercheroLado || "",
           fotoPerchero: p.fotoPerchero || "",
           fotoPercheroEspalda: p.fotoPercheroEspalda || "",
+          vitrina: p.vitrina === true,
+          fotoVitrina: p.fotoVitrina || "",
           descripcion: p.descripcion || "",
           tallas: lista(p.tallas).sort(ordenarTallas),
           colores: lista(p.colores),
