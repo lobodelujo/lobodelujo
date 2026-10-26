@@ -2,6 +2,24 @@
   "productos": [
     {
       "perchero": false,
+      "precio": 43000,
+      "nombre": "BURBERRY",
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo bordado en hilo\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261026-101942-ltm-1.jpg",
+        "img/productos/20261026-101950-z0u-2.jpg",
+        "img/productos/20261026-101959-5pk-3.jpg",
+        "img/productos/20261026-102010-oen-4.jpg"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "etiqueta": "Nuevo",
+      "tallas": [
+        "S"
+      ]
+    },
+    {
+      "perchero": false,
       "precio": 46000,
       "nombre": "OFF WHITE",
       "descripcion": ">100% algodón\n>cuello redondo\n>serigrafia al tacto\n>lavar a mano",
