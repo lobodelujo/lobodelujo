@@ -54,8 +54,8 @@ collections:
               - { name: fotoPercheroLado, label: "🐺 Perchero · foto DE LADO en la percha (prompt PERCHERO · LADO EN LA PERCHA · PNG sin fondo de Canva). Así cuelga en el riel", widget: image, required: false, choose_url: false }
               - { name: fotoPerchero, label: "🐺 Perchero · foto DE FRENTE en la percha (prompt PERCHERO · FRENTE EN LA PERCHA · PNG sin fondo). Se ve al tocarla; si no subes una, se recorta sola de tus fotos", widget: image, required: false, choose_url: false }
               - { name: fotoPercheroEspalda, label: "🐺 Perchero · foto DE ESPALDA en la percha (prompt PERCHERO · ESPALDA EN LA PERCHA · PNG sin fondo, opcional)", widget: image, required: false, choose_url: false }
-              - { name: vitrina, label: "💫 Girar en la vitrina de Accesorios (solo salen los que marques)", widget: boolean, default: false, required: false }
-              - { name: fotoVitrina, label: "💫 Vitrina · foto SIN FONDO del accesorio solo, de frente (PNG de Canva). Es la que gira; si no subes una, se intenta recortar sola tu foto 1", widget: image, required: false, choose_url: false }
+              - { name: vitrina, label: "💫 Girar en La Vitrina de Lobo (solo salen los que marques)", widget: boolean, default: false, required: false }
+              - { name: fotoVitrina, label: "💫 Vitrina · foto SIN FONDO del accesorio solo (prompt VITRINA · ACCESORIO SOLO · PNG sin fondo de Canva). Es la que gira; si no subes una, se intenta recortar sola tu foto 1", widget: image, required: false, choose_url: false }
               - { name: descripcion, label: "Descripción corta", widget: text, required: false }
               - name: tallas
                 label: Tallas disponibles
