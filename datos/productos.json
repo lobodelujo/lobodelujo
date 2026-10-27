@@ -3,8 +3,9 @@
     {
       "perchero": false,
       "precio": 30000,
+      "fotoVitrina": "img/productos/20261027-130453-x1j-diseno-sin-titulo-42.png",
       "nombre": "GODSPEED",
-      "vitrina": false,
+      "vitrina": true,
       "descripcion": ">algodón 100%\n>gorra en malla\n>visera curva\n>logo bordado\n>ajustable",
       "fotos": [
         "img/productos/20261027-125058-hmu-1.jpg",
