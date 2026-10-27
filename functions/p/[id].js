@@ -5,6 +5,19 @@
 // Igual que en cargar.js, para que los nombres de los links coincidan
 const slug = (s) =>
   String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const lista = (v) =>
+  (Array.isArray(v) ? v : typeof v === "string" ? v.split(",") : []).map((x) => String(x ?? "").trim()).filter(Boolean);
+const codigoFoto = (p) => {
+  const f = String(lista(p.fotos)[0] || "").split("/").pop();
+  const m = f.match(/^\d{8}-\d{6}-([a-z0-9]+)-/i);
+  return m ? m[1].toLowerCase() : slug(f.replace(/\.[^.]+$/, ""));
+};
+const unico = (usados, base) => {
+  let s = base, n = 2;
+  while (usados.has(s)) s = `${base}-${n++}`;
+  usados.add(s);
+  return s;
+};
 const precio = (n) => "$" + String(Math.round(Number(n) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
@@ -17,15 +30,20 @@ export async function onRequest({ request, params, env }) {
   try {
     const r = await env.ASSETS.fetch(new URL("/datos/productos.json", url.origin));
     const datos = await r.json();
-    const usados = new Set();
-    for (const x of datos.productos || []) {
-      if (!x || !x.nombre) continue;
+    // Igual que en cargar.js: con nombre repetido, el link lleva el código de la foto 1; el link de antes
+    // (nombre-2, nombre-3… según el orden) también se acepta
+    const crudos = (datos.productos || []).filter((x) => x && x.nombre);
+    const veces = {};
+    for (const x of crudos) { const b = slug(x.nombre) || "producto"; veces[b] = (veces[b] || 0) + 1; }
+    const usados = new Set(), viejos = new Set();
+    let viejo = null;
+    for (const x of crudos) {
       const base = slug(x.nombre) || "producto";
-      let s = base, n = 2;
-      while (usados.has(s)) s = `${base}-${n++}`;
-      usados.add(s);
-      if (s === id) { p = x; break; }
+      const nuevo = unico(usados, veces[base] > 1 ? [base, codigoFoto(x)].filter(Boolean).join("-") : base);
+      if (nuevo === id) { p = x; break; }
+      if (!viejo && unico(viejos, base) === id) viejo = x;
     }
+    if (!p) p = viejo;
   } catch {}
 
   const titulo = p ? `${p.nombre} · ${precio(p.precio)}` : "Lobo de Lujo 🐺";
