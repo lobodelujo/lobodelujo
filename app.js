@@ -35,10 +35,11 @@ const imgTag = (src, ph, extra = "", ancho = 600) =>
   `<img src="${esc(foto(src, ancho))}" data-ph="${esc(ph)}" onerror="ph(this)" alt="${esc(ph)}" ${extra}>`;
 
 // ---------- Estado ----------
-// "Inicio" es la portada por categorías (perchero, vitrina, recién llegados); "Todo" es la grilla con todo lo subido
+// "Inicio" es la portada por categorías (perchero, vitrina, recién llegados); "Ver todo" es la grilla con todo lo subido
 const INICIO = "Inicio";
+const TODO = "Ver todo";
 let filtro = INICIO;
-const sinCategoria = () => filtro === INICIO || filtro === "Todo";
+const sinCategoria = () => filtro === INICIO || filtro === TODO;
 let filtroTalla = null;
 let texto = "";
 let bolsa = [];
@@ -466,7 +467,7 @@ $("#elegir-wa").addEventListener("click", (e) => {
 const categorias = () => [...new Set([...(TIENDA.categorias || []), ...PRODUCTOS.map((p) => p.categoria)])];
 
 function pintarFiltros() {
-  const cats = [INICIO, "Todo", ...categorias()];
+  const cats = [INICIO, TODO, ...categorias()];
   const fila = $("#filtros");
   fila.innerHTML = cats
     .map((c) => `<button class="chip" role="tab" aria-selected="${c === filtro}" data-cat="${esc(c)}">${esc(c)}</button>`)
@@ -483,7 +484,7 @@ function pintarTallas() {
     .filter((t) => t.toLowerCase() !== "única")
     .sort(ordenarTallas);
   const caja = $("#filtro-tallas");
-  // En "Todo" se mezclan sistemas de tallas, así que el subfiltro aparece al elegir una categoría
+  // En "Ver todo" se mezclan sistemas de tallas, así que el subfiltro aparece al elegir una categoría
   caja.hidden = sinCategoria() || tallas.length < 2;
   if (caja.hidden) return;
   caja.innerHTML =
@@ -795,7 +796,7 @@ function verCategoria(cat) {
 
 function pintarGrilla() {
   const q = texto.trim().toLowerCase();
-  // En Inicio sin búsqueda se ve la portada por categorías; si no, la grilla (en "Todo", con todos los productos
+  // En Inicio sin búsqueda se ve la portada por categorías; si no, la grilla (en "Ver todo", con todos los productos
   // de todas las categorías, en el orden del panel)
   const inicio = filtro === INICIO && !q;
   $("#editorial").hidden = !inicio;
