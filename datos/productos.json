@@ -3,6 +3,28 @@
     {
       "perchero": false,
       "precio": 46000,
+      "nombre": "OFF WHITE",
+      "vitrina": false,
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo serigrafía al tacto\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261027-123812-ovx-2.jpg",
+        "img/productos/20261027-123821-xdw-1.jpg",
+        "img/productos/20261027-123829-q6b-3.jpg"
+      ],
+      "colores": [
+        "negro"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "etiqueta": "Nuevo",
+      "tallas": [
+        "M",
+        "L"
+      ]
+    },
+    {
+      "perchero": false,
+      "precio": 46000,
       "nombre": "REPRESENT",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo estampado sobre toda la prenda\n>lavar a mano",
