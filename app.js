@@ -35,7 +35,10 @@ const imgTag = (src, ph, extra = "", ancho = 600) =>
   `<img src="${esc(foto(src, ancho))}" data-ph="${esc(ph)}" onerror="ph(this)" alt="${esc(ph)}" ${extra}>`;
 
 // ---------- Estado ----------
-let filtro = "Todo";
+// "Inicio" es la portada por categorías (perchero, vitrina, recién llegados); "Todo" es la grilla con todo lo subido
+const INICIO = "Inicio";
+let filtro = INICIO;
+const sinCategoria = () => filtro === INICIO || filtro === "Todo";
 let filtroTalla = null;
 let texto = "";
 let bolsa = [];
@@ -463,7 +466,7 @@ $("#elegir-wa").addEventListener("click", (e) => {
 const categorias = () => [...new Set([...(TIENDA.categorias || []), ...PRODUCTOS.map((p) => p.categoria)])];
 
 function pintarFiltros() {
-  const cats = ["Todo", ...categorias()];
+  const cats = [INICIO, "Todo", ...categorias()];
   const fila = $("#filtros");
   fila.innerHTML = cats
     .map((c) => `<button class="chip" role="tab" aria-selected="${c === filtro}" data-cat="${esc(c)}">${esc(c)}</button>`)
@@ -475,13 +478,13 @@ function pintarFiltros() {
 
 // Subfiltro de tallas: muestra las tallas que existen en la categoría elegida
 function pintarTallas() {
-  const enCategoria = PRODUCTOS.filter((p) => filtro === "Todo" || p.categoria === filtro);
+  const enCategoria = PRODUCTOS.filter((p) => sinCategoria() || p.categoria === filtro);
   const tallas = [...new Set(enCategoria.flatMap((p) => p.tallas || []))]
     .filter((t) => t.toLowerCase() !== "única")
     .sort(ordenarTallas);
   const caja = $("#filtro-tallas");
   // En "Todo" se mezclan sistemas de tallas, así que el subfiltro aparece al elegir una categoría
-  caja.hidden = filtro === "Todo" || tallas.length < 2;
+  caja.hidden = sinCategoria() || tallas.length < 2;
   if (caja.hidden) return;
   caja.innerHTML =
     `<span class="etiqueta-talla">Talla</span>` +
@@ -792,17 +795,18 @@ function verCategoria(cat) {
 
 function pintarGrilla() {
   const q = texto.trim().toLowerCase();
-  // Sin categoría ni búsqueda se ve el inicio por categorías; si no, la grilla con todos los productos
-  const inicio = filtro === "Todo" && !q;
+  // En Inicio sin búsqueda se ve la portada por categorías; si no, la grilla (en "Todo", con todos los productos
+  // de todas las categorías, en el orden del panel)
+  const inicio = filtro === INICIO && !q;
   $("#editorial").hidden = !inicio;
   $("#vista").hidden = inicio;
   if (inicio) return;
   const lista = PRODUCTOS.filter(
-    (p) => (filtro === "Todo" || p.categoria === filtro) &&
+    (p) => (sinCategoria() || p.categoria === filtro) &&
       (!filtroTalla || (p.tallas || []).includes(filtroTalla)) &&
       (!q || `${p.nombre} ${p.categoria} ${p.descripcion}`.toLowerCase().includes(q))
   );
-  $("#vista-titulo").textContent = q ? `${filtro === "Todo" ? "" : filtro + " · "}“${texto.trim()}”` : filtro;
+  $("#vista-titulo").textContent = q ? `${sinCategoria() ? "" : filtro + " · "}“${texto.trim()}”` : filtro;
   $("#vista-cuenta").textContent = lista.length === 1 ? "1 producto" : `${lista.length} productos`;
   $("#grilla").innerHTML = lista
     .map((p) => {
@@ -832,6 +836,14 @@ function pintarGrilla() {
 $("#filtros").addEventListener("click", (e) => {
   const b = e.target.closest("[data-cat]");
   if (b) verCategoria(b.dataset.cat);
+});
+// El logo vuelve al Inicio (y el link "#" sube al principio de la página)
+$(".logo").addEventListener("click", () => {
+  filtro = INICIO;
+  filtroTalla = null;
+  pintarFiltros();
+  pintarTallas();
+  pintarGrilla();
 });
 $("#editorial").addEventListener("click", (e) => {
   const g = e.target.closest("[data-ver-cat]");

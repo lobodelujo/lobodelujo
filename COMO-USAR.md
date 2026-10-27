@@ -90,6 +90,7 @@ En el inicio, en el lugar de Accesorios, los accesorios flotan en un círculo qu
 - El panel también le pone un **nombre único** a cada foto, así las `1.jpg`, `2.jpg` de Canva no se pisan entre prendas.
 
 ## Lo que ve el cliente
+- **Botones de arriba:** **Inicio** es la portada (categorías, El Perchero, La Vitrina y Recién llegados). **Todo** muestra todos tus productos juntos, de todas las categorías, en el orden de tu lista del panel. El logo también vuelve al Inicio.
 - **Pedido por WhatsApp:** cada prenda llega con su link 📸; al tocarlo se ve la foto de la prenda.
 - **Links para Instagram:** en la ficha de cada prenda está **"Copiar link de este producto"**; ese link muestra la foto, el nombre y el precio al compartirlo.
 
