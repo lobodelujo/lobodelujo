@@ -4,7 +4,8 @@
 const $ = (sel, el = document) => el.querySelector(sel);
 const fmt = (n) => "$" + Math.round(n).toLocaleString("es-CL");
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-const buscarProducto = (id) => PRODUCTOS.find((p) => p.id === id);
+// También acepta el link de antes (idViejo), para los links que ya se mandaron por WhatsApp o Instagram
+const buscarProducto = (id) => PRODUCTOS.find((p) => p.id === id) || PRODUCTOS.find((p) => p.idViejo === id);
 // Acepta un número ("569...") o una lista [{ nombre, numero }]
 const NUMEROS = Array.isArray(TIENDA.whatsapp)
   ? TIENDA.whatsapp.filter((n) => n && n.numero)
@@ -44,7 +45,7 @@ let filtroTalla = null;
 let texto = "";
 let bolsa = [];
 try { bolsa = JSON.parse(localStorage.getItem("lobo-bolsa")) || []; } catch { bolsa = []; }
-bolsa = bolsa.filter((i) => buscarProducto(i.id));
+bolsa = bolsa.filter((i) => buscarProducto(i.id)).map((i) => ({ ...i, id: buscarProducto(i.id).id }));
 const guardarBolsa = () => { try { localStorage.setItem("lobo-bolsa", JSON.stringify(bolsa)); } catch {} };
 
 // ---------- Textos de la tienda ----------
@@ -467,7 +468,8 @@ $("#elegir-wa").addEventListener("click", (e) => {
 const categorias = () => [...new Set([...(TIENDA.categorias || []), ...PRODUCTOS.map((p) => p.categoria)])];
 
 function pintarFiltros() {
-  const cats = [INICIO, TODO, ...categorias()];
+  // Solo las categorías que tienen productos: el botón de una nueva aparece solo al subir su primer producto
+  const cats = [INICIO, TODO, ...categorias().filter((c) => PRODUCTOS.some((p) => p.categoria === c))];
   const fila = $("#filtros");
   fila.innerHTML = cats
     .map((c) => `<button class="chip" role="tab" aria-selected="${c === filtro}" data-cat="${esc(c)}">${esc(c)}</button>`)
@@ -493,9 +495,13 @@ function pintarTallas() {
     tallas.map((t) => `<button class="chip" data-talla="${esc(t)}" aria-pressed="${t === filtroTalla}">${esc(t)}</button>`).join("");
 }
 
+// "Nuevo" se ve solo en los 8 primeros de la lista que lo tienen (el último drop): si todo es nuevo, nada lo es
+const NUEVOS_MAX = 8;
+const conNuevo = new Set(PRODUCTOS.filter((p) => p.etiqueta === "Nuevo").slice(0, NUEVOS_MAX).map((p) => p.id));
+
 function badge(p) {
   if (!p.disponible) return `<span class="badge gris">Agotado</span>`;
-  if (!p.etiqueta) return "";
+  if (!p.etiqueta || (p.etiqueta === "Nuevo" && !conNuevo.has(p.id))) return "";
   const clase = p.etiqueta === "Oferta" ? "rojo" : "";
   return `<span class="badge ${clase}">${esc(p.etiqueta)}</span>`;
 }
@@ -531,8 +537,19 @@ function pintarEditorial() {
   // El Perchero de Lobo va justo después de la primera categoría que se cuelga (Poleras)
   const anclaPerchero = categorias().find((c) => PERCHERO.includes(c) && PRODUCTOS.some((p) => p.categoria === c));
   // La vitrina que gira va en el lugar de Accesorios (si esa categoría no está en la lista, al final)
-  const conVitrina = vitrinaProductos().length > 0;
+  const conVitrina = vitrinaProductos().length >= VITRINA_MIN;
   const vitrinaAlFinal = conVitrina && !categorias().includes(VITRINA_CATEGORIA);
+  // Recién llegados va primero: el que llega desde Instagram viene a ver lo nuevo
+  const recien = nuevos.length ? `
+    <section class="ed-bloque">
+      <div class="ed-cab"><h2>Recién llegados</h2></div>
+      <div class="carrusel" id="carrusel">
+        <div class="carrusel-pista" id="carrusel-pista">${nuevos.map(tarjetaChica).join("")}</div>
+        <button class="flecha izq" data-mover="-1" aria-label="Anteriores">‹</button>
+        <button class="flecha der" data-mover="1" aria-label="Siguientes">›</button>
+        <div class="carrusel-barra" aria-hidden="true"><span></span></div>
+      </div>
+    </section>` : "";
   $("#editorial").innerHTML = categorias()
     .map((cat) => {
       if (cat === VITRINA_CATEGORIA) return conVitrina ? vitrinaHtml() : "";
@@ -555,16 +572,8 @@ function pintarEditorial() {
         ${chicas.length ? `<div class="ed-chicas">${chicas.map(tarjetaChica).join("")}</div>` : ""}
       </section>${perchero}`;
     })
-    .join("") + (vitrinaAlFinal ? vitrinaHtml() : "") + (nuevos.length ? `
-    <section class="ed-bloque">
-      <div class="ed-cab"><h2>Recién llegados</h2></div>
-      <div class="carrusel" id="carrusel">
-        <div class="carrusel-pista" id="carrusel-pista">${nuevos.map(tarjetaChica).join("")}</div>
-        <button class="flecha izq" data-mover="-1" aria-label="Anteriores">‹</button>
-        <button class="flecha der" data-mover="1" aria-label="Siguientes">›</button>
-        <div class="carrusel-barra" aria-hidden="true"><span></span></div>
-      </div>
-    </section>` : "");
+    .join("") + (vitrinaAlFinal ? vitrinaHtml() : "");
+  $("#editorial").insertAdjacentHTML("afterbegin", recien);
   prepararCarrusel();
   prepararPerchero();
   prepararVitrina();
@@ -1230,6 +1239,7 @@ const PERCHERO = ["Poleras", "Polerones"]; // la sección va justo después de l
 const PERCHERO_NO_CUELGAN = ["Gorras", "Lentes", "Accesorios"];
 const PERCHERO_PINZAS = ["Pantalones", "Shorts"]; // estos van en percha de pinzas, tomados de la pretina
 const PERCHERO_MAX = 16;
+const PERCHERO_MIN = 3; // con menos prendas el riel se ve vacío: la sección espera hasta que haya 3 marcadas
 
 function percheroHtml() {
   return `<section class="ed-bloque perchero-bloque" id="perchero-bloque">
@@ -1679,7 +1689,7 @@ function prepararPerchero() {
   // Solo las que la tienda marcó en el panel, en el orden de su lista. Si no marcó ninguna, no hay perchero.
   const cuelga = (p) => p.disponible && p.fotos.length && !PERCHERO_NO_CUELGAN.includes(p.categoria);
   const candidatos = PRODUCTOS.filter((p) => p.perchero && cuelga(p)).slice(0, PERCHERO_MAX);
-  if (!candidatos.length) { bloque.remove(); return; }
+  if (candidatos.length < PERCHERO_MIN) { bloque.remove(); return; }
 
   // Física de la ropa colgada (resorte con roce) y de las etiquetas (más livianas, se mecen más)
   const K = 52, C = 2.6, K_ET = 95, C_ET = 1.8;
@@ -2286,6 +2296,7 @@ function prepararPerchero() {
 // liso); si no se puede, ese no sale. Si no hay ninguno marcado, la sección no aparece.
 const VITRINA_CATEGORIA = "Accesorios";
 const VITRINA_MAX = 12;
+const VITRINA_MIN = 4; // con menos accesorios el círculo se ve vacío: la sección espera hasta que haya 4 marcados
 const vitrinaProductos = () =>
   PRODUCTOS.filter((p) => p.vitrina && p.disponible && (p.fotoVitrina || p.fotos.length)).slice(0, VITRINA_MAX);
 
@@ -2350,7 +2361,7 @@ function prepararVitrina() {
   const caja = $("#vitrina"), escena = $("#vitrina-escena"), sombras = $("#vitrina-sombras"), ficha = $("#vitrina-ficha");
   const palabra = $("#vitrina-palabra"), puntos = $("#vitrina-puntos"), pista = $("#vitrina-pista");
   const candidatos = vitrinaProductos();
-  if (!candidatos.length) { bloque.remove(); return; }
+  if (candidatos.length < VITRINA_MIN) { bloque.remove(); return; }
 
   const AUTO = 0.32;        // accesorios por segundo cuando gira sola (uno nuevo adelante cada ~3 s, como en el video)
   const ESPERA_AUTO = 3500; // después de moverla con el dedo, vuelve a girar sola a los 3,5 s

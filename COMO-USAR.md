@@ -28,7 +28,7 @@ Entra a **lobodelujo.pages.dev/admin** → **Catálogo**.
    - **Categoría** (menú)
    - **Precio**: sin puntos ni $, ej: `15990`
    - **Precio anterior**: solo si está en oferta
-   - **Etiqueta**: Nuevo, Oferta o Últimas unidades (opcional). Las que tienen **Nuevo** salen primero en "Recién llegados".
+   - **Etiqueta**: Nuevo, Oferta o Últimas unidades (opcional). Las que tienen **Nuevo** salen primero en "Recién llegados". El cartelito "Nuevo" se ve solo en las **8 primeras de tu lista** que lo tengan (tu último drop): si todo dice nuevo, nada parece nuevo.
    - **¿Hay stock?**: encendido
    - **Descripción**
    - **Tallas**: toca y elige varias
@@ -77,7 +77,8 @@ En el inicio, en el lugar de Accesorios, los accesorios flotan en un círculo qu
 2. Enciende **💫 Girar en La Vitrina de Lobo**.
 3. En **💫 Vitrina · foto SIN FONDO** sube el PNG del accesorio solo, con el fondo quitado en Canva (foto hecha con el prompt **VITRINA · ACCESORIO SOLO**).
 4. **Publicar**.
-- Salen solo los que marques, en el orden de tu lista (máximo 12). Si no marcas ninguno, la vitrina no aparece.
+- Salen solo los que marques, en el orden de tu lista (máximo 12). La vitrina **aparece cuando marcas 4 o más**: con menos, el círculo se ve vacío.
+- Lo mismo con **El Perchero de Lobo**: aparece cuando marcas **3 prendas o más**.
 - Sin PNG, la página intenta recortar sola tu foto 1 (fondo claro y liso). Si no puede, ese accesorio no sale.
 - Los agotados no salen en la vitrina.
 - Los **colores** del producto salen como puntitos en la ficha grande (Negro, Blanco, Azul marino, Café, Dorado, Plateado…).
@@ -90,7 +91,7 @@ En el inicio, en el lugar de Accesorios, los accesorios flotan en un círculo qu
 - El panel también le pone un **nombre único** a cada foto, así las `1.jpg`, `2.jpg` de Canva no se pisan entre prendas.
 
 ## Lo que ve el cliente
-- **Botones de arriba:** **Inicio** es la portada (categorías, El Perchero, La Vitrina y Recién llegados). **Ver todo** muestra todos tus productos juntos, de todas las categorías, en el orden de tu lista del panel. El logo también vuelve al Inicio.
+- **Botones de arriba:** solo aparecen las categorías que tienen productos (el botón de una nueva aparece solo al subir su primer producto). **Inicio** es la portada: primero Recién llegados y después cada categoría, El Perchero y La Vitrina. **Ver todo** muestra todos tus productos juntos, de todas las categorías, en el orden de tu lista del panel. El logo también vuelve al Inicio.
 - **Pedido por WhatsApp:** cada prenda llega con su link 📸; al tocarlo se ve la foto de la prenda.
 - **Links para Instagram:** en la ficha de cada prenda está **"Copiar link de este producto"**; ese link muestra la foto, el nombre y el precio al compartirlo.
 

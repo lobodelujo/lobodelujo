@@ -23,6 +23,22 @@ const lista = (v) =>
 const slug = (s) =>
   String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
+// Link de cada producto: su nombre. Si otro se llama igual, se le suma el código de su foto 1 (lo pone el panel al
+// subirla), así el link no cambia al reordenar la lista ni al subir otro con el mismo nombre.
+// idViejo es el link de antes (nombre-2, nombre-3… según el orden), para que los que ya se mandaron sigan abriendo.
+// functions/p/[id].js hace lo mismo para la vista previa de WhatsApp.
+const codigoFoto = (p) => {
+  const f = String(lista(p.fotos)[0] || "").split("/").pop();
+  const m = f.match(/^\d{8}-\d{6}-([a-z0-9]+)-/i);
+  return m ? m[1].toLowerCase() : slug(f.replace(/\.[^.]+$/, ""));
+};
+const unico = (usados, base) => {
+  let s = base, n = 2;
+  while (usados.has(s)) s = `${base}-${n++}`;
+  usados.add(s);
+  return s;
+};
+
 (async () => {
   try {
     const leer = (url) => fetch(url, { cache: "no-store" }).then((r) => {
@@ -32,16 +48,16 @@ const slug = (s) =>
     const [tienda, datos] = await Promise.all([leer("datos/tienda.json"), leer("datos/productos.json")]);
 
     window.TIENDA = { ...tienda, whatsapp: (tienda.whatsapp || []).filter((n) => n && n.numero) };
-    const usados = new Set();
-    window.PRODUCTOS = (datos.productos || [])
-      .filter((p) => p && p.nombre)
+    const crudos = (datos.productos || []).filter((p) => p && p.nombre);
+    const veces = {};
+    for (const p of crudos) { const b = slug(p.nombre) || "producto"; veces[b] = (veces[b] || 0) + 1; }
+    const usados = new Set(), viejos = new Set();
+    window.PRODUCTOS = crudos
       .map((p) => {
         const base = slug(p.nombre) || "producto";
-        let id = base, n = 2;
-        while (usados.has(id)) id = `${base}-${n++}`;
-        usados.add(id);
         return {
-          id,
+          id: unico(usados, veces[base] > 1 ? [base, codigoFoto(p)].filter(Boolean).join("-") : base),
+          idViejo: unico(viejos, base),
           nombre: p.nombre,
           categoria: p.categoria || "Otros",
           precio: Number(p.precio) || 0,
