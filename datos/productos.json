@@ -2,6 +2,25 @@
   "productos": [
     {
       "perchero": false,
+      "precio": 30000,
+      "nombre": "GODSPEED",
+      "vitrina": false,
+      "descripcion": ">algodón 100%\n>gorra en malla\n>visera curva\n>logo bordado\n>ajustable",
+      "fotos": [
+        "img/productos/20261027-125058-hmu-1.jpg",
+        "img/productos/20261027-125102-io9-2.jpg",
+        "img/productos/20261027-125105-m20-3.jpg",
+        "img/productos/20261027-125108-wrx-4.jpg"
+      ],
+      "colores": [
+        "blanco"
+      ],
+      "categoria": "Accesorios",
+      "disponible": true,
+      "etiqueta": "Nuevo"
+    },
+    {
+      "perchero": false,
       "precio": 46000,
       "nombre": "LOUIS VUITTON",
       "vitrina": false,
