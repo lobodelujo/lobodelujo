@@ -116,17 +116,17 @@ const TIPOS = {
     nombre: "Polera",
     medidas: { A: ["Ancho", "de axila a axila"], B: ["Largo", "desde el hombro hasta abajo"], C: ["Manga", "desde el hombro hasta el borde"] },
     porDefecto: ["A", "B"],
-    tallas: ["XS", "S", "M", "L", "XL", "XXL", "3XL"],
+    tallas: ["XS", "S", "M", "L", "XL", "XXL", "3XL", "Única"],
     tallasDefecto: ["S", "M", "L", "XL"],
     trazos: ["M -45 0 Q 0 40 45 0 L 110 16 L 192 78 L 156 136 L 116 114 L 116 360 L -116 360 L -116 114 L -156 136 L -192 78 L -110 16 Z"],
     detalles: ["M -36 3 Q 0 31 36 3"],
-    flechas: { A: [[-116, 150], [116, 150], 0.5], B: [[60, 8], [60, 360], 0.75], C: [[120, 3], [202, 65], 0.5] },
+    flechas: { A: [[-116, 150], [116, 150], 0.5], B: [[60, 8], [60, 360], 0.75], C: [[120, 3], [202, 65], 0.5, [26, -34]] },
   },
   poleron: {
     nombre: "Polerón",
     medidas: { A: ["Ancho", "de axila a axila"], B: ["Largo", "desde el hombro hasta abajo"], C: ["Manga", "desde el hombro hasta el puño"] },
     porDefecto: ["A", "B", "C"],
-    tallas: ["XS", "S", "M", "L", "XL", "XXL", "3XL"],
+    tallas: ["XS", "S", "M", "L", "XL", "XXL", "3XL", "Única"],
     tallasDefecto: ["S", "M", "L", "XL"],
     trazos: [
       "M -60 26 L -112 34 L -196 318 L -160 336 L -122 140 L -122 342 L 122 342 L 122 140 L 160 336 L 196 318 L 112 34 L 60 26 Z",
@@ -139,7 +139,7 @@ const TIPOS = {
     nombre: "Pantalón",
     medidas: { A: ["Cintura", "de lado a lado, sin estirar"], B: ["Largo", "por el costado, de arriba al ruedo"], C: ["Tiro", "de arriba a la entrepierna"] },
     porDefecto: ["A", "B"],
-    tallas: ["XS", "S", "M", "L", "XL", "XXL", "36", "38", "40", "42", "44", "46", "48"],
+    tallas: ["XS", "S", "M", "L", "XL", "XXL", "36", "38", "40", "42", "44", "46", "48", "Única"],
     tallasDefecto: ["38", "40", "42", "44"],
     trazos: ["M -112 0 L 112 0 L 124 372 L 34 372 L 0 128 L -34 372 L -124 372 Z"],
     detalles: ["M -112 26 L 112 26"],
@@ -149,7 +149,7 @@ const TIPOS = {
     nombre: "Short",
     medidas: { A: ["Cintura", "de lado a lado, sin estirar"], B: ["Largo", "por el costado, de arriba al ruedo"], C: ["Tiro", "de arriba a la entrepierna"] },
     porDefecto: ["A", "B"],
-    tallas: ["XS", "S", "M", "L", "XL", "XXL", "36", "38", "40", "42", "44", "46", "48"],
+    tallas: ["XS", "S", "M", "L", "XL", "XXL", "36", "38", "40", "42", "44", "46", "48", "Única"],
     tallasDefecto: ["S", "M", "L", "XL"],
     trazos: ["M -116 0 L 116 0 L 132 210 L 30 210 L 0 120 L -30 210 L -132 210 Z"],
     detalles: ["M -116 26 L 116 26"],
@@ -303,10 +303,11 @@ function dibujarPrenda(t, cols, zona) {
     const [x1, y1] = aLienzo(a), [x2, y2] = aLienzo(b);
     flecha(x1, y1, x2, y2);
   }
+  // La letra va sobre la flecha; si la flecha es corta (manga de polera), al lado para no taparla
   for (const k of cols) {
-    const [a, b, f] = t.flechas[k];
+    const [a, b, f, [dx, dy] = [0, 0]] = t.flechas[k];
     const [x1, y1] = aLienzo(a), [x2, y2] = aLienzo(b);
-    insignia(k, x1 + (x2 - x1) * f, y1 + (y2 - y1) * f);
+    insignia(k, x1 + (x2 - x1) * f + dx * s, y1 + (y2 - y1) * f + dy * s);
   }
 }
 
@@ -347,13 +348,43 @@ function dibujar() {
   filasLeyenda.forEach((l, i) => { ctx.textAlign = "center"; ctx.fillText(l, W / 2, 790 + i * 34); });
 
   // Tabla
-  const tx = 80, tw = W - 160, ty = 830 + Math.max(0, filasLeyenda.length - 1) * 34, tb = 1200;
+  const tx = 80, tw = W - 160, tb = 1200;
+  let ty = 830 + Math.max(0, filasLeyenda.length - 1) * 34;
   const nCols = cols.length + 1, cw = tw / nCols, cab = 74;
   if (!tallas.length || !cols.length) {
     ctx.fillStyle = SUAVE; ctx.font = '500 30px Inter'; ctx.textAlign = "center";
     ctx.fillText("Elige al menos una talla y una medida", W / 2, ty + 120);
+  } else if (tallas.length === 1) {
+    // Prenda de una sola talla: "TALLA M" grande y cada medida en su tarjeta
+    const x = tallas[0], gap = 24, ch = 240, alto = 80 + ch, y0 = ty + Math.max(0, (tb - ty - alto) / 2);
+    ctx.fillStyle = ORO; ctx.font = '400 70px "Bebas Neue"'; ctx.textBaseline = "middle";
+    espaciado(x === "Única" ? "TALLA ÚNICA" : `TALLA ${x}`, W / 2, y0 + 34, 4);
+    const cwu = (tw - gap * (cols.length - 1)) / cols.length;
+    cols.forEach((k, i) => {
+      const cx = tx + i * (cwu + gap), cy = y0 + 80;
+      cajaRedonda(cx, cy, cwu, ch, 22);
+      ctx.fillStyle = "rgba(255, 255, 255, .035)"; ctx.fill();
+      ctx.strokeStyle = LINEA; ctx.lineWidth = 2; ctx.stroke();
+      insignia(k, cx + cwu / 2, cy + 46);
+      ctx.textBaseline = "middle";
+      ctx.fillStyle = SUAVE; ctx.font = '400 38px "Bebas Neue"';
+      espaciado(t.medidas[k][0].toUpperCase(), cx + cwu / 2, cy + 102, 3);
+      const v = ((d.valores[x] || {})[k] || "").replace(".", ",");
+      ctx.font = `700 ${cols.length === 3 ? 78 : 92}px Inter`;
+      const anchoV = ctx.measureText(v || "–").width;
+      ctx.font = "500 30px Inter";
+      const anchoCm = v ? ctx.measureText(" cm").width : 0;
+      const inicio = cx + cwu / 2 - (anchoV + anchoCm) / 2;
+      ctx.textAlign = "left";
+      ctx.fillStyle = v ? TEXTO : SUAVE; ctx.font = `700 ${cols.length === 3 ? 78 : 92}px Inter`;
+      ctx.fillText(v || "–", inicio, cy + 178);
+      if (v) { ctx.fillStyle = SUAVE; ctx.font = "500 30px Inter"; ctx.fillText(" cm", inicio + anchoV, cy + 190); }
+    });
+    ctx.textBaseline = "alphabetic";
   } else {
-    const fila = Math.min(82, (tb - ty - cab) / tallas.length);
+    // Con pocas tallas las filas crecen un poco y la tabla queda centrada en su espacio
+    const fila = Math.min(96, (tb - ty - cab) / tallas.length);
+    ty += Math.max(0, (tb - ty - cab - fila * tallas.length) / 2);
     cajaRedonda(tx, ty, tw, cab + fila * tallas.length, 22);
     ctx.save(); ctx.clip();
     ctx.fillStyle = "rgba(250, 208, 44, .10)"; ctx.fillRect(tx, ty, tw, cab);
