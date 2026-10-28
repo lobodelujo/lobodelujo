@@ -63,6 +63,7 @@ collections:
                 multiple: true
                 required: false
                 options: [XS, S, M, L, XL, XXL, "36", "38", "40", "42", "44", "46", "38-41", "42-45", "Única"]
+              - { name: fotoMedidas, label: "📏 Foto de medidas de ESTA prenda (tallas y medidas en cm). En la ficha sale el botón Ver medidas; no se mezcla con tus fotos", widget: image, required: false, choose_url: false }
               - { name: colores, label: "Colores (separados por coma, ej: Negro, Blanco)", widget: list, required: false }
               - name: fotos
                 label: Fotos (la primera es la portada)
