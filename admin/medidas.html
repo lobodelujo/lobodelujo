@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Foto de medidas · Lobo de Lujo</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#0b0b0c">
+  <link rel="icon" type="image/png" href="/img/logo-lobo-128.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Hace la "Foto de medidas" de cada prenda con el estilo de la marca: se escriben los números,
+       se descarga la foto y se sube en el panel (campo 📏 Foto de medidas del producto) */
+    :root {
+      --negro: #0b0b0c; --carbon: #151517; --gris: #26262a; --linea: #34343a;
+      --texto: #f4f1ea; --suave: #a3a09a; --oro: #fad02c;
+      --titulo: "Bebas Neue", Impact, sans-serif;
+      --cuerpo: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    [hidden] { display: none !important; }
+    body { background: var(--negro); color: var(--texto); font-family: var(--cuerpo); line-height: 1.5; -webkit-font-smoothing: antialiased; }
+    button, input, textarea { font: inherit; color: inherit; }
+    button { background: none; border: 0; cursor: pointer; }
+
+    .cab { display: flex; align-items: center; gap: 10px; padding: 14px 16px; border-bottom: 1px solid var(--linea); }
+    .cab img { width: 30px; height: auto; }
+    .cab b { font-family: var(--titulo); font-size: 24px; letter-spacing: 2px; color: var(--oro); font-weight: 400; }
+    .cab span { margin-left: auto; font-size: 13px; color: var(--suave); }
+
+    .todo { max-width: 1040px; margin: 0 auto; padding: 16px; display: grid; gap: 20px; }
+    @media (min-width: 860px) { .todo { grid-template-columns: 420px 1fr; align-items: start; } .vista { position: sticky; top: 16px; } }
+
+    .vista canvas { display: block; width: 100%; max-width: 420px; height: auto; margin: 0 auto; border-radius: 12px; border: 1px solid var(--linea); }
+    .botones { display: grid; gap: 10px; margin-top: 14px; max-width: 420px; margin-inline: auto; }
+    .btn { display: block; width: 100%; padding: 14px 18px; border-radius: 12px; font-weight: 700; font-size: 15px; text-align: center; }
+    .btn-oro { background: var(--oro); color: var(--negro); }
+    .btn-borde { border: 1.5px solid var(--oro); color: var(--oro); }
+    .pista { font-size: 13px; color: var(--suave); text-align: center; }
+    .pista b { color: var(--texto); }
+
+    .form { display: grid; gap: 22px; }
+    .campo h3 { font-size: 13px; font-weight: 600; color: var(--suave); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+    .campo h3 small { text-transform: none; letter-spacing: 0; font-weight: 400; }
+    .fila { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip { padding: 9px 14px; border-radius: 999px; border: 1px solid var(--linea); background: var(--carbon); font-size: 14px; font-weight: 500; }
+    .chip[aria-pressed="true"] { border-color: var(--oro); background: rgba(250, 208, 44, .14); color: var(--oro); font-weight: 700; }
+    .chip i { font-style: normal; display: inline-grid; place-items: center; width: 20px; height: 20px; margin-right: 6px; border-radius: 50%; background: var(--oro); color: var(--negro); font-size: 12px; font-weight: 800; }
+    .texto { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--linea); background: var(--carbon); font-size: 15px; }
+    .texto:focus, .tabla input:focus { outline: 2px solid var(--oro); outline-offset: 1px; }
+    textarea.texto { resize: vertical; min-height: 64px; }
+
+    .tabla { display: grid; gap: 6px; }
+    .tabla .linea { display: grid; gap: 6px; align-items: center; }
+    .tabla .tit { font-size: 12px; font-weight: 700; color: var(--oro); text-align: center; }
+    .tabla .talla { font-family: var(--titulo); font-size: 24px; letter-spacing: 1px; text-align: center; }
+    .tabla input { width: 100%; min-width: 0; padding: 10px 6px; border-radius: 10px; border: 1px solid var(--linea); background: var(--carbon); font-size: 16px; font-weight: 600; text-align: center; }
+    .vacio { font-size: 14px; color: var(--suave); }
+    .aviso { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--oro); color: var(--negro); font-weight: 700; padding: 10px 18px; border-radius: 999px; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <header class="cab">
+    <img src="/img/logo-lobo-128.png" alt="" width="30" height="34">
+    <b>LOBO DE LUJO</b>
+    <span>Foto de medidas</span>
+  </header>
+
+  <main class="todo">
+    <section class="vista">
+      <canvas id="lienzo" width="1080" height="1350" aria-label="Vista previa de la foto de medidas"></canvas>
+      <div class="botones">
+        <button class="btn btn-oro" id="guardar">📲 Guardar foto en el celular</button>
+        <button class="btn btn-borde" id="descargar">⬇️ Descargar foto</button>
+        <p class="pista">Después súbela en el panel, en la prenda: <b>📏 Foto de medidas</b>.</p>
+      </div>
+    </section>
+
+    <section class="form">
+      <div class="campo">
+        <h3>Tipo de prenda</h3>
+        <div class="fila" id="tipos"></div>
+      </div>
+      <div class="campo">
+        <h3>Nombre de la prenda <small>(opcional, sale bajo el título)</small></h3>
+        <input class="texto" id="nombre" maxlength="40" placeholder="Ej: Polera oversize negra" autocomplete="off">
+      </div>
+      <div class="campo">
+        <h3>Medidas que salen en la foto</h3>
+        <div class="fila" id="medidas"></div>
+      </div>
+      <div class="campo">
+        <h3>Tallas</h3>
+        <div class="fila" id="tallas"></div>
+      </div>
+      <div class="campo">
+        <h3>Medidas en cm</h3>
+        <div class="tabla" id="tabla"></div>
+      </div>
+      <div class="campo">
+        <h3>Nota de abajo</h3>
+        <textarea class="texto" id="nota" maxlength="140"></textarea>
+      </div>
+    </section>
+  </main>
+
+  <p class="aviso" id="aviso" hidden></p>
+
+<script>
+// ---------- Tipos de prenda: dibujo, medidas y tallas ----------
+// Cada dibujo está en coordenadas propias (el centro de la prenda es x = 0); las flechas marcan dónde se mide
+const TIPOS = {
+  polera: {
+    nombre: "Polera",
+    medidas: { A: ["Ancho", "de axila a axila"], B: ["Largo", "desde el hombro hasta abajo"], C: ["Manga", "desde el hombro hasta el borde"] },
+    porDefecto: ["A", "B"],
+    tallas: ["XS", "S", "M", "L", "XL", "XXL", "3XL"],
+    tallasDefecto: ["S", "M", "L", "XL"],
+    trazos: ["M -45 0 Q 0 40 45 0 L 110 16 L 192 78 L 156 136 L 116 114 L 116 360 L -116 360 L -116 114 L -156 136 L -192 78 L -110 16 Z"],
+    detalles: ["M -36 3 Q 0 31 36 3"],
+    flechas: { A: [[-116, 150], [116, 150], 0.5], B: [[60, 8], [60, 360], 0.75], C: [[120, 3], [202, 65], 0.5] },
+  },
+  poleron: {
+    nombre: "Polerón",
+    medidas: { A: ["Ancho", "de axila a axila"], B: ["Largo", "desde el hombro hasta abajo"], C: ["Manga", "desde el hombro hasta el puño"] },
+    porDefecto: ["A", "B", "C"],
+    tallas: ["XS", "S", "M", "L", "XL", "XXL", "3XL"],
+    tallasDefecto: ["S", "M", "L", "XL"],
+    trazos: [
+      "M -60 26 L -112 34 L -196 318 L -160 336 L -122 140 L -122 342 L 122 342 L 122 140 L 160 336 L 196 318 L 112 34 L 60 26 Z",
+      "M -60 26 C -74 -44 74 -44 60 26",
+    ],
+    detalles: ["M -40 26 C -40 -12 40 -12 40 26", "M -72 250 L 72 250 L 86 318 L -86 318 Z", "M -122 324 L 122 324", "M -192 304 L -158 320", "M 192 304 L 158 320"],
+    flechas: { A: [[-122, 170], [122, 170], 0.5], B: [[62, 30], [62, 342], 0.62], C: [[129, 29], [213, 313], 0.5] },
+  },
+  pantalon: {
+    nombre: "Pantalón",
+    medidas: { A: ["Cintura", "de lado a lado, sin estirar"], B: ["Largo", "por el costado, de arriba al ruedo"], C: ["Tiro", "de arriba a la entrepierna"] },
+    porDefecto: ["A", "B"],
+    tallas: ["XS", "S", "M", "L", "XL", "XXL", "36", "38", "40", "42", "44", "46", "48"],
+    tallasDefecto: ["38", "40", "42", "44"],
+    trazos: ["M -112 0 L 112 0 L 124 372 L 34 372 L 0 128 L -34 372 L -124 372 Z"],
+    detalles: ["M -112 26 L 112 26"],
+    flechas: { A: [[-112, -24], [112, -24], 0.5], B: [[136, 0], [148, 372], 0.5], C: [[-14, 26], [-14, 128], 0.5] },
+  },
+  short: {
+    nombre: "Short",
+    medidas: { A: ["Cintura", "de lado a lado, sin estirar"], B: ["Largo", "por el costado, de arriba al ruedo"], C: ["Tiro", "de arriba a la entrepierna"] },
+    porDefecto: ["A", "B"],
+    tallas: ["XS", "S", "M", "L", "XL", "XXL", "36", "38", "40", "42", "44", "46", "48"],
+    tallasDefecto: ["S", "M", "L", "XL"],
+    trazos: ["M -116 0 L 116 0 L 132 210 L 30 210 L 0 120 L -30 210 L -132 210 Z"],
+    detalles: ["M -116 26 L 116 26"],
+    flechas: { A: [[-116, -24], [116, -24], 0.5], B: [[140, 0], [156, 210], 0.5], C: [[-14, 26], [-14, 120], 0.5] },
+  },
+};
+const NOTA = "Medidas en cm, con la prenda estirada sobre una superficie plana. Pueden variar entre 1 y 2 cm.";
+
+// ---------- Estado (se recuerda en este celular, por tipo de prenda) ----------
+let estado = { tipo: "polera", nota: NOTA, porTipo: {} };
+try { estado = { ...estado, ...JSON.parse(localStorage.getItem("lobo-medidas")) }; } catch {}
+const guardarEstado = () => { try { localStorage.setItem("lobo-medidas", JSON.stringify(estado)); } catch {} };
+function delTipo() {
+  const t = TIPOS[estado.tipo];
+  if (!estado.porTipo[estado.tipo]) estado.porTipo[estado.tipo] = { medidas: [...t.porDefecto], tallas: [...t.tallasDefecto], valores: {} };
+  return estado.porTipo[estado.tipo];
+}
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+// ---------- Formulario ----------
+function pintarForm() {
+  const t = TIPOS[estado.tipo], d = delTipo();
+  $("tipos").innerHTML = Object.entries(TIPOS)
+    .map(([k, v]) => `<button class="chip" data-tipo="${k}" aria-pressed="${k === estado.tipo}">${v.nombre}</button>`).join("");
+  $("medidas").innerHTML = Object.entries(t.medidas)
+    .map(([k, [n]]) => `<button class="chip" data-medida="${k}" aria-pressed="${d.medidas.includes(k)}"><i>${k}</i>${n}</button>`).join("");
+  $("tallas").innerHTML = t.tallas
+    .map((x) => `<button class="chip" data-talla="${x}" aria-pressed="${d.tallas.includes(x)}">${x}</button>`).join("");
+  pintarTabla();
+  $("nota").value = estado.nota;
+}
+function pintarTabla() {
+  const t = TIPOS[estado.tipo], d = delTipo();
+  const cols = ["A", "B", "C"].filter((k) => d.medidas.includes(k));
+  const tallas = t.tallas.filter((x) => d.tallas.includes(x));
+  if (!tallas.length || !cols.length) { $("tabla").innerHTML = `<p class="vacio">Elige al menos una talla y una medida.</p>`; return; }
+  const grilla = `grid-template-columns: 56px repeat(${cols.length}, 1fr)`;
+  $("tabla").innerHTML =
+    `<div class="linea" style="${grilla}"><span></span>${cols.map((k) => `<span class="tit">${k} · ${t.medidas[k][0]}</span>`).join("")}</div>` +
+    tallas.map((x) => `<div class="linea" style="${grilla}"><span class="talla">${x}</span>${cols
+      .map((k) => `<input inputmode="decimal" maxlength="5" data-celda="${x}|${k}" value="${esc((d.valores[x] || {})[k] || "")}" aria-label="${t.medidas[k][0]} talla ${x}" placeholder="–">`)
+      .join("")}</div>`).join("");
+}
+const alternar = (lista, v) => (lista.includes(v) ? lista.filter((x) => x !== v) : [...lista, v]);
+
+document.querySelector(".form").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-tipo], [data-medida], [data-talla]");
+  if (!b) return;
+  const d = delTipo();
+  if (b.dataset.tipo) estado.tipo = b.dataset.tipo;
+  if (b.dataset.medida) d.medidas = alternar(d.medidas, b.dataset.medida);
+  if (b.dataset.talla) d.tallas = alternar(d.tallas, b.dataset.talla);
+  pintarForm();
+  cambio();
+});
+document.querySelector(".form").addEventListener("input", (e) => {
+  const c = e.target.dataset.celda;
+  if (c) {
+    const [talla, k] = c.split("|"), d = delTipo();
+    d.valores[talla] = { ...(d.valores[talla] || {}), [k]: e.target.value.trim() };
+  }
+  if (e.target.id === "nota") estado.nota = e.target.value;
+  cambio();
+});
+let espera = null;
+function cambio() {
+  guardarEstado();
+  cancelAnimationFrame(espera);
+  espera = requestAnimationFrame(dibujar);
+}
+
+// ---------- Dibujo de la foto (1080 × 1350, vertical como las fotos del catálogo) ----------
+const lienzo = $("lienzo"), ctx = lienzo.getContext("2d");
+const W = 1080, H = 1350, ORO = "#fad02c", TEXTO = "#f4f1ea", SUAVE = "#a3a09a", LINEA = "#34343a";
+const logo = new Image();
+logo.onload = () => cambio();
+logo.src = "/img/logo-lobo-256.png";
+
+// Texto con espacio entre letras (no todos los celulares tienen letterSpacing en el canvas)
+function espaciado(txt, x, y, esp, alinear = "center") {
+  const letras = [...txt];
+  const ancho = letras.reduce((s, l) => s + ctx.measureText(l).width, 0) + esp * (letras.length - 1);
+  let cx = alinear === "center" ? x - ancho / 2 : alinear === "right" ? x - ancho : x;
+  ctx.textAlign = "left";
+  for (const l of letras) { ctx.fillText(l, cx, y); cx += ctx.measureText(l).width + esp; }
+}
+function lineas(txt, maxAncho) {
+  const out = [];
+  let actual = "";
+  for (const p of String(txt).split(/\s+/).filter(Boolean)) {
+    const prueba = actual ? actual + " " + p : p;
+    if (ctx.measureText(prueba).width > maxAncho && actual) { out.push(actual); actual = p; } else actual = prueba;
+  }
+  if (actual) out.push(actual);
+  return out;
+}
+function cajaRedonda(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+
+function flecha(x1, y1, x2, y2) {
+  const ang = Math.atan2(y2 - y1, x2 - x1), p = 18;
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  for (const [x, y, a] of [[x1, y1, ang + Math.PI], [x2, y2, ang]]) {
+    ctx.beginPath();
+    ctx.moveTo(x - p * Math.cos(a - 0.5), y - p * Math.sin(a - 0.5));
+    ctx.lineTo(x, y);
+    ctx.lineTo(x - p * Math.cos(a + 0.5), y - p * Math.sin(a + 0.5));
+    ctx.stroke();
+  }
+}
+function insignia(letra, x, y) {
+  ctx.fillStyle = ORO;
+  ctx.beginPath(); ctx.arc(x, y, 25, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = "#0b0b0c"; ctx.font = '400 36px "Bebas Neue"'; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText(letra, x, y + 2);
+  ctx.textBaseline = "alphabetic";
+}
+
+function dibujarPrenda(t, cols, zona) {
+  // Encaja el dibujo (con sus flechas) en la zona, centrado
+  const pts = [];
+  for (const d of [...t.trazos, ...t.detalles]) {
+    const nums = d.match(/-?\d+(\.\d+)?/g).map(Number);
+    for (let i = 0; i < nums.length; i += 2) pts.push([nums[i], nums[i + 1]]);
+  }
+  for (const k of cols) pts.push(t.flechas[k][0], t.flechas[k][1]);
+  const xs = pts.map((p) => p[0]), ys = pts.map((p) => p[1]);
+  const minX = Math.min(...xs) - 30, maxX = Math.max(...xs) + 30, minY = Math.min(...ys) - 30, maxY = Math.max(...ys) + 30;
+  const s = Math.min(zona.w / (maxX - minX), zona.h / (maxY - minY));
+  const ox = zona.x + zona.w / 2 - ((minX + maxX) / 2) * s, oy = zona.y + zona.h / 2 - ((minY + maxY) / 2) * s;
+  const aLienzo = ([x, y]) => [ox + x * s, oy + y * s];
+
+  ctx.save();
+  ctx.translate(ox, oy); ctx.scale(s, s);
+  ctx.lineJoin = "round"; ctx.lineCap = "round";
+  for (const d of t.trazos) {
+    const p = new Path2D(d);
+    ctx.fillStyle = "rgba(244, 241, 234, .05)"; ctx.fill(p);
+    ctx.strokeStyle = "rgba(244, 241, 234, .9)"; ctx.lineWidth = 5 / s; ctx.stroke(p);
+  }
+  for (const d of t.detalles) { ctx.strokeStyle = "rgba(244, 241, 234, .45)"; ctx.lineWidth = 3 / s; ctx.stroke(new Path2D(d)); }
+  ctx.restore();
+
+  ctx.strokeStyle = ORO; ctx.lineWidth = 5; ctx.lineCap = "round"; ctx.lineJoin = "round";
+  for (const k of cols) {
+    const [a, b] = t.flechas[k];
+    const [x1, y1] = aLienzo(a), [x2, y2] = aLienzo(b);
+    flecha(x1, y1, x2, y2);
+  }
+  for (const k of cols) {
+    const [a, b, f] = t.flechas[k];
+    const [x1, y1] = aLienzo(a), [x2, y2] = aLienzo(b);
+    insignia(k, x1 + (x2 - x1) * f, y1 + (y2 - y1) * f);
+  }
+}
+
+function dibujar() {
+  const t = TIPOS[estado.tipo], d = delTipo();
+  const cols = ["A", "B", "C"].filter((k) => d.medidas.includes(k));
+  const tallas = t.tallas.filter((x) => d.tallas.includes(x));
+  const nombre = $("nombre").value.trim();
+
+  // Fondo negro con una luz suave arriba
+  ctx.fillStyle = "#0b0b0c"; ctx.fillRect(0, 0, W, H);
+  const luz = ctx.createRadialGradient(W / 2, 260, 40, W / 2, 260, 760);
+  luz.addColorStop(0, "rgba(250, 208, 44, .10)"); luz.addColorStop(1, "rgba(250, 208, 44, 0)");
+  ctx.fillStyle = luz; ctx.fillRect(0, 0, W, H);
+
+  // Marca: lobo + LOBO DE LUJO
+  ctx.font = '400 46px "Bebas Neue"';
+  const marca = "LOBO DE LUJO", anchoMarca = [...marca].reduce((s, l) => s + ctx.measureText(l).width, 0) + 6 * (marca.length - 1);
+  const altoLogo = 64, anchoLogo = logo.naturalWidth ? (altoLogo * logo.naturalWidth) / logo.naturalHeight : 0;
+  const x0 = W / 2 - (anchoLogo + 16 + anchoMarca) / 2;
+  if (anchoLogo) ctx.drawImage(logo, x0, 70, anchoLogo, altoLogo);
+  ctx.fillStyle = ORO;
+  espaciado(marca, x0 + anchoLogo + 16, 120, 6, "left");
+
+  // Título y nombre de la prenda
+  ctx.fillStyle = TEXTO; ctx.font = '400 124px "Bebas Neue"';
+  espaciado("GUÍA DE MEDIDAS", W / 2, 268, 4);
+  ctx.fillStyle = ORO; ctx.fillRect(W / 2 - 60, 292, 120, 4);
+  if (nombre) { ctx.fillStyle = ORO; ctx.font = '600 32px Inter'; espaciado(nombre.toUpperCase(), W / 2, 348, 3); }
+
+  // Dibujo de la prenda con las flechas
+  dibujarPrenda(t, cols, { x: 140, y: nombre ? 380 : 340, w: W - 280, h: nombre ? 360 : 400 });
+
+  // Qué es cada letra
+  ctx.font = '400 24px Inter'; ctx.fillStyle = SUAVE;
+  const leyenda = cols.map((k) => `${k}: ${t.medidas[k][0].toLowerCase()} ${t.medidas[k][1]}`);
+  const filasLeyenda = leyenda.length ? lineas(leyenda.join("   ·   "), W - 160) : [];
+  filasLeyenda.forEach((l, i) => { ctx.textAlign = "center"; ctx.fillText(l, W / 2, 790 + i * 34); });
+
+  // Tabla
+  const tx = 80, tw = W - 160, ty = 830 + Math.max(0, filasLeyenda.length - 1) * 34, tb = 1200;
+  const nCols = cols.length + 1, cw = tw / nCols, cab = 74;
+  if (!tallas.length || !cols.length) {
+    ctx.fillStyle = SUAVE; ctx.font = '500 30px Inter'; ctx.textAlign = "center";
+    ctx.fillText("Elige al menos una talla y una medida", W / 2, ty + 120);
+  } else {
+    const fila = Math.min(82, (tb - ty - cab) / tallas.length);
+    cajaRedonda(tx, ty, tw, cab + fila * tallas.length, 22);
+    ctx.save(); ctx.clip();
+    ctx.fillStyle = "rgba(250, 208, 44, .10)"; ctx.fillRect(tx, ty, tw, cab);
+    tallas.forEach((_, i) => { if (i % 2) { ctx.fillStyle = "rgba(255, 255, 255, .035)"; ctx.fillRect(tx, ty + cab + i * fila, tw, fila); } });
+    ctx.restore();
+    cajaRedonda(tx, ty, tw, cab + fila * tallas.length, 22);
+    ctx.strokeStyle = LINEA; ctx.lineWidth = 2; ctx.stroke();
+
+    ctx.fillStyle = ORO; ctx.font = '400 40px "Bebas Neue"'; ctx.textBaseline = "middle";
+    espaciado("TALLA", tx + cw / 2, ty + cab / 2 + 2, 2);
+    cols.forEach((k, i) => espaciado(`${k} · ${t.medidas[k][0].toUpperCase()}`, tx + cw * (i + 1.5), ty + cab / 2 + 2, 2));
+    tallas.forEach((x, r) => {
+      const cy = ty + cab + fila * r + fila / 2 + 2;
+      ctx.fillStyle = TEXTO; ctx.font = `400 ${Math.round(Math.min(52, fila * 0.62))}px "Bebas Neue"`;
+      espaciado(x, tx + cw / 2, cy, 2);
+      ctx.font = `700 ${Math.round(Math.min(40, fila * 0.48))}px Inter`;
+      cols.forEach((k, i) => {
+        const v = ((d.valores[x] || {})[k] || "").replace(".", ",");
+        ctx.fillStyle = v ? TEXTO : SUAVE;
+        ctx.textAlign = "center"; ctx.fillText(v || "–", tx + cw * (i + 1.5), cy);
+      });
+    });
+    ctx.textBaseline = "alphabetic";
+  }
+
+  // Nota de abajo
+  ctx.fillStyle = SUAVE; ctx.font = '400 24px Inter'; ctx.textAlign = "center";
+  lineas(estado.nota, W - 160).slice(0, 2).forEach((l, i, arr) => ctx.fillText(l, W / 2, H - 70 - (arr.length - 1 - i) * 34));
+}
+
+// ---------- Guardar la foto ----------
+const slug = (s) => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+const nombreArchivo = () => `medidas-${slug($("nombre").value) || slug(TIPOS[estado.tipo].nombre)}.jpg`;
+const hacerFoto = () => new Promise((ok) => { dibujar(); lienzo.toBlob(ok, "image/jpeg", 0.92); });
+function aviso(txt) {
+  const a = $("aviso");
+  a.textContent = txt; a.hidden = false;
+  clearTimeout(aviso.t); aviso.t = setTimeout(() => { a.hidden = true; }, 2600);
+}
+$("descargar").addEventListener("click", async () => {
+  const url = URL.createObjectURL(await hacerFoto());
+  const a = document.createElement("a");
+  a.href = url; a.download = nombreArchivo();
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  aviso("Foto descargada 📏");
+});
+// En el celular se abre el menú para guardarla en la galería ("Guardar imagen")
+const puedeCompartir = (() => {
+  try { return !!(navigator.canShare && navigator.canShare({ files: [new File([""], "x.jpg", { type: "image/jpeg" })] })); } catch { return false; }
+})();
+$("guardar").hidden = !puedeCompartir;
+$("guardar").addEventListener("click", async () => {
+  const archivo = new File([await hacerFoto()], nombreArchivo(), { type: "image/jpeg" });
+  try { await navigator.share({ files: [archivo] }); } catch {}
+});
+
+$("nombre").addEventListener("input", cambio);
+pintarForm();
+dibujar();
+// Las letras se dibujan bien recién cuando terminan de cargar
+Promise.all([
+  document.fonts.load('400 124px "Bebas Neue"'), document.fonts.load("700 40px Inter"),
+  document.fonts.load("600 32px Inter"), document.fonts.load("400 24px Inter"),
+]).then(cambio, cambio);
+</script>
+</body>
+</html>
