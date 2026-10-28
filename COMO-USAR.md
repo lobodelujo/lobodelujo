@@ -33,6 +33,7 @@ Entra a **lobodelujo.pages.dev/admin** → **Catálogo**.
    - **Descripción**
    - **Tallas**: toca y elige varias
    - **📏 Foto de medidas** (opcional): una foto con las tallas y medidas en cm de **esa** prenda. En la ficha aparece el botón **📏 Ver medidas** al lado de "Talla", y la foto se abre en grande con zoom. No se mezcla con las fotos de la prenda. Si no subes una, el botón no aparece.
+     La foto se hace en **lobodelujo.pages.dev/admin/medidas**: eliges el tipo de prenda (polera, polerón, pantalón o short), las tallas y escribes las medidas en cm. Ves cómo queda y tocas **📲 Guardar foto en el celular**. Esa página recuerda tus últimas medidas, así que para la prenda siguiente solo cambias lo distinto.
    - **Colores**: separados por coma, ej. `Negro, Blanco`
    - **Fotos**: toca **Agregar foto** → **Elegir una imagen** → **Subir** → elige de la galería. Repite por cada foto (4 o más). **La primera es la portada.**
 4. Arriba toca **Publicar** → **Publicar ahora**.
