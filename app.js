@@ -937,9 +937,12 @@ const moverFoto = (d) => {
   pintarFoto();
 };
 
-function grupoOpciones(nombre, clave, valores) {
+// La foto de medidas de cada prenda (se sube en el panel) se abre en el visor con zoom
+const botonMedidas = (p) => p.fotoMedidas ? `<button class="ver-medidas" data-medidas>📏 Ver medidas</button>` : "";
+
+function grupoOpciones(nombre, clave, valores, extra = "") {
   if (!valores.length) return "";
-  return `<div class="opcion"><h4>${nombre}: <b>${esc(sel[clave] || "elige una")}</b></h4>
+  return `<div class="opcion"><h4><span>${nombre}: <b>${esc(sel[clave] || "elige una")}</b></span>${extra}</h4>
     <div class="opciones">${valores
       .map((v) => `<button data-opt="${clave}" data-val="${esc(v)}" aria-pressed="${sel[clave] === v}">${esc(v)}</button>`)
       .join("")}</div></div>`;
@@ -952,7 +955,7 @@ function pintarDetalle() {
     <h2 id="m-nombre">${esc(p.nombre)}</h2>
     <p class="precio">${precioHtml(p)}</p>
     <p class="desc">${esc(p.descripcion)}</p>
-    ${grupoOpciones("Talla", "talla", p.tallas)}
+    ${p.tallas.length ? grupoOpciones("Talla", "talla", p.tallas, botonMedidas(p)) : p.fotoMedidas ? `<div class="opcion">${botonMedidas(p)}</div>` : ""}
     ${grupoOpciones("Color", "color", p.colores)}
     ${p.disponible ? `
       <div class="opcion"><h4>Cantidad</h4>
@@ -977,6 +980,7 @@ function faltaOpcion() {
 const descripcionItem = (i) => [i.talla && `Talla ${i.talla}`, i.color && `Color ${i.color}`].filter(Boolean).join(" · ");
 
 $("#detalle").addEventListener("click", async (e) => {
+  if (e.target.closest("[data-medidas]")) { abrirMedidas(); return; }
   const opt = e.target.closest("[data-opt]");
   if (opt) { sel[opt.dataset.opt] = opt.dataset.val; pintarDetalle(); return; }
   const c = e.target.closest("[data-cant]");
@@ -1029,6 +1033,8 @@ $("#modal").addEventListener("click", (e) => { if (e.target.closest("[data-cerra
 const visor = $("#visor"), vImg = $("#visor-img"), vEscena = $("#visor-escena");
 const ZOOM = 2.5;
 let vIdx = 0, zoom = false, origen = { x: 50, y: 50 }, gesto = null;
+// Fotos que muestra el visor: las de la prenda o, con "Ver medidas", solo la foto de medidas
+let vFotos = [], vMedidas = false;
 
 function aplicarZoom() {
   vImg.style.transformOrigin = `${origen.x}% ${origen.y}%`;
@@ -1036,14 +1042,14 @@ function aplicarZoom() {
   visor.classList.toggle("con-zoom", zoom);
 }
 function pintarVisor() {
-  const f = actual.fotos;
+  const f = vFotos;
   zoom = false;
   aplicarZoom();
   vImg.classList.remove("sin-foto");
   vImg.onerror = () => ph(vImg);
-  vImg.alt = `${actual.nombre} · ${vIdx + 1}`;
+  vImg.alt = vMedidas ? `Medidas · ${actual.nombre}` : `${actual.nombre} · ${vIdx + 1}`;
   vImg.src = foto(f[vIdx], 2000);
-  $("#visor-contador").textContent = `${vIdx + 1} / ${f.length}`;
+  $("#visor-contador").textContent = vMedidas ? "📏 Medidas" : `${vIdx + 1} / ${f.length}`;
   $("#visor-ant").hidden = $("#visor-sig").hidden = $("#visor-minis").hidden = f.length < 2;
   $("#visor-minis").innerHTML = f
     .map((src, i) => `<button data-vfoto="${i}" aria-current="${i === vIdx}" aria-label="Foto ${i + 1}">${imgTag(src, String(i + 1), "", 200)}</button>`)
@@ -1051,7 +1057,17 @@ function pintarVisor() {
 }
 function abrirVisor() {
   if (!actual || !actual.fotos.length) return;
+  vFotos = actual.fotos;
+  vMedidas = false;
   vIdx = fotoIdx;
+  pintarVisor();
+  visor.hidden = false;
+}
+function abrirMedidas() {
+  if (!actual || !actual.fotoMedidas) return;
+  vFotos = [actual.fotoMedidas];
+  vMedidas = true;
+  vIdx = 0;
   pintarVisor();
   visor.hidden = false;
 }
@@ -1060,10 +1076,10 @@ function cerrarVisor() {
   visor.hidden = true;
   zoom = false;
   aplicarZoom();
-  if (actual) { fotoIdx = vIdx; pintarFoto(); }
+  if (actual && !vMedidas) { fotoIdx = vIdx; pintarFoto(); }
 }
 const moverVisor = (d) => {
-  const n = actual.fotos.length;
+  const n = vFotos.length;
   vIdx = (vIdx + d + n) % n;
   pintarVisor();
 };
@@ -1118,7 +1134,7 @@ vEscena.addEventListener("pointerup", (e) => {
     if (!zoom) origen = puntoEn(e.clientX, e.clientY);
     zoom = !zoom;
     aplicarZoom();
-  } else if (!zoom && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) && actual.fotos.length > 1) {
+  } else if (!zoom && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) && vFotos.length > 1) {
     moverVisor(dx < 0 ? 1 : -1);
   }
   gesto = null;

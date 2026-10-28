@@ -722,8 +722,11 @@ img.sin-foto {
 .detalle h2 { font-family: var(--titulo); font-size: 40px; line-height: 1; letter-spacing: 1px; font-weight: 400; }
 .detalle .precio { font-size: 22px; margin-top: 0; }
 .detalle .desc { color: var(--suave); }
-.opcion h4 { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--suave); }
+.opcion h4 { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--suave); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .opcion h4 b { color: var(--texto); }
+/* Botón de la foto de medidas de cada prenda, al lado de "Talla" */
+.ver-medidas { flex: none; padding: 6px 12px; border: 1px solid rgba(250, 208, 44, .45); border-radius: 999px; color: var(--oro); font-size: 12.5px; font-weight: 600; white-space: nowrap; transition: background .2s; }
+.ver-medidas:hover, .ver-medidas:focus-visible { background: rgba(250, 208, 44, .12); }
 .opciones { display: flex; flex-wrap: wrap; gap: 8px; }
 .opciones button { min-width: 48px; padding: 9px 14px; border-radius: 10px; border: 1px solid var(--linea); font-size: 14px; }
 .opciones button[aria-pressed="true"] { border-color: var(--oro); background: rgba(250, 208, 44, .14); color: var(--oro); font-weight: 700; }

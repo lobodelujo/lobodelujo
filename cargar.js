@@ -72,6 +72,7 @@ const unico = (usados, base) => {
           fotoVitrina: p.fotoVitrina || "",
           descripcion: p.descripcion || "",
           tallas: lista(p.tallas).sort(ordenarTallas),
+          fotoMedidas: p.fotoMedidas || "",
           colores: lista(p.colores),
           fotos: lista(p.fotos),
         };
