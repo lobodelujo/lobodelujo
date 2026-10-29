@@ -2,6 +2,27 @@
   "productos": [
     {
       "perchero": false,
+      "precio": 65000,
+      "nombre": "CORTEIZ",
+      "vitrina": false,
+      "descripcion": ">100% algodón\n> pretina elástica con cordón\n> finales de las mangas elásticas\n> bolsillos laterales / atrás\n> serigrafía al tacto\n> costuras amarillas que realzan los cortes\n> lavar a mano",
+      "fotos": [
+        "img/productos/20261029-094002-syy-1.jpg",
+        "img/productos/20261029-094012-g69-2.jpg",
+        "img/productos/20261029-094020-823-3.jpg",
+        "img/productos/20261029-094027-spl-4.jpg"
+      ],
+      "colores": [],
+      "categoria": "Pantalones",
+      "disponible": true,
+      "etiqueta": "Nuevo",
+      "tallas": [
+        "L",
+        "XL"
+      ]
+    },
+    {
+      "perchero": false,
       "precio": 43000,
       "nombre": "RHUDE",
       "vitrina": false,
