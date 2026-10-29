@@ -105,6 +105,58 @@
     })();
   </script>
 
+  <!-- En la lista de productos, al lado de cada nombre va su foto de portada (la foto 1), para reconocer
+       la prenda sin abrirla. El resumen de config.yml trae las fotos entre ⟪ ⟫: aquí se saca ese texto
+       y en su lugar se pone la miniatura. -->
+  <style>
+    .lobo-mini { display: inline-block; width: 56px; height: 70px; margin-right: 12px; border-radius: 6px;
+      object-fit: cover; vertical-align: middle; background: #e8e6e1; }
+  </style>
+  <script>
+    (function () {
+      // ⟪ y ⟫ escritos con su código, para que este mismo script no cuente como texto con marca
+      var MARCA = /\s*⟪([\s\S]*?)⟫/;
+      var revisar = function () {
+        var andador = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+          acceptNode: function (n) {
+            var tag = n.parentNode && n.parentNode.nodeName;
+            if (tag === "SCRIPT" || tag === "STYLE" || tag === "TEXTAREA") return NodeFilter.FILTER_SKIP;
+            return n.nodeValue.indexOf("⟪") >= 0 ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
+          }
+        });
+        var nodos = [];
+        while (andador.nextNode()) nodos.push(andador.currentNode);
+        nodos.forEach(function (n) {
+          var m = n.nodeValue.match(MARCA);
+          if (!m) return;
+          n.nodeValue = n.nodeValue.replace(MARCA, "");
+          var ruta = (m[1].match(/[^"\[\],\s]+\.(?:jpe?g|png|webp|gif)/i) || [""])[0];
+          var src = !ruta || /^(https?:)?\//.test(ruta) ? ruta : "/" + ruta;
+          var mini = n.previousSibling && n.previousSibling.className === "lobo-mini" ? n.previousSibling : null;
+          if (!mini) {
+            mini = document.createElement("img");
+            mini.className = "lobo-mini";
+            mini.alt = "";
+            mini.loading = "lazy";
+            // Foto recién subida que todavía no está publicada en la web: queda el cuadrito gris
+            mini.onerror = function () { this.removeAttribute("src"); };
+            n.parentNode.insertBefore(mini, n);
+          }
+          if (mini.getAttribute("src") !== src) {
+            if (src) mini.src = src;
+            else mini.removeAttribute("src");
+          }
+        });
+      };
+      var pendiente = false;
+      new MutationObserver(function () {
+        if (pendiente) return;
+        pendiente = true;
+        setTimeout(function () { pendiente = false; revisar(); }, 60);
+      }).observe(document.body, { childList: true, subtree: true, characterData: true });
+    })();
+  </script>
+
   <!-- Panel de administración (Decap CMS). La configuración está en config.yml -->
   <script src="https://unpkg.com/decap-cms@^3.6.0/dist/decap-cms.js"></script>
 </body>

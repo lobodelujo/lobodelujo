@@ -34,7 +34,8 @@ collections:
             widget: list
             add_to_top: true
             collapsed: true
-            summary: "{{fields.nombre}} · ${{fields.precio}} · {{fields.categoria}}"
+            # Lo que va entre ⟪ ⟫ no se ve: admin/index.html lo cambia por la miniatura de la foto de portada
+            summary: "{{fields.nombre}} · ${{fields.precio}} · {{fields.categoria}} ⟪{{fields.fotos}}⟫"
             fields:
               - { name: nombre, label: "Nombre del producto", widget: string }
               - name: categoria
