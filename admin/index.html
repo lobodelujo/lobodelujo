@@ -139,7 +139,12 @@
             mini.alt = "";
             mini.loading = "lazy";
             // Foto recién subida que todavía no está publicada en la web: queda el cuadrito gris
-            mini.onerror = function () { this.removeAttribute("src"); };
+            mini.onerror = function () { this.removeAttribute("src"); this.style.width = ""; };
+            // Las fotos horizontales (portadas de categoría) se ven anchas, sin recortarlas
+            mini.onload = function () {
+              var r = this.naturalWidth / this.naturalHeight;
+              this.style.width = r > 1 ? Math.round(70 * Math.min(r, 16 / 9)) + "px" : "";
+            };
             n.parentNode.insertBefore(mini, n);
           }
           if (mini.getAttribute("src") !== src) {

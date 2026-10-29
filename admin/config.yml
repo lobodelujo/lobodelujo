@@ -99,7 +99,8 @@ collections:
             widget: list
             required: false
             collapsed: true
-            summary: "{{fields.categoria}}"
+            # Igual que en Productos: lo que va entre ⟪ ⟫ se cambia por la miniatura de la foto grande
+            summary: "{{fields.categoria}} ⟪{{fields.foto}}⟫"
             fields:
               - name: categoria
                 label: Categoría
