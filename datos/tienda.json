@@ -28,6 +28,13 @@
   "instagram": "https://www.instagram.com/lobo_de_lujo_/",
   "envio": "Envíos a todo Chile desde Antofagasta",
   "videoPortadaMovil": "img/productos/20261026-205412-xcj-video-catalogo-vertical-volumen-bajo.mp4",
+  "portadasCategorias": [
+    {
+      "foto": "img/productos/20261030-162100-d47-gemini-generated-image-coamhfcoamhfcoam.jpg",
+      "categoria": "Gorras",
+      "fotoMovil": "img/productos/20261030-162100-d47-gemini-generated-image-coamhfcoamhfcoam.jpg"
+    }
+  ],
   "portadaTitulo": "Disponible ya",
   "portadaSubtitulo": "Nueva colección",
   "fraseAbajo": "primero que todo"
