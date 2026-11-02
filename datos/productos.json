@@ -2,6 +2,27 @@
   "productos": [
     {
       "perchero": false,
+      "precio": 46000,
+      "nombre": "OFF WHITE",
+      "vitrina": false,
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo serigrafia\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261102-185213-79z-1.jpg",
+        "img/productos/20261102-185222-i29-2.jpg",
+        "img/productos/20261102-185226-7wa-3.jpg",
+        "img/productos/20261102-185229-3kz-4.jpg"
+      ],
+      "colores": [
+        "BLANCO"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "tallas": [
+        "L"
+      ]
+    },
+    {
+      "perchero": false,
       "precio": 43000,
       "nombre": "OASIS",
       "vitrina": false,
