@@ -2,6 +2,29 @@
   "productos": [
     {
       "perchero": false,
+      "precio": 48000,
+      "nombre": "CORTEIZ",
+      "vitrina": true,
+      "descripcion": ">100% algodón / jeans\n>botones con sello\n>logo serigrafia al tacto\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261102-192431-tkv-4.jpg",
+        "img/productos/20261102-192440-kap-1.jpg",
+        "img/productos/20261102-192436-ijq-2.jpg",
+        "img/productos/20261102-192446-i7b-3.jpg"
+      ],
+      "colores": [
+        "AZUL CIELO"
+      ],
+      "categoria": "Shorts",
+      "disponible": true,
+      "etiqueta": "Nuevo",
+      "tallas": [
+        "M",
+        "L"
+      ]
+    },
+    {
+      "perchero": false,
       "precio": 66000,
       "nombre": "ADIDAS",
       "vitrina": false,
