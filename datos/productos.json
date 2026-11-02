@@ -2,6 +2,27 @@
   "productos": [
     {
       "perchero": false,
+      "precio": 46000,
+      "nombre": "CHROME HEARTS",
+      "vitrina": false,
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo cocido sobre la prenda adelante y atrás\n>bordado \n>lavar a mano",
+      "fotos": [
+        "img/productos/20261101-213129-wok-2.jpg",
+        "img/productos/20261101-213133-u86-1.jpg",
+        "img/productos/20261101-213136-53h-3.jpg"
+      ],
+      "colores": [
+        "AZUL MARINO"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "etiqueta": "Nuevo",
+      "tallas": [
+        "L"
+      ]
+    },
+    {
+      "perchero": false,
       "precio": 65000,
       "nombre": "CORTEIZ",
       "vitrina": false,
