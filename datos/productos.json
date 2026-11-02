@@ -2,6 +2,27 @@
   "productos": [
     {
       "perchero": false,
+      "precio": 56000,
+      "nombre": "HELLSTAR",
+      "vitrina": false,
+      "descripcion": ">100% algodón\n>con capucha\n>logo en serigrafia adelante y atrás\n>manga larga\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261102-191404-rnn-2.jpg",
+        "img/productos/20261102-191408-t28-1.jpg",
+        "img/productos/20261102-191412-ykf-3.jpg",
+        "img/productos/20261102-191416-5mz-4.jpg"
+      ],
+      "colores": [
+        "BEIGE"
+      ],
+      "categoria": "Polerones",
+      "disponible": true,
+      "tallas": [
+        "M"
+      ]
+    },
+    {
+      "perchero": false,
       "precio": 46000,
       "nombre": "OFF WHITE",
       "vitrina": false,
