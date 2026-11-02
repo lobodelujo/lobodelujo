@@ -3,6 +3,27 @@
     {
       "perchero": false,
       "precio": 46000,
+      "nombre": "LOUIS VUITTON",
+      "vitrina": false,
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo cocido sobre la prenda adelante y atrás\n>bordado\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261101-213535-rmg-4.jpg",
+        "img/productos/20261101-213540-xa2-1.jpg",
+        "img/productos/20261101-213546-6ww-3.jpg",
+        "img/productos/20261101-213543-rp8-2.jpg"
+      ],
+      "colores": [
+        "NEGRO"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "tallas": [
+        "L"
+      ]
+    },
+    {
+      "perchero": false,
+      "precio": 46000,
       "nombre": "CHROME HEARTS",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo cocido sobre la prenda adelante y atrás\n>bordado \n>lavar a mano",
