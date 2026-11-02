@@ -1,6 +1,27 @@
 {
   "productos": [
     {
+      "perchero": false,
+      "precio": 43000,
+      "nombre": "OASIS",
+      "vitrina": false,
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo serigrafia al tacto\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261102-184618-itf-1.jpg",
+        "img/productos/20261102-184623-fvd-2.jpg",
+        "img/productos/20261102-184626-y17-3.jpg",
+        "img/productos/20261102-184630-dn7-4.jpg"
+      ],
+      "colores": [
+        "GRIS"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "tallas": [
+        "M"
+      ]
+    },
+    {
       "perchero": true,
       "fotoPerchero": "img/productos/20261101-213956-f9n-1.png",
       "fotoPercheroLado": "img/productos/20261101-214002-4xu-3.png",
