@@ -2,6 +2,27 @@
   "productos": [
     {
       "perchero": false,
+      "precio": 46000,
+      "vitrina": false,
+      "descripcion": ">100% algodón\n>cuello redondo\n>boxyfit\n>logo en serigrafia al tacto\n>detalles en pedrería\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261103-142857-e5y-4.jpg",
+        "img/productos/20261103-142851-8ym-2.jpg",
+        "img/productos/20261103-142854-8th-3.jpg",
+        "img/productos/20261103-142848-y6w-1.jpg"
+      ],
+      "colores": [
+        "BEIGE"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "etiqueta": null,
+      "tallas": [
+        "L"
+      ]
+    },
+    {
+      "perchero": false,
       "precio": 30000,
       "nombre": "GODSPEED",
       "vitrina": false,
