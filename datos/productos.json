@@ -2,7 +2,8 @@
   "productos": [
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 35000,
+      "nombre": "BKYS",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>boxyfit\n>logo en serigrafia al tacto\n>detalles en pedrería\n>lavar a mano",
       "fotos": [
