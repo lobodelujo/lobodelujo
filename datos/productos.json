@@ -2,6 +2,27 @@
   "productos": [
     {
       "perchero": false,
+      "precio": 46000,
+      "nombre": "PALM ANGELS",
+      "vitrina": false,
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo en serigrafia al tacto adelante y atrás\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261103-161002-ni5-1.jpg",
+        "img/productos/20261103-161005-o60-2.jpg",
+        "img/productos/20261103-161008-5pr-3.jpg",
+        "img/productos/20261103-161011-nvs-4.jpg"
+      ],
+      "colores": [
+        "NEGRO"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "tallas": [
+        "XL"
+      ]
+    },
+    {
+      "perchero": false,
       "precio": 38000,
       "nombre": "FEAR OF GOD",
       "vitrina": false,
