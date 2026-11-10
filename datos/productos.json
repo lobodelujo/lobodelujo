@@ -22,9 +22,24 @@
       ]
     },
     {
-      "disponible": true,
       "perchero": false,
-      "vitrina": false
+      "precio": 30000,
+      "nombre": "CHROME HEARTS",
+      "vitrina": false,
+      "descripcion": ">algodón 100%\n>gorra en malla\n>visera curva\n>logo bordado\n>ajustable",
+      "fotos": [
+        "img/productos/20261110-141222-65v-1.jpg",
+        "img/productos/20261110-141226-zjx-2.jpg",
+        "img/productos/20261110-141229-b8s-3.jpg"
+      ],
+      "colores": [
+        "NEGRO"
+      ],
+      "categoria": "Gorras",
+      "disponible": true,
+      "tallas": [
+        "Única"
+      ]
     },
     {
       "perchero": false,
