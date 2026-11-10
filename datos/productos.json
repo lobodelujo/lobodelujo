@@ -2,6 +2,24 @@
   "productos": [
     {
       "perchero": false,
+      "precio": 23000,
+      "fotoVitrina": "img/productos/20261110-130727-e32-billetera-gucci-vitrina.png",
+      "nombre": "GUCCI",
+      "vitrina": true,
+      "descripcion": ">material cuero granulado\n>billetera plegable / tarjetero\n>interior compartimento para billetes\n>logo en relieve / costuras finas en los bordes\n>medida tamaño bolsillo",
+      "fotos": [
+        "img/productos/20261110-131039-g5j-1.jpg",
+        "img/productos/20261110-131052-638-2.jpg"
+      ],
+      "colores": [
+        "NEGRO"
+      ],
+      "categoria": "Accesorios",
+      "disponible": true,
+      "etiqueta": "Nuevo"
+    },
+    {
+      "perchero": false,
       "precio": 18000,
       "fotoVitrina": "img/productos/20261110-130219-a36-encendedor-supreme-vitrina.png",
       "nombre": "SUPREME",
