@@ -3,6 +3,32 @@
     {
       "perchero": false,
       "precio": 30000,
+      "nombre": "CORTEIZ",
+      "vitrina": false,
+      "descripcion": ">algodón 100%\n>gorra en malla\n>visera curva\n>logo bordado\n>ajustable",
+      "fotos": [
+        "img/productos/20261110-140656-5bl-1.jpg",
+        "img/productos/20261110-140708-uns-2.jpg",
+        "img/productos/20261110-140717-15x-3.jpg"
+      ],
+      "colores": [
+        "CAMUFLADO"
+      ],
+      "categoria": "Gorras",
+      "disponible": true,
+      "etiqueta": "Nuevo",
+      "tallas": [
+        "Única"
+      ]
+    },
+    {
+      "disponible": true,
+      "perchero": false,
+      "vitrina": false
+    },
+    {
+      "perchero": false,
+      "precio": 30000,
       "fotoVitrina": "img/productos/20261110-131310-zyh-godspeed-gorra-vitrina.png",
       "nombre": "GODSPEED",
       "vitrina": true,
