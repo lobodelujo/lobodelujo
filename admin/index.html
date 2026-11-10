@@ -41,10 +41,22 @@
         for (var i = 3; i < d.length; i += 4) if (d[i] < 250) return true;
         return false;
       };
+      // La foto se copia a la memoria apenas se elige: el panel la sube recién al publicar (y vuelve a subir
+      // las de toda la sesión), así que si entretanto se renombra o se mueve su carpeta (por ejemplo al
+      // ponerle ✅), sin la copia la subida falla con "Failed to fetch"
+      var enMemoria = function (f, nombre) {
+        var copia = function (datos) { return new File([datos], nombre, { type: f.type, lastModified: f.lastModified }); };
+        return f.arrayBuffer().then(copia, function () { return copia(f); });
+      };
       // Devuelve la foto optimizada, o la original renombrada si ya era liviana, no es foto o algo falla
       var optimizar = function (f, base, ext) {
-        var original = new File([f], base + ext, { type: f.type, lastModified: f.lastModified });
-        if (!/^image\/(jpeg|png|webp)$/.test(f.type)) return Promise.resolve(original);
+        return enMemoria(f, base + ext).then(function (original) {
+          if (!/^image\/(jpeg|png|webp)$/.test(f.type)) return original;
+          return achicar(original, base);
+        });
+      };
+      var achicar = function (f, base) {
+        var original = f;
         return cargar(f).then(function (img) {
           var lado = Math.max(img.naturalWidth, img.naturalHeight);
           if (f.size <= YA_LIVIANA && lado <= LADO_MAX) return original;
