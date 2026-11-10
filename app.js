@@ -2352,7 +2352,7 @@ function vitrinaHtml() {
       <div class="vitrina-ficha" id="vitrina-ficha" aria-live="polite"></div>
       <button class="vitrina-cerrar" id="vitrina-cerrar" aria-label="Volver a la vitrina">×</button>
     </div>
-    ${verTodo ? `<a class="ed-btn ed-btn-solo" href="#catalogo" data-ver-cat="${esc(VITRINA_CATEGORIA)}">Ver todo</a>` : ""}
+    ${verTodo ? `<a class="ed-btn ed-btn-solo" href="#catalogo" data-ver-cat="${esc(VITRINA_CATEGORIA)}">Ver todos los accesorios</a>` : ""}
   </section>`;
 }
 
