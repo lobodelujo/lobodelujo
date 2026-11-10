@@ -3,6 +3,27 @@
     {
       "perchero": false,
       "precio": 46000,
+      "nombre": "DOLCE&GABBANA",
+      "vitrina": false,
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo bordado\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261109-222442-pqt-2.jpg",
+        "img/productos/20261109-222448-f58-3.jpg",
+        "img/productos/20261109-222452-rib-1.jpg",
+        "img/productos/20261109-222455-rl2-4.jpg"
+      ],
+      "colores": [
+        "NEGRO"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "tallas": [
+        "L"
+      ]
+    },
+    {
+      "perchero": false,
+      "precio": 46000,
       "nombre": "CHROME HEARTS",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo alta densidad \n>lavar a mano",
