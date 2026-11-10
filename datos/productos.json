@@ -3,6 +3,26 @@
     {
       "perchero": false,
       "precio": 46000,
+      "nombre": "ROUGHPLAY",
+      "vitrina": false,
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo serigrafia al tacto / brillos\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261109-225622-de0-1.jpg",
+        "img/productos/20261109-225627-k95-2.jpg",
+        "img/productos/20261109-225631-86m-3.jpg"
+      ],
+      "colores": [
+        "GRIS"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "tallas": [
+        "L"
+      ]
+    },
+    {
+      "perchero": false,
+      "precio": 46000,
       "nombre": "HELLSTAR",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo alta densidad\n>lavar a mano",
