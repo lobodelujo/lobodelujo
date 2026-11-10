@@ -2,6 +2,27 @@
   "productos": [
     {
       "perchero": false,
+      "precio": 30000,
+      "nombre": "GODSPEED",
+      "vitrina": false,
+      "descripcion": ">algodón 100%\n>gorra en malla\n>visera curva\n>logo bordado\n>ajustable",
+      "fotos": [
+        "img/productos/20261110-141912-f36-1.jpg",
+        "img/productos/20261110-141917-hnv-2.jpg",
+        "img/productos/20261110-141924-pv9-4.jpg",
+        "img/productos/20261110-141921-m7h-3.jpg"
+      ],
+      "colores": [
+        "ROJA / NEGRO"
+      ],
+      "categoria": "Gorras",
+      "disponible": true,
+      "tallas": [
+        "Única"
+      ]
+    },
+    {
+      "perchero": false,
       "precio": 27000,
       "nombre": "AMIRI",
       "vitrina": false,
