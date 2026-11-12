@@ -227,6 +227,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
+      "fotoMedidas": "img/productos/20261112-184959-493-medidas-polera.jpg",
       "tallas": [
         "L"
       ]
@@ -765,28 +766,6 @@
       "tallas": [
         "M",
         "XL"
-      ]
-    },
-    {
-      "perchero": false,
-      "precio": 46000,
-      "nombre": "OFF WHITE ",
-      "vitrina": false,
-      "descripcion": ">100% algodón\n>cuello redondo\n>logo bordado sobre la prenda adelante y atrás\n>lavar a mano",
-      "fotos": [
-        "img/productos/20261027-122250-awp-off-white.jpg",
-        "img/productos/20261027-122041-ico-1.jpg",
-        "img/productos/20261027-122044-7kb-2.jpg",
-        "img/productos/20261027-122048-pcc-3.jpg"
-      ],
-      "colores": [
-        "blanco"
-      ],
-      "categoria": "Poleras",
-      "disponible": true,
-      "etiqueta": "Nuevo",
-      "tallas": [
-        "M"
       ]
     },
     {
@@ -1361,26 +1340,6 @@
       ],
       "colores": [
         "beige"
-      ],
-      "categoria": "Poleras",
-      "disponible": true,
-      "etiqueta": "Nuevo",
-      "tallas": [
-        "S"
-      ]
-    },
-    {
-      "precio": 46000,
-      "nombre": "BALENCIAGA",
-      "descripcion": "> polera oversize\n> cuello redondo\n> algodón 100%\n> estampado\n> hebilla metálica",
-      "fotos": [
-        "img/productos/1.jpg",
-        "img/productos/2.jpg",
-        "img/productos/3.jpg",
-        "img/productos/4.jpg"
-      ],
-      "colores": [
-        "Negro"
       ],
       "categoria": "Poleras",
       "disponible": true,
