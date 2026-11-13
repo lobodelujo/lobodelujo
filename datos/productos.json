@@ -3,6 +3,28 @@
     {
       "perchero": false,
       "precio": 46000,
+      "nombre": "CHROME HEARTS",
+      "vitrina": false,
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo bordado adelante y atrás\n>lavar a mano\n>placa metálica",
+      "fotos": [
+        "img/productos/20261113-182428-hsn-1.jpg",
+        "img/productos/20261113-182441-f0w-4.jpg",
+        "img/productos/20261113-182437-cfq-3.jpg",
+        "img/productos/20261113-182433-n7v-2.jpg"
+      ],
+      "colores": [
+        "BLANCO"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "fotoMedidas": "img/productos/20261113-182403-9pv-medidas-polera.jpg",
+      "tallas": [
+        "XL"
+      ]
+    },
+    {
+      "perchero": false,
+      "precio": 46000,
       "nombre": "CACTUS JACK",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo en serigrafia adelante y atrás\n>lavar a mano",
