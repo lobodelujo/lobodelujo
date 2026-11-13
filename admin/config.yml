@@ -109,6 +109,7 @@ collections:
               - { name: foto, label: "Foto grande (horizontal, ideal 1920×1080)", widget: image, choose_url: false }
               - { name: fotoMovil, label: "Foto para celular (vertical 1080×1350, opcional)", widget: image, required: false, choose_url: false }
           - { name: categorias, label: "Orden de las categorías (separadas por coma)", widget: list }
+          - { name: fichaInfo, label: "📦 Línea corta de envío y cambios en cada ficha (separa cada dato con ·)", widget: string, required: false }
           - name: preguntas
             label: "❓ Preguntas frecuentes (salen al final de la página, antes del pie)"
             label_singular: pregunta
