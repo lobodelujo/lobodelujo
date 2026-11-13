@@ -3,6 +3,27 @@
     {
       "perchero": false,
       "precio": 46000,
+      "nombre": "OFF WHITE",
+      "vitrina": false,
+      "descripcion": ">100% algodón\n>cuello redondo\n>detalles bordados\n>logo en serigrafia atrás\n>detalles con hilo\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261113-190154-zh6-2.jpg",
+        "img/productos/20261113-190158-3jk-1.jpg",
+        "img/productos/20261113-190202-snb-3.jpg"
+      ],
+      "colores": [
+        "AMARILLO LIMON"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "fotoMedidas": "img/productos/20261113-190119-b6b-medidas-polera.jpg",
+      "tallas": [
+        "XL"
+      ]
+    },
+    {
+      "perchero": false,
+      "precio": 46000,
       "nombre": "GODSPEED",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo en serigrafia adelante y atrás\n>lavar a mano",
