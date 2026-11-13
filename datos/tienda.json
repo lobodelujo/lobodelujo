@@ -52,5 +52,15 @@
   ],
   "portadaTitulo": "Disponible ya",
   "portadaSubtitulo": "Nueva colección",
-  "fraseAbajo": "primero que todo"
+  "fraseAbajo": "primero que todo",
+  "preguntas": [
+    { "pregunta": "¿Qué formas de pago aceptan?", "respuesta": "Efectivo, transferencia y tarjetas de débito y crédito." },
+    { "pregunta": "¿Hacen envíos a todo Chile? ¿Cuánto demoran?", "respuesta": "Sí. Enviamos por Starken y Blue Express a todo Chile y llega en 3 días hábiles aproximadamente. Dentro de Antofagasta entregamos el mismo día." },
+    { "pregunta": "¿Cuánto cuesta el envío?", "respuesta": "El envío cuesta $6.000 a cualquier región de Chile. Dentro de la ciudad de Antofagasta el delivery es gratis." },
+    { "pregunta": "¿Puedo recibir mi pedido en persona?", "respuesta": "Sí, en Antofagasta hacemos entregas en persona. Lo coordinamos por WhatsApp." },
+    { "pregunta": "¿Puedo cambiar una prenda?", "respuesta": "Sí, aceptamos cambios por talla en un plazo máximo de 20 días. Los costos de envío del cambio los paga el cliente." },
+    { "pregunta": "¿Cómo sé cuál es mi talla?", "respuesta": "En la última foto de cada modelo aparece la talla. Si tienes dudas, escríbenos por WhatsApp y te ayudamos a elegir." },
+    { "pregunta": "¿En qué horario atienden?", "respuesta": "Respondemos por WhatsApp 24/7." },
+    { "pregunta": "¿Puedo reservar una prenda?", "respuesta": "Sí, solo con abono. El abono mínimo es de $10.000 y te guardamos la prenda por 30 días. Si no se retira en ese plazo, la prenda vuelve a la venta y el abono no se devuelve." }
+  ]
 }
