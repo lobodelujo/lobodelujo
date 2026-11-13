@@ -86,6 +86,11 @@ const unico = (usados, base) => {
           descripcion: p.descripcion || "",
           tallas: lista(p.tallas).sort(ordenarTallas),
           fotoMedidas: p.fotoMedidas || "",
+          // Fotos de medidas sueltas, una por talla (panel: "Más fotos de medidas")
+          medidasTallas: (Array.isArray(p.medidasTallas) ? p.medidasTallas : [])
+            .filter((m) => m && m.foto)
+            .map((m) => ({ talla: String(m.talla ?? "").trim(), foto: m.foto }))
+            .sort((a, b) => ordenarTallas(a.talla, b.talla)),
           colores: lista(p.colores),
           fotos: lista(p.fotos),
         };

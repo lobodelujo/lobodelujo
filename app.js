@@ -1014,7 +1014,9 @@ const moverFoto = (d) => {
 };
 
 // La foto de medidas de cada prenda (se sube en el panel) se abre en el visor con zoom
-const botonMedidas = (p) => p.fotoMedidas ? `<button class="ver-medidas" data-medidas>📏 Ver medidas</button>` : "";
+// Todas las fotos de medidas de la prenda: la principal (puede traer todas las tallas) y las sueltas por talla
+const fotosMedidas = (p) => [...(p.fotoMedidas ? [{ talla: "", foto: p.fotoMedidas }] : []), ...(p.medidasTallas || [])];
+const botonMedidas = (p) => fotosMedidas(p).length ? `<button class="ver-medidas" data-medidas>📏 Ver medidas</button>` : "";
 
 function grupoOpciones(nombre, clave, valores, extra = "") {
   if (!valores.length) return "";
@@ -1051,7 +1053,7 @@ function pintarDetalle() {
     <h2 id="m-nombre">${esc(p.nombre)}</h2>
     <p class="precio">${precioHtml(p)}</p>
     ${descripcionHtml(p.descripcion)}
-    ${p.tallas.length ? grupoOpciones("Talla", "talla", p.tallas, botonMedidas(p)) : p.fotoMedidas ? `<div class="opcion">${botonMedidas(p)}</div>` : ""}
+    ${p.tallas.length ? grupoOpciones("Talla", "talla", p.tallas, botonMedidas(p)) : fotosMedidas(p).length ? `<div class="opcion">${botonMedidas(p)}</div>` : ""}
     ${grupoOpciones("Color", "color", p.colores)}
     ${p.disponible ? `
       <div class="opcion"><h4>Cantidad</h4>
@@ -1133,7 +1135,7 @@ const visor = $("#visor"), vImg = $("#visor-img"), vEscena = $("#visor-escena");
 const ZOOM = 2.5;
 let vIdx = 0, zoom = false, origen = { x: 50, y: 50 }, gesto = null;
 // Fotos que muestra el visor: las de la prenda o, con "Ver medidas", solo la foto de medidas
-let vFotos = [], vMedidas = false;
+let vFotos = [], vMedidas = false, vTallas = [];
 
 function aplicarZoom() {
   vImg.style.transformOrigin = `${origen.x}% ${origen.y}%`;
@@ -1148,7 +1150,10 @@ function pintarVisor() {
   vImg.onerror = () => ph(vImg);
   vImg.alt = vMedidas ? `Medidas · ${actual.nombre}` : `${actual.nombre} · ${vIdx + 1}`;
   vImg.src = foto(f[vIdx], 2000);
-  $("#visor-contador").textContent = vMedidas ? "📏 Medidas" : `${vIdx + 1} / ${f.length}`;
+  const tallaMedida = vMedidas && vTallas[vIdx];
+  $("#visor-contador").textContent = vMedidas
+    ? `📏 Medidas${tallaMedida ? ` · Talla ${tallaMedida}` : f.length > 1 ? ` · ${vIdx + 1} / ${f.length}` : ""}`
+    : `${vIdx + 1} / ${f.length}`;
   $("#visor-ant").hidden = $("#visor-sig").hidden = $("#visor-minis").hidden = f.length < 2;
   $("#visor-minis").innerHTML = f
     .map((src, i) => `<button data-vfoto="${i}" aria-current="${i === vIdx}" aria-label="Foto ${i + 1}">${imgTag(src, String(i + 1), "", 200)}</button>`)
@@ -1163,10 +1168,13 @@ function abrirVisor() {
   visor.hidden = false;
 }
 function abrirMedidas() {
-  if (!actual || !actual.fotoMedidas) return;
-  vFotos = [actual.fotoMedidas];
+  const lista = actual ? fotosMedidas(actual) : [];
+  if (!lista.length) return;
+  vFotos = lista.map((m) => m.foto);
+  vTallas = lista.map((m) => m.talla);
   vMedidas = true;
-  vIdx = 0;
+  // Si el cliente ya eligió talla, se abre directo en la foto de esa talla
+  vIdx = Math.max(0, sel.talla ? vTallas.indexOf(sel.talla) : 0);
   pintarVisor();
   visor.hidden = false;
 }
