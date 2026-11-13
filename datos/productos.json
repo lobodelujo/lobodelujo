@@ -2,6 +2,29 @@
   "productos": [
     {
       "perchero": false,
+      "precio": 46000,
+      "nombre": "OFF WHITE",
+      "vitrina": false,
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo bordado adelante y atrás\n>lavar a mano",
+      "precioAntes": 0,
+      "fotos": [
+        "img/productos/20261113-190809-ao2-2.jpg",
+        "img/productos/20261113-190813-fh7-1.jpg",
+        "img/productos/20261113-190818-80a-3.jpg"
+      ],
+      "colores": [
+        "NEGRO"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "etiqueta": "Nuevo",
+      "fotoMedidas": "img/productos/20261113-190745-ow8-medidas-polera.jpg",
+      "tallas": [
+        "XL"
+      ]
+    },
+    {
+      "perchero": false,
       "precio": 43000,
       "nombre": "MONCLER",
       "vitrina": false,
