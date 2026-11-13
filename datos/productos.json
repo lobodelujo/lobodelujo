@@ -1,9 +1,26 @@
 {
   "productos": [
     {
-      "disponible": true,
       "perchero": false,
-      "vitrina": false
+      "precio": 46000,
+      "nombre": "DOLCE&GABBANA",
+      "vitrina": false,
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo bordado adelante\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261113-182856-l0f-1.jpg",
+        "img/productos/20261113-182903-s58-2.jpg",
+        "img/productos/20261113-182912-98q-4.jpg",
+        "img/productos/20261113-182908-60r-3.jpg"
+      ],
+      "colores": [
+        "BEIGE"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "fotoMedidas": "img/productos/20261113-182834-qe9-medidas-polera.jpg",
+      "tallas": [
+        "XL"
+      ]
     },
     {
       "perchero": false,
