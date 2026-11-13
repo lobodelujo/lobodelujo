@@ -1,0 +1,44 @@
+# Fotos livianas del catálogo.
+# Cada vez que se sube una foto desde el panel, este robot le hace una copia chica (para las tarjetas) y la guarda
+# en img/mini. La foto original no se toca: es la que se ve en grande y con zoom.
+# Si este robot falla, el catálogo sigue funcionando igual, solo que con las fotos originales.
+name: Fotos livianas
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "img/productos/**"
+      - ".github/minis.cjs"
+      - ".github/workflows/minis.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fotos-livianas
+  cancel-in-progress: false
+
+jobs:
+  minis:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Instalar la herramienta de fotos
+        run: npm install --no-save --no-audit --no-fund --prefix "$RUNNER_TEMP/herr" sharp@0.33
+      - name: Crear las copias livianas que falten
+        run: NODE_PATH="$RUNNER_TEMP/herr/node_modules" node .github/minis.cjs
+      - name: Guardar en el repositorio
+        run: |
+          git config user.name "lobo-fotos"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A img/mini datos/minis.json
+          if git diff --cached --quiet; then echo "Nada nuevo"; exit 0; fi
+          git commit -m "Fotos livianas (automático)"
+          git pull --rebase origin main
+          git push origin HEAD:main
