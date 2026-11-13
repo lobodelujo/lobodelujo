@@ -65,6 +65,19 @@ collections:
                 required: false
                 options: [XS, S, M, L, XL, XXL, "36", "38", "40", "42", "44", "46", "38-41", "42-45", "Única"]
               - { name: fotoMedidas, label: "📏 Foto de medidas de ESTA prenda (hazla en lobodelujo.pages.dev/admin/medidas). En la ficha sale el botón Ver medidas; no se mezcla con tus fotos", widget: image, required: false, choose_url: false }
+              - name: medidasTallas
+                label: "📏 Más fotos de medidas · una por talla (si tienes una foto suelta para cada talla: agrega una, elige la talla y sube su foto)"
+                label_singular: foto de medidas
+                widget: list
+                required: false
+                collapsed: false
+                summary: "Talla {{fields.talla}} ⟪{{fields.foto}}⟫"
+                fields:
+                  - name: talla
+                    label: Talla de esta foto
+                    widget: select
+                    options: [XS, S, M, L, XL, XXL, "36", "38", "40", "42", "44", "46", "38-41", "42-45", "Única"]
+                  - { name: foto, label: "Foto de medidas de esa talla", widget: image, choose_url: false }
               - { name: colores, label: "Colores (separados por coma, ej: Negro, Blanco)", widget: list, required: false }
               - name: fotos
                 label: Fotos (la primera es la portada)
