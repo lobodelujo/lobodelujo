@@ -1092,7 +1092,9 @@
       "categoria": "Poleras",
       "disponible": true,
       "etiqueta": "Nuevo",
+      "fotoMedidas": "img/productos/20261113-171045-k0q-medidas-polera.jpg",
       "tallas": [
+        "S",
         "M"
       ]
     },
