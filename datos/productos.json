@@ -1,6 +1,11 @@
 {
   "productos": [
     {
+      "disponible": true,
+      "perchero": false,
+      "vitrina": false
+    },
+    {
       "perchero": false,
       "precio": 46000,
       "nombre": "CHROME HEARTS",
