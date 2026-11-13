@@ -2,6 +2,28 @@
   "productos": [
     {
       "perchero": false,
+      "precio": 38000,
+      "nombre": "BKYS",
+      "vitrina": false,
+      "descripcion": ">boxy fit \n>100% algodón\n>cuello redondo\n>logo en serigrafia adelante y atrás\n>detalles con brillos\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261113-181307-ndk-1.jpg",
+        "img/productos/20261113-181311-ctz-2.jpg",
+        "img/productos/20261113-181315-ja8-3.jpg",
+        "img/productos/20261113-181319-rg7-4.jpg"
+      ],
+      "colores": [
+        "azul eléctrico"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "fotoMedidas": "img/productos/20261113-181233-p8q-medidas-polera.jpg",
+      "tallas": [
+        "XL"
+      ]
+    },
+    {
+      "perchero": false,
       "precio": 46000,
       "nombre": "AMIRI",
       "vitrina": false,
