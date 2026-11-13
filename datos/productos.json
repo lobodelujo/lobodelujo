@@ -3,6 +3,27 @@
     {
       "perchero": false,
       "precio": 46000,
+      "nombre": "ROUGH PLAY",
+      "vitrina": false,
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo en serigrafia adelante y atrás\n>detalles con brillos\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261113-183855-26m-1.jpg",
+        "img/productos/20261113-183900-2fl-2.jpg",
+        "img/productos/20261113-183905-nol-3.jpg"
+      ],
+      "colores": [
+        "GRIS"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "fotoMedidas": "img/productos/20261113-183830-qds-medidas-polera.jpg",
+      "tallas": [
+        "XL"
+      ]
+    },
+    {
+      "perchero": false,
+      "precio": 46000,
       "nombre": "ESSENTIALS",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo en alta densidad adelante y atrás\n>lavar a mano",
