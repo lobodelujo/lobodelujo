@@ -2,6 +2,28 @@
   "productos": [
     {
       "perchero": false,
+      "precio": 10000,
+      "fotoVitrina": "img/productos/20261113-190944-abh-llavero-off-white-vitrina.png",
+      "nombre": "OFF WHITE",
+      "vitrina": true,
+      "descripcion": ">cinta tejida alta calidad\n>mosquetón alpinista metálico con el logo\n>argolla para llaves\n>largo aprox 25 cm\n>ancho aprox 4 cm\n>accesorio plástico dentado",
+      "fotos": [
+        "img/productos/20261113-191500-mbp-2.jpg",
+        "img/productos/20261113-191505-izt-3.jpg",
+        "img/productos/20261113-191510-a85-1.jpg"
+      ],
+      "colores": [
+        "GRIS"
+      ],
+      "categoria": "Accesorios",
+      "disponible": true,
+      "etiqueta": "Nuevo",
+      "tallas": [
+        "Única"
+      ]
+    },
+    {
+      "perchero": false,
       "precio": 46000,
       "nombre": "OFF WHITE",
       "vitrina": false,
