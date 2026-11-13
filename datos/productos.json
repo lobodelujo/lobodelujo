@@ -2,6 +2,27 @@
   "productos": [
     {
       "perchero": false,
+      "precio": 46000,
+      "nombre": "AMIRI",
+      "vitrina": false,
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo en serigrafia adelante y atrás\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261113-180855-6dp-2.jpg",
+        "img/productos/20261113-180851-js7-1.jpg",
+        "img/productos/20261113-180900-pvl-3.jpg"
+      ],
+      "colores": [
+        "NEGRO"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "fotoMedidas": "img/productos/20261113-180823-ik6-medidas-polera.jpg",
+      "tallas": [
+        "XL"
+      ]
+    },
+    {
+      "perchero": false,
       "precio": 43000,
       "nombre": "DIOR",
       "vitrina": false,
