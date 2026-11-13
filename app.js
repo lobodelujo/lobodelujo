@@ -2981,3 +2981,19 @@ $("#instalar-app").addEventListener("click", async () => {
   instalacion = null;
   $("#instalar-app").hidden = true;
 });
+// ---------- Preguntas frecuentes ----------
+// Se escriben en el panel (Datos de la tienda > Preguntas frecuentes). Cada una se abre al tocarla.
+(() => {
+  const lista = (TIENDA.preguntas || []).filter((x) => x && x.pregunta && x.respuesta);
+  if (!lista.length) return;
+  $("#faq-lista").innerHTML = lista
+    .map((x) => `<details class="faq-item"><summary>${esc(x.pregunta)}</summary><p>${esc(x.respuesta).replace(/\r?\n/g, "<br>")}</p></details>`)
+    .join("");
+  $("#preguntas").hidden = false;
+  $("#link-faq-caja").hidden = false;
+  // Al abrir una pregunta se cierran las demás
+  $("#faq-lista").addEventListener("toggle", (e) => {
+    if (!e.target.open) return;
+    for (const d of document.querySelectorAll(".faq-item[open]")) if (d !== e.target) d.open = false;
+  }, true);
+})();

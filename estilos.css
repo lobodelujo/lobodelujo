@@ -806,3 +806,21 @@ img.sin-foto {
 /* ---------- Instalar como app ---------- */
 .instalar { color: var(--oro); text-decoration: underline; font-size: 14px; }/* En el PC la X de cerrar la ficha queda arriba a la derecha: el corazón se corre para no quedar debajo */
 @media (min-width: 860px) { .cat-fila { padding-right: 48px; } }
+
+/* ---------- Preguntas frecuentes ---------- */
+.faq { padding: 48px 16px; border-top: 1px solid var(--gris); scroll-margin-top: 70px; }
+.faq h2 { font-family: var(--titulo); font-weight: 400; font-size: 40px; letter-spacing: 1px; text-align: center; text-transform: uppercase; margin-bottom: 24px; }
+.faq-lista { max-width: 760px; margin: 0 auto; display: grid; gap: 10px; }
+.faq-item { border: 1px solid var(--linea); border-radius: var(--radio); background: var(--carbon); transition: border-color .25s; }
+.faq-item[open] { border-color: var(--oro); }
+.faq-item summary {
+  list-style: none; cursor: pointer; padding: 16px 48px 16px 18px; position: relative;
+  font-weight: 600; font-size: 15px; line-height: 1.35;
+}
+.faq-item summary::-webkit-details-marker { display: none; }
+.faq-item summary::after {
+  content: "+"; position: absolute; right: 18px; top: 50%; transform: translateY(-50%);
+  color: var(--oro); font-size: 24px; font-weight: 400; line-height: 1; transition: transform .25s;
+}
+.faq-item[open] summary::after { transform: translateY(-50%) rotate(45deg); }
+.faq-item p { padding: 0 18px 18px; color: var(--suave); font-size: 14.5px; line-height: 1.6; }
