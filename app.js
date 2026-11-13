@@ -28,25 +28,82 @@ function enviarWa(texto) {
 
 // Cuando una foto todavía no existe en img/, se muestra el logo como recuadro de ejemplo
 function ph(img) {
+  // Si falla la copia liviana (img/mini), primero se intenta con la foto original
+  const original = img.dataset.original;
+  if (original) { delete img.dataset.original; img.src = original; return; }
   img.onerror = null;
   img.classList.add("sin-foto");
   img.src = "img/logo-lobo-128.png";
 }
-const imgTag = (src, ph, extra = "", ancho = 600) =>
-  `<img src="${esc(foto(src, ancho))}" data-ph="${esc(ph)}" onerror="ph(this)" alt="${esc(ph)}" ${extra}>`;
+const imgTag = (src, ph, extra = "", ancho = 600) => {
+  const liviana = foto(src, ancho);
+  return `<img src="${esc(liviana)}"${liviana !== src ? ` data-original="${esc(src)}"` : ""} data-ph="${esc(ph)}" onerror="ph(this)" alt="${esc(ph)}" ${extra}>`;
+};
+// La segunda foto de cada tarjeta solo se ve al pasar el mouse: en el teléfono no se descarga nunca y en el PC
+// recién cuando el mouse llega a la tarjeta
+const CON_MOUSE = matchMedia("(hover: hover)").matches;
+const segundaFoto = (p) => {
+  const f = p.fotos || [];
+  if (!CON_MOUSE || !f[1]) return "";
+  const liviana = foto(f[1], 600);
+  return `<img class="b" data-src="${esc(liviana)}"${liviana !== f[1] ? ` data-original="${esc(f[1])}"` : ""} data-ph="${esc(p.nombre + " · 2")}" onerror="ph(this)" alt="">`;
+};
+document.addEventListener("pointerover", (e) => {
+  const caja = e.target.closest && e.target.closest(".card, .ed-prod");
+  const b = caja && caja.querySelector("img.b[data-src]");
+  if (!b) return;
+  b.src = b.dataset.src;
+  b.removeAttribute("data-src");
+});
 
 // ---------- Estado ----------
 // "Inicio" es la portada por categorías (perchero, vitrina, recién llegados); "Ver todo" es la grilla con todo lo subido
 const INICIO = "Inicio";
 const TODO = "Ver todo";
+const FAVORITOS = "Favoritos"; // se abre con el corazón de arriba: las prendas que el cliente guardó en este teléfono
 let filtro = INICIO;
-const sinCategoria = () => filtro === INICIO || filtro === TODO;
+const sinCategoria = () => filtro === INICIO || filtro === TODO || filtro === FAVORITOS;
 let filtroTalla = null;
 let texto = "";
 let bolsa = [];
 try { bolsa = JSON.parse(localStorage.getItem("lobo-bolsa")) || []; } catch { bolsa = []; }
 bolsa = bolsa.filter((i) => buscarProducto(i.id)).map((i) => ({ ...i, id: buscarProducto(i.id).id }));
 const guardarBolsa = () => { try { localStorage.setItem("lobo-bolsa", JSON.stringify(bolsa)); } catch {} };
+
+// ---------- Favoritos ----------
+// El corazón de cada prenda la guarda en este teléfono (sin cuenta ni registro); el corazón de arriba las muestra
+let favoritos = [];
+try { favoritos = JSON.parse(localStorage.getItem("lobo-favoritos")) || []; } catch { favoritos = []; }
+favoritos = [...new Set(favoritos.filter((id) => buscarProducto(id)).map((id) => buscarProducto(id).id))];
+const CORAZON = `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3s-7.6-4.7-7.6-10.3A4.2 4.2 0 0 1 12 7.4a4.2 4.2 0 0 1 7.6 2.6c0 5.6-7.6 10.3-7.6 10.3z"/></svg>`;
+const esFavorito = (id) => favoritos.includes(id);
+const textoFavorito = (id) => (esFavorito(id) ? "Quitar de mis favoritos" : "Guardar en mis favoritos");
+const botonFavorito = (p, clase = "") =>
+  `<button class="fav ${clase}" data-fav="${esc(p.id)}" aria-pressed="${esFavorito(p.id)}" aria-label="${textoFavorito(p.id)}">${CORAZON}</button>`;
+function pintarContadorFavoritos() {
+  const c = $("#contador-favoritos");
+  c.hidden = favoritos.length === 0;
+  c.textContent = favoritos.length;
+}
+function cambiarFavorito(id) {
+  const estaba = esFavorito(id);
+  favoritos = estaba ? favoritos.filter((x) => x !== id) : [...favoritos, id];
+  try { localStorage.setItem("lobo-favoritos", JSON.stringify(favoritos)); } catch {}
+  pintarContadorFavoritos();
+  for (const b of document.querySelectorAll("[data-fav]")) {
+    if (b.dataset.fav !== id) continue;
+    b.setAttribute("aria-pressed", String(!estaba));
+    b.setAttribute("aria-label", textoFavorito(id));
+  }
+  // En la lista de favoritos, la prenda que se quita desaparece al tiro
+  if (filtro === FAVORITOS && !texto.trim()) pintarGrilla();
+  aviso(estaba ? "Quitado de tus favoritos" : "Guardado en tus favoritos ♥");
+}
+$("#abrir-favoritos").addEventListener("click", () => {
+  if (!$("#modal").hidden) cerrarProducto();
+  verCategoria(FAVORITOS);
+  window.scrollTo({ top: $("#catalogo").getBoundingClientRect().top + scrollY - $(".barra").offsetHeight, behavior: "smooth" });
+});
 
 // ---------- Textos de la tienda ----------
 $("#aviso-envio").textContent = TIENDA.envio;
@@ -513,7 +570,7 @@ function tarjetaChica(p) {
   return `<a class="ed-prod ${p.disponible ? "" : "agotado"}" href="#producto=${esc(p.id)}">
     <span class="card-media">
       ${imgTag(f[0], p.nombre + " · 1", 'class="a" loading="lazy"')}
-      ${f[1] ? imgTag(f[1], p.nombre + " · 2", 'class="b" loading="lazy"') : ""}
+      ${segundaFoto(p)}
       ${badge(p)}
     </span>
     <span class="ed-prod-info">
@@ -811,8 +868,10 @@ function pintarGrilla() {
   $("#editorial").hidden = !inicio;
   $("#vista").hidden = inicio;
   if (inicio) return;
+  const soloFavoritos = filtro === FAVORITOS && !q;
   const lista = PRODUCTOS.filter(
     (p) => (sinCategoria() || p.categoria === filtro) &&
+      (!soloFavoritos || favoritos.includes(p.id)) &&
       (!filtroTalla || (p.tallas || []).includes(filtroTalla)) &&
       (!q || `${p.nombre} ${p.categoria} ${p.descripcion}`.toLowerCase().includes(q))
   );
@@ -824,9 +883,10 @@ function pintarGrilla() {
       return `<article class="card ${p.disponible ? "" : "agotado"}">
         <button class="card-media" data-abrir="${esc(p.id)}" aria-label="Ver ${esc(p.nombre)}">
           ${imgTag(f[0], p.nombre + " · 1", 'class="a" loading="lazy"')}
-          ${f[1] ? imgTag(f[1], p.nombre + " · 2", 'class="b" loading="lazy"') : ""}
+          ${segundaFoto(p)}
           ${badge(p)}
         </button>
+        ${botonFavorito(p)}
         <button class="card-info" data-abrir="${esc(p.id)}">
           <h3>${esc(p.nombre)}</h3>
           <p class="card-fotos">${f.length} fotos</p>
@@ -838,6 +898,8 @@ function pintarGrilla() {
   $("#sin-resultados").hidden = lista.length > 0;
   $("#sin-resultados").textContent = q
     ? "No encontramos productos con esa búsqueda 🐺"
+    : soloFavoritos
+    ? "Todavía no guardas favoritos 🐺 Toca el corazón de la prenda que te guste."
     : filtroTalla
     ? `Por ahora no tenemos talla ${filtroTalla} en ${filtro} 🐺 Pregúntanos por WhatsApp.`
     : "Muy pronto subimos productos en esta categoría 🐺 Pregúntanos por WhatsApp.";
@@ -881,6 +943,8 @@ $("#filtro-tallas").addEventListener("click", (e) => {
 });
 $("#buscar").addEventListener("input", (e) => { texto = e.target.value; pintarGrilla(); });
 $("#grilla").addEventListener("click", (e) => {
+  const fav = e.target.closest("[data-fav]");
+  if (fav) { cambiarFavorito(fav.dataset.fav); return; }
   const b = e.target.closest("[data-abrir]");
   if (!b) return;
   const abrir = () => { location.hash = "producto=" + b.dataset.abrir; };
@@ -923,7 +987,19 @@ function pintarFoto() {
   img.onerror = () => ph(img);
   img.dataset.ph = `${actual.nombre} · ${fotoIdx + 1}`;
   img.alt = img.dataset.ph;
-  img.src = foto(f[fotoIdx], 1200);
+  // Primero la copia liviana (la misma de la tarjeta, que ya está descargada) y encima la foto con toda su calidad
+  const grande = foto(f[fotoIdx], 1200), chica = foto(f[fotoIdx], 600);
+  img.dataset.grande = grande;
+  if (chica !== grande) {
+    img.dataset.original = grande;
+    img.src = chica;
+    const lista = new Image();
+    lista.onload = () => { if (img.dataset.grande === grande && !img.classList.contains("sin-foto")) { delete img.dataset.original; img.src = grande; } };
+    lista.src = grande;
+  } else {
+    delete img.dataset.original;
+    img.src = grande;
+  }
   $("#g-contador").textContent = `${fotoIdx + 1} / ${f.length}`;
   const varias = f.length > 1;
   $("#g-ant").hidden = $("#g-sig").hidden = !varias;
@@ -948,13 +1024,25 @@ function grupoOpciones(nombre, clave, valores, extra = "") {
       .join("")}</div></div>`;
 }
 
+// La descripción escrita en renglones que parten con ">" (o "-", "•") se muestra como lista, un detalle por línea.
+// El texto corrido se muestra tal cual, respetando sus saltos de línea.
+function descripcionHtml(t) {
+  t = String(t || "").trim();
+  if (!t) return "";
+  const MARCA = /^\s*[>•*–-]+\s*/;
+  if (!/(^|\n)\s*[>•*–-]+\s*\S/.test(t)) return `<p class="desc">${esc(t).replace(/\r?\n/g, "<br>")}</p>`;
+  const lineas = t.split(/\r?\n+|\s+(?=>)/).map((l) => l.replace(MARCA, "").trim()).filter(Boolean);
+  if (lineas.length < 2) return `<p class="desc">${esc(lineas[0] || "")}</p>`;
+  return `<ul class="desc desc-lista">${lineas.map((l) => `<li>${esc(l)}</li>`).join("")}</ul>`;
+}
+
 function pintarDetalle() {
   const p = actual;
   $("#detalle").innerHTML = `
-    <p class="cat">${esc(p.categoria)}</p>
+    <div class="cat-fila"><p class="cat">${esc(p.categoria)}</p>${botonFavorito(p, "fav-ficha")}</div>
     <h2 id="m-nombre">${esc(p.nombre)}</h2>
     <p class="precio">${precioHtml(p)}</p>
-    <p class="desc">${esc(p.descripcion)}</p>
+    ${descripcionHtml(p.descripcion)}
     ${p.tallas.length ? grupoOpciones("Talla", "talla", p.tallas, botonMedidas(p)) : p.fotoMedidas ? `<div class="opcion">${botonMedidas(p)}</div>` : ""}
     ${grupoOpciones("Color", "color", p.colores)}
     ${p.disponible ? `
@@ -981,6 +1069,8 @@ const descripcionItem = (i) => [i.talla && `Talla ${i.talla}`, i.color && `Color
 
 $("#detalle").addEventListener("click", async (e) => {
   if (e.target.closest("[data-medidas]")) { abrirMedidas(); return; }
+  const fav = e.target.closest("[data-fav]");
+  if (fav) { cambiarFavorito(fav.dataset.fav); return; }
   const opt = e.target.closest("[data-opt]");
   if (opt) { sel[opt.dataset.opt] = opt.dataset.val; pintarDetalle(); return; }
   const c = e.target.closest("[data-cant]");
@@ -2876,4 +2966,18 @@ prepararRuta();
 animarTitulos($(".pasos"));
 pintarGrilla();
 pintarBolsa();
+pintarContadorFavoritos();
 revisarHash();
+
+// ---------- Instalar como app ----------
+// En los teléfonos que lo permiten (Android), el pie muestra "Instalar la app": deja el lobo en la pantalla de inicio.
+// En iPhone se hace desde Compartir > "Agregar a inicio" (usa los mismos íconos).
+let instalacion = null;
+window.addEventListener("beforeinstallprompt", (e) => { instalacion = e; $("#instalar-app").hidden = false; });
+window.addEventListener("appinstalled", () => { instalacion = null; $("#instalar-app").hidden = true; });
+$("#instalar-app").addEventListener("click", async () => {
+  if (!instalacion) return;
+  try { instalacion.prompt(); await instalacion.userChoice; } catch {}
+  instalacion = null;
+  $("#instalar-app").hidden = true;
+});

@@ -3,3 +3,9 @@
   Cache-Control: no-cache
 /admin/*
   Cache-Control: no-cache
+# Las fotos y videos de los productos nunca cambian de nombre (el panel les pone fecha y hora):
+# el teléfono del cliente las guarda y la segunda visita carga al instante
+/img/productos/*
+  Cache-Control: public, max-age=2592000
+/img/mini/*
+  Cache-Control: public, max-age=31536000, immutable

@@ -9,11 +9,19 @@ function ordenarTallas(a, b) {
   return a.localeCompare(b, "es");
 }
 
-// Solo en Netlify las fotos se achican solas (Image CDN); en Cloudflare u otro hosting se usan tal cual
-const EN_NETLIFY = location.hostname.endsWith(".netlify.app");
+// Fotos livianas: un robot de GitHub (.github/workflows/minis.yml) guarda en img/mini una copia chica de cada
+// foto (560 px de ancho, WebP) para las tarjetas y, de cada PNG, una copia WebP del mismo tamaño. La foto grande
+// de la ficha y la del zoom siguen siendo el archivo original, así no se pierde calidad.
+// datos/minis.json dice qué copias existen: una foto recién subida se ve con su archivo original hasta que el
+// robot termina (1 o 2 minutos), y si el robot falla todo sigue funcionando como antes.
+let MINIS = new Set(), GRANDES = new Set();
 function foto(src, ancho) {
-  if (!src || !EN_NETLIFY || /^(https?:|data:)/.test(src)) return src;
-  return `/.netlify/images?url=/${encodeURIComponent(src.replace(/^\//, ""))}&w=${ancho}&q=80`;
+  if (!src || /^(https?:|data:)/.test(src)) return src;
+  const limpio = src.replace(/^\//, "");
+  const copia = "img/mini/" + limpio.split("/").pop().replace(/\.[^.]+$/, "");
+  if (ancho <= 600 && MINIS.has(limpio)) return copia + ".webp";
+  if (ancho < 2000 && GRANDES.has(limpio)) return copia + "-g.webp";
+  return src;
 }
 
 const lista = (v) =>
@@ -45,7 +53,12 @@ const unico = (usados, base) => {
       if (!r.ok) throw new Error(`${url}: ${r.status}`);
       return r.json();
     });
-    const [tienda, datos] = await Promise.all([leer("datos/tienda.json"), leer("datos/productos.json")]);
+    const [tienda, datos, minis] = await Promise.all([
+      leer("datos/tienda.json"),
+      leer("datos/productos.json"),
+      leer("datos/minis.json").catch(() => null), // si todavía no existe, se usan las fotos originales
+    ]);
+    if (minis) { MINIS = new Set(minis.m || []); GRANDES = new Set(minis.g || []); }
 
     window.TIENDA = { ...tienda, whatsapp: (tienda.whatsapp || []).filter((n) => n && n.numero) };
     const crudos = (datos.productos || []).filter((p) => p && p.nombre);

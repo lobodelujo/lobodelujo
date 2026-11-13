@@ -783,3 +783,26 @@ img.sin-foto {
   font-weight: 600; font-size: 14px; box-shadow: 0 8px 24px rgba(0, 0, 0, .4);
   max-width: calc(100% - 32px); text-align: center;
 }
+
+/* ---------- Favoritos ---------- */
+.barra-botones { display: flex; align-items: center; gap: 2px; }
+.card { position: relative; }
+.fav {
+  position: absolute; top: 8px; right: 8px; z-index: 3;
+  width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%;
+  background: rgba(11, 11, 12, .5); backdrop-filter: blur(6px); transition: transform .15s;
+}
+.fav svg { width: 20px; height: 20px; fill: none; stroke: #fff; stroke-width: 1.8; stroke-linejoin: round; transition: fill .2s, stroke .2s; }
+.fav[aria-pressed="true"] svg { fill: var(--oro); stroke: var(--oro); }
+.fav:active { transform: scale(.86); }
+.cat-fila { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.fav-ficha { position: static; flex: none; width: 42px; height: 42px; background: var(--gris); backdrop-filter: none; }
+
+/* ---------- Descripción de la prenda en lista (un detalle por línea) ---------- */
+.desc-lista { list-style: none; padding: 0; display: grid; gap: 7px; }
+.desc-lista li { position: relative; padding-left: 18px; }
+.desc-lista li::before { content: ""; position: absolute; left: 2px; top: .62em; width: 6px; height: 6px; border-radius: 50%; background: var(--oro); }
+
+/* ---------- Instalar como app ---------- */
+.instalar { color: var(--oro); text-decoration: underline; font-size: 14px; }/* En el PC la X de cerrar la ficha queda arriba a la derecha: el corazón se corre para no quedar debajo */
+@media (min-width: 860px) { .cat-fila { padding-right: 48px; } }
