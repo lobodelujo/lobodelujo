@@ -940,6 +940,10 @@ $("#filtro-tallas").addEventListener("click", (e) => {
   filtroTalla = b.dataset.talla || null;
   pintarTallas();
   pintarGrilla();
+  // Con una talla quedan menos prendas y la página se achica: sin esto, quien estaba abajo en la lista
+  // terminaba en el pie de página. Se sube al principio de la lista, igual que al elegir una categoría.
+  const arriba = $("#catalogo").getBoundingClientRect().top + scrollY - $(".barra").offsetHeight;
+  if (scrollY > arriba) window.scrollTo({ top: arriba, behavior: "auto" });
 });
 $("#buscar").addEventListener("input", (e) => { texto = e.target.value; pintarGrilla(); });
 $("#grilla").addEventListener("click", (e) => {
