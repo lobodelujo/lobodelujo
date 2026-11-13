@@ -1,0 +1,3 @@
+# El panel (/admin) muestra las fotos con la ruta img/productos/... relativa a /admin/; sin esto le llegaba
+# una página en vez de la foto y se veía en blanco. Se entrega la foto real, sin cambiar la dirección.
+/admin/img/*  /img/:splat  200
