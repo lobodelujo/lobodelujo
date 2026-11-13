@@ -1008,32 +1008,6 @@
       ]
     },
     {
-      "perchero": true,
-      "fotoPerchero": "img/productos/20261024-140533-80d-godspeed-frente.png",
-      "fotoPercheroLado": "img/productos/20261024-140515-3cg-godsped-perfil.png",
-      "fotoPercheroEspalda": "img/productos/20261024-140615-4bd-gosped-espalda.png",
-      "precio": 46000,
-      "nombre": "GODSPEED",
-      "descripcion": ">100% algodón\n>cuello redondo\n>lavar a mano",
-      "precioAntes": "",
-      "fotos": [
-        "img/productos/20261024-162945-s0r-1.jpg",
-        "img/productos/20261024-163105-z6w-2.jpg",
-        "img/productos/20261024-163113-oxi-3.jpg",
-        "img/productos/20261024-163124-ah1-gemini-generated-image-qcovxvqcovxvqcov.jpg"
-      ],
-      "colores": [
-        "beige"
-      ],
-      "categoria": "Poleras",
-      "disponible": true,
-      "etiqueta": "Nuevo",
-      "fotoMedidas": "img/productos/20261113-161747-sgx-medidas-polera.jpg",
-      "tallas": [
-        "XL"
-      ]
-    },
-    {
       "perchero": false,
       "precio": 46000,
       "nombre": "CHROME HEARTS",
@@ -1115,7 +1089,7 @@
       "categoria": "Poleras",
       "disponible": true,
       "etiqueta": "Nuevo",
-      "fotoMedidas": "img/productos/20261113-162104-g8e-medidas-polera.jpg",
+      "fotoMedidas": "img/productos/20261113-172340-kd3-medidas-polera-casa-negra.jpg",
       "tallas": [
         "M",
         "XL"
