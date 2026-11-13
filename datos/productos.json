@@ -2,6 +2,28 @@
   "productos": [
     {
       "perchero": false,
+      "precio": 46000,
+      "nombre": "ROUGH PLAY",
+      "vitrina": false,
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo en serigrafia al tacto adelante y atrás\n>detalles con brillos",
+      "fotos": [
+        "img/productos/20261113-191935-2dg-whatsapp-image-2026-11-11-at-9-05-42-pm.jpeg",
+        "img/productos/20261113-191939-6j0-1.jpeg",
+        "img/productos/20261113-191944-iq8-4.jpg",
+        "img/productos/20261113-191948-nr1-whatsapp-image-2026-11-11-at-9-05-43-pm2.jpeg"
+      ],
+      "colores": [
+        "BEIGE"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "fotoMedidas": "img/productos/20261113-191905-z23-medidas-polera.jpg",
+      "tallas": [
+        "XL"
+      ]
+    },
+    {
+      "perchero": false,
       "precio": 10000,
       "fotoVitrina": "img/productos/20261113-190944-abh-llavero-off-white-vitrina.png",
       "nombre": "OFF WHITE",
