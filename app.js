@@ -1036,6 +1036,14 @@ function descripcionHtml(t) {
   return `<ul class="desc desc-lista">${lineas.map((l) => `<li>${esc(l)}</li>`).join("")}</ul>`;
 }
 
+// Línea corta de envío y cambios, justo antes de los botones de compra. Se escribe en el panel
+// (Datos de la tienda), separando cada dato con "·"; si está vacía, no aparece.
+function infoFicha() {
+  const datos = String(TIENDA.fichaInfo || "").split(/\s*[·|]\s*/).map((x) => x.trim()).filter(Boolean);
+  if (!datos.length) return "";
+  return `<ul class="ficha-info">${datos.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>`;
+}
+
 function pintarDetalle() {
   const p = actual;
   $("#detalle").innerHTML = `
@@ -1050,6 +1058,7 @@ function pintarDetalle() {
         <div class="cantidad"><button data-cant="-1" aria-label="Menos">−</button><span>${sel.cant}</span><button data-cant="1" aria-label="Más">+</button></div>
       </div>
       <p class="aviso-opcion" id="aviso-opcion"></p>
+      ${infoFicha()}
       <div class="acciones">
         <button class="btn btn-oro" data-accion="agregar">Agregar al carrito</button>
         <button class="btn btn-wa" data-accion="pedir">Pedir ahora por WhatsApp</button>
