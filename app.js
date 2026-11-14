@@ -523,10 +523,14 @@ $("#elegir-wa").addEventListener("click", (e) => {
 
 // ---------- Filtros y grilla ----------
 const categorias = () => [...new Set([...(TIENDA.categorias || []), ...PRODUCTOS.map((p) => p.categoria)])];
+// Una categoría con una sola prenda se ve pobre: su botón y su bloque del Inicio aparecen solos desde la 2ª prenda.
+// Mientras tanto, esa prenda igual se ve en "Ver todo", en el buscador y en Recién llegados.
+const MIN_POR_CATEGORIA = 2;
+const categoriaVisible = (c) => PRODUCTOS.filter((p) => p.categoria === c).length >= MIN_POR_CATEGORIA;
 
 function pintarFiltros() {
   // Solo las categorías que tienen productos: el botón de una nueva aparece solo al subir su primer producto
-  const cats = [INICIO, TODO, ...categorias().filter((c) => PRODUCTOS.some((p) => p.categoria === c))];
+  const cats = [INICIO, TODO, ...categorias().filter(categoriaVisible)];
   const fila = $("#filtros");
   fila.innerHTML = cats
     .map((c) => `<button class="chip" role="tab" aria-selected="${c === filtro}" data-cat="${esc(c)}">${esc(c)}</button>`)
@@ -611,7 +615,7 @@ function pintarEditorial() {
     .map((cat) => {
       if (cat === VITRINA_CATEGORIA) return conVitrina ? vitrinaHtml() : "";
       const prods = PRODUCTOS.filter((p) => p.categoria === cat);
-      if (!prods.length) return "";
+      if (!categoriaVisible(cat)) return "";
       const perchero = cat === anclaPerchero ? percheroHtml() : "";
       // La foto grande se sube en el panel; si no hay, se usa la del primer producto (y ese no se repite abajo)
       const portada = (TIENDA.portadasCategorias || []).find((c) => c && c.categoria === cat && c.foto);
