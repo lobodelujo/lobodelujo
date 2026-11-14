@@ -78,7 +78,15 @@ collections:
                     widget: select
                     options: [XS, S, M, L, XL, XXL, "36", "38", "40", "42", "44", "46", "38-41", "42-45", "Única"]
                   - { name: foto, label: "Foto de medidas de esa talla", widget: image, choose_url: false }
-              - { name: colores, label: "Colores (separados por coma, ej: Negro, Blanco)", widget: list, required: false }
+              # Un color por casilla: así se puede escribir con espacios (ej: "Verde botella"). Con la casilla de
+              # antes (todo separado por coma) el panel se comía el espacio mientras se escribía.
+              - name: colores
+                label: "Colores (uno por casilla: toca «Agregar color» para sumar otro)"
+                label_singular: color
+                widget: list
+                required: false
+                collapsed: false
+                field: { name: color, label: Color, widget: string }
               - name: fotos
                 label: Fotos (la primera es la portada)
                 label_singular: foto
