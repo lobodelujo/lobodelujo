@@ -1,6 +1,28 @@
 {
   "productos": [
     {
+      "perchero": false,
+      "precio": 36000,
+      "fotoVitrina": "img/productos/20261114-193515-dvz-lentes-jacob-vitrina.png",
+      "nombre": "MARC JACOBS",
+      "vitrina": true,
+      "descripcion": ">marco de acetato color verde\n>lentes degradados \n>patillas carey café con manchas miel\n>puente y bisagras metálicas\n>protección UV400\n>cero aumento",
+      "fotos": [
+        "img/productos/20261114-193401-9o7-1.jpg",
+        "img/productos/20261114-193406-j6g-2.jpg",
+        "img/productos/20261114-193412-419-3.jpg",
+        "img/productos/20261114-193515-dvz-lentes-jacob-vitrina.png"
+      ],
+      "colores": [
+        "VERDE BOTELLA / CAREY"
+      ],
+      "categoria": "Accesorios",
+      "disponible": true,
+      "tallas": [
+        "Única"
+      ]
+    },
+    {
       "perchero": true,
       "fotoPerchero": "img/productos/20261114-184933-fhi-1.png",
       "fotoPercheroLado": "img/productos/20261114-184921-p04-lobo-de-lujo.png",
