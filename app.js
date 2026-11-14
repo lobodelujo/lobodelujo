@@ -556,8 +556,8 @@ function pintarTallas() {
     tallas.map((t) => `<button class="chip" data-talla="${esc(t)}" aria-pressed="${t === filtroTalla}">${esc(t)}</button>`).join("");
 }
 
-// "Nuevo" se ve solo en los 8 primeros de la lista que lo tienen (el último drop): si todo es nuevo, nada lo es
-const NUEVOS_MAX = 8;
+// "Nuevo" se ve en los 12 primeros de la lista que lo tienen (el último drop): si todo es nuevo, nada lo es
+const NUEVOS_MAX = 12;
 const conNuevo = new Set(PRODUCTOS.filter((p) => p.etiqueta === "Nuevo").slice(0, NUEVOS_MAX).map((p) => p.id));
 
 function badge(p) {
