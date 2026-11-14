@@ -6,7 +6,7 @@ backend:
   repo: lobodelujo/lobodelujo
   branch: main
   # El inicio de sesión con GitHub lo hace la propia web en Cloudflare (carpeta functions/api)
-  base_url: https://lobodelujo.pages.dev
+  base_url: https://lobodelujo.cl
   auth_endpoint: api/auth
   commit_messages:
     update: "Actualizar {{collection}}: {{slug}}"
@@ -64,7 +64,7 @@ collections:
                 multiple: true
                 required: false
                 options: [XS, S, M, L, XL, XXL, "36", "38", "40", "42", "44", "46", "38-41", "42-45", "Única"]
-              - { name: fotoMedidas, label: "📏 Foto de medidas de ESTA prenda (hazla en lobodelujo.pages.dev/admin/medidas). En la ficha sale el botón Ver medidas; no se mezcla con tus fotos", widget: image, required: false, choose_url: false }
+              - { name: fotoMedidas, label: "📏 Foto de medidas de ESTA prenda (hazla en lobodelujo.cl/admin/medidas). En la ficha sale el botón Ver medidas; no se mezcla con tus fotos", widget: image, required: false, choose_url: false }
               - name: medidasTallas
                 label: "📏 Más fotos de medidas · una por talla (si tienes una foto suelta para cada talla: agrega una, elige la talla y sube su foto)"
                 label_singular: foto de medidas
