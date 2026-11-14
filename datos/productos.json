@@ -20,7 +20,8 @@
       "disponible": true,
       "tallas": [
         "Única"
-      ]
+      ],
+      "etiqueta": "Nuevo"
     },
     {
       "perchero": true,
@@ -44,7 +45,8 @@
       "fotoMedidas": "img/productos/20261114-181405-47x-medidas-polera.jpg",
       "tallas": [
         "XL"
-      ]
+      ],
+      "etiqueta": "Nuevo"
     },
     {
       "perchero": false,
@@ -66,7 +68,8 @@
       "fotoMedidas": "img/productos/20261113-191905-z23-medidas-polera.jpg",
       "tallas": [
         "XL"
-      ]
+      ],
+      "etiqueta": "Nuevo"
     },
     {
       "perchero": false,
@@ -85,7 +88,7 @@
       ],
       "categoria": "Accesorios",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "tallas": [
         "Única"
       ]
@@ -454,7 +457,8 @@
       "disponible": true,
       "tallas": [
         "Única"
-      ]
+      ],
+      "etiqueta": "Nuevo"
     },
     {
       "perchero": false,
@@ -475,7 +479,8 @@
       "disponible": true,
       "tallas": [
         "Única"
-      ]
+      ],
+      "etiqueta": "Nuevo"
     },
     {
       "perchero": false,
@@ -513,7 +518,7 @@
       ],
       "categoria": "Gorras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "tallas": [
         "Única"
       ]
@@ -557,7 +562,7 @@
       ],
       "categoria": "Gorras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "tallas": [
         "Única"
       ]
@@ -578,7 +583,7 @@
       ],
       "categoria": "Accesorios",
       "disponible": true,
-      "etiqueta": "Nuevo"
+      "etiqueta": ""
     },
     {
       "perchero": false,
@@ -596,7 +601,7 @@
       ],
       "categoria": "Accesorios",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "tallas": [
         "Única"
       ]
@@ -687,7 +692,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261112-185145-v8y-medidas-polera.jpg",
       "tallas": [
         "L"
@@ -753,7 +758,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261112-185407-ix9-medidas-polera.jpg",
       "tallas": [
         "L"
@@ -775,7 +780,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261112-185526-ti3-medidas-polera.jpg",
       "tallas": [
         "L"
@@ -799,7 +804,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261112-185716-461-medidas-polera.jpg",
       "tallas": [
         "L"
@@ -867,7 +872,7 @@
       ],
       "categoria": "Gorras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "tallas": [
         "Única"
       ]
@@ -890,7 +895,7 @@
       ],
       "categoria": "Shorts",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "tallas": [
         "M",
         "L"
@@ -958,7 +963,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-153351-bcx-medidas-polera.jpg",
       "tallas": [
         "L"
@@ -1029,7 +1034,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-155054-9kr-medidas-polera.jpg",
       "tallas": [
         "L"
@@ -1050,7 +1055,7 @@
       "colores": [],
       "categoria": "Pantalones",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "tallas": [
         "L",
         "XL"
@@ -1118,7 +1123,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-155256-p7t-medidas-polera.jpg",
       "tallas": [
         "M",
@@ -1142,7 +1147,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-155417-iz2-medidas-polera.jpg",
       "tallas": [
         "M"
@@ -1165,7 +1170,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-155604-bbm-medidas-polera.jpg",
       "tallas": [
         "M"
@@ -1189,7 +1194,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-155752-whj-medidas-polera.jpg",
       "tallas": [
         "M",
@@ -1211,7 +1216,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-160042-wup-medidas-polera.jpg",
       "tallas": [
         "L"
@@ -1233,7 +1238,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-160145-j51-medidas-polera.jpg",
       "tallas": [
         "L"
@@ -1256,7 +1261,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-160244-1uo-medidas-polera.jpg",
       "tallas": [
         "L"
@@ -1282,7 +1287,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-160430-dv8-medidas-polera.jpg",
       "tallas": [
         "M",
@@ -1302,7 +1307,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-160536-a4u-medidas-polera.jpg",
       "tallas": [
         "S"
@@ -1348,7 +1353,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-172009-doi-medidas-polera-supreme.jpg",
       "tallas": [
         "M"
@@ -1370,7 +1375,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-161418-dad-medidas-polera.jpg",
       "tallas": [
         "M"
@@ -1392,7 +1397,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-161518-jz8-medidas-polera.jpg",
       "tallas": [
         "XL"
@@ -1415,7 +1420,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-161654-0hz-medidas-polera.jpg",
       "tallas": [
         "M"
@@ -1437,7 +1442,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-161837-zy4-medidas-polera.jpg",
       "tallas": [
         "M"
@@ -1480,7 +1485,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-171045-k0q-medidas-polera.jpg",
       "tallas": [
         "S",
@@ -1502,7 +1507,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-172340-kd3-medidas-polera-casa-negra.jpg",
       "tallas": [
         "M",
@@ -1524,7 +1529,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-162147-qo3-medidas-polera.jpg",
       "tallas": [
         "M"
@@ -1605,7 +1610,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-171537-ep1-medidas-polera-off.jpg",
       "tallas": [
         "S",
@@ -1627,7 +1632,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-164614-vun-medidas-polera.jpg",
       "tallas": [
         "S"
@@ -1648,7 +1653,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-164702-flt-medidas-polera.jpg",
       "tallas": [
         "S"
@@ -1669,7 +1674,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-165202-5qr-medidas-polera.jpg",
       "tallas": [
         "S"
@@ -1690,7 +1695,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-165323-f7u-medidas-polera.jpg",
       "tallas": [
         "S"
@@ -1711,7 +1716,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-165432-21n-medidas-polera.jpg",
       "tallas": [
         "L"
@@ -1732,7 +1737,7 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
-      "etiqueta": "Nuevo",
+      "etiqueta": "",
       "fotoMedidas": "img/productos/20261113-165530-6yu-medidas-polera.jpg",
       "tallas": [
         "S"
