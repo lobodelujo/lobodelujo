@@ -42,7 +42,7 @@ collections:
                 label: Categoría
                 widget: select
                 # Si agregas una categoría aquí, agrégala también en "Datos de la tienda"
-                options: [Poleras, Polerones, Pantalones, Shorts, Gorras, Lentes, Accesorios]
+                options: [Poleras, Gorras, Accesorios, Shorts, Lentes, Pantalones, Polerones]
               - { name: precio, label: "Precio (sin puntos ni $)", widget: number, value_type: int, min: 0 }
               - { name: precioAntes, label: "Precio anterior tachado (solo si está en oferta)", widget: number, value_type: int, min: 0, required: false }
               - name: etiqueta
@@ -118,7 +118,7 @@ collections:
               - name: categoria
                 label: Categoría
                 widget: select
-                options: [Poleras, Polerones, Pantalones, Shorts, Gorras, Lentes, Accesorios]
+                options: [Poleras, Gorras, Accesorios, Shorts, Lentes, Pantalones, Polerones]
               - { name: foto, label: "Foto grande (horizontal, ideal 1920×1080)", widget: image, choose_url: false }
               - { name: fotoMovil, label: "Foto para celular (vertical 1080×1350, opcional)", widget: image, required: false, choose_url: false }
           - { name: categorias, label: "Orden de las categorías (separadas por coma)", widget: list }
