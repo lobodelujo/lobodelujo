@@ -542,9 +542,9 @@
     {
       "perchero": false,
       "precio": 30000,
-      "fotoVitrina": "img/productos/20261110-131310-zyh-godspeed-gorra-vitrina.png",
+      "fotoVitrina": "",
       "nombre": "GODSPEED",
-      "vitrina": true,
+      "vitrina": false,
       "descripcion": ">algodón 100%\n>gorra en malla\n>visera curva\n>logo bordado\n>ajustable\n>botón contramarcado",
       "fotos": [
         "img/productos/20261110-131527-uqv-2.jpg",
