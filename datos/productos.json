@@ -1309,7 +1309,10 @@
       ]
     },
     {
-      "perchero": false,
+      "perchero": true,
+      "fotoPerchero": "img/productos/20261114-191314-ens-1.png",
+      "fotoPercheroLado": "img/productos/20261114-191308-6sx-3.png",
+      "fotoPercheroEspalda": "img/productos/20261114-191319-e82-2.png",
       "precio": 46000,
       "nombre": "SUPREME",
       "descripcion": ">100% algodón\n>cuello redondo\n>logo serigrafia al tacto\n>lavar a mano",
