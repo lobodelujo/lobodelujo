@@ -63,6 +63,8 @@
       <span class="hero-grande" id="hero-frase">Presencia</span>
       <span class="hero-abajo" id="hero-abajo">primero que todo</span>
     </h1>
+    <!-- Solo en el teléfono (o si el navegador permite instalar): deja la app con el logo en la pantalla de inicio -->
+    <button class="btn btn-borde btn-app" data-instalar hidden>📲 Descargar aplicación</button>
   </section>
 
   <main id="catalogo" class="catalogo">
@@ -115,7 +117,7 @@
     <p id="pie-envio"></p>
     <p><a id="link-ig" href="#" target="_blank" rel="noopener">Instagram</a> · <a id="link-wa" href="#" target="_blank" rel="noopener">WhatsApp</a><span id="link-faq-caja" hidden> · <a href="#preguntas">Preguntas frecuentes</a></span></p>
     <!-- Solo aparece en los teléfonos que permiten instalar el catálogo como app -->
-    <p><button class="instalar" id="instalar-app" hidden>📲 Instalar la app de Lobo de Lujo</button></p>
+    <p><button class="btn btn-borde btn-app" data-instalar hidden>📲 Descargar aplicación</button></p>
     <p class="pie-copy">© <span id="anio"></span> Lobo de Lujo</p>
   </footer>
 
@@ -179,6 +181,17 @@
       <h3 id="elegir-titulo">¿A quién le escribes? 💬</h3>
       <div id="wa-opciones" class="wa-opciones"></div>
       <button class="compartir" data-cerrar-wa>Cancelar</button>
+    </div>
+  </div>
+
+  <!-- Cómo instalar la app cuando el teléfono no muestra el aviso solo (iPhone, o Android antes de tiempo) -->
+  <div class="elegir-wa" id="ayuda-app" hidden>
+    <div class="modal-fondo" data-cerrar-app></div>
+    <div class="elegir-caja" role="dialog" aria-modal="true" aria-labelledby="ayuda-app-titulo">
+      <img class="ayuda-app-icono" src="img/app-192.png" alt="" width="76" height="76">
+      <h3 id="ayuda-app-titulo">Descarga la app 📲</h3>
+      <ol class="ayuda-app-pasos" id="ayuda-app-pasos"></ol>
+      <button class="compartir" data-cerrar-app>Listo</button>
     </div>
   </div>
 

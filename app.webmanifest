@@ -3,6 +3,7 @@
   "short_name": "Lobo de Lujo",
   "description": "Moda urbana con envíos a todo Chile",
   "lang": "es",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

@@ -804,7 +804,11 @@ img.sin-foto {
 .desc-lista li::before { content: ""; position: absolute; left: 2px; top: .62em; width: 6px; height: 6px; border-radius: 50%; background: var(--oro); }
 
 /* ---------- Instalar como app ---------- */
-.instalar { color: var(--oro); text-decoration: underline; font-size: 14px; }/* En el PC la X de cerrar la ficha queda arriba a la derecha: el corazón se corre para no quedar debajo */
+.btn-app { margin-top: 18px; padding: 11px 22px; font-size: 14px; }
+.pie .btn-app { margin-top: 6px; }
+.ayuda-app-icono { margin: 0 auto; border-radius: 18px; box-shadow: 0 8px 24px rgba(250, 208, 44, .18); }
+.ayuda-app-pasos { padding-left: 22px; display: grid; gap: 10px; color: var(--suave); font-size: 15px; }
+.ayuda-app-pasos b { color: var(--texto); }/* En el PC la X de cerrar la ficha queda arriba a la derecha: el corazón se corre para no quedar debajo */
 @media (min-width: 860px) { .cat-fila { padding-right: 48px; } }
 
 /* ---------- Preguntas frecuentes ---------- */

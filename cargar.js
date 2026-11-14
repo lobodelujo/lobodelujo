@@ -1,5 +1,14 @@
 // Carga los datos que se editan desde el panel (/admin) y después arranca el catálogo (app.js)
 
+// Instalar como app: el teléfono avisa que se puede instalar apenas abre la página, antes de que cargue app.js.
+// Se guarda el aviso para que el botón "Descargar aplicación" abra la instalación con un solo toque.
+window.instalacionApp = null;
+addEventListener("beforeinstallprompt", (e) => {
+  e.preventDefault();
+  window.instalacionApp = e;
+  document.dispatchEvent(new Event("app-instalable"));
+});
+
 const ORDEN_LETRAS = ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL", "2XL", "3XL"];
 function ordenarTallas(a, b) {
   const ia = ORDEN_LETRAS.indexOf(a.toUpperCase()), ib = ORDEN_LETRAS.indexOf(b.toUpperCase());

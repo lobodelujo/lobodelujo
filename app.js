@@ -2994,18 +2994,46 @@ pintarBolsa();
 pintarContadorFavoritos();
 revisarHash();
 
-// ---------- Instalar como app ----------
-// En los teléfonos que lo permiten (Android), el pie muestra "Instalar la app": deja el lobo en la pantalla de inicio.
-// En iPhone se hace desde Compartir > "Agregar a inicio" (usa los mismos íconos).
-let instalacion = null;
-window.addEventListener("beforeinstallprompt", (e) => { instalacion = e; $("#instalar-app").hidden = false; });
-window.addEventListener("appinstalled", () => { instalacion = null; $("#instalar-app").hidden = true; });
-$("#instalar-app").addEventListener("click", async () => {
-  if (!instalacion) return;
-  try { instalacion.prompt(); await instalacion.userChoice; } catch {}
-  instalacion = null;
-  $("#instalar-app").hidden = true;
+// ---------- Descargar aplicación ----------
+// Botón "📲 Descargar aplicación" (arriba, bajo la frase, y en el pie). Deja el catálogo como app, con el logo del
+// lobo en la pantalla de inicio. En Android abre la instalación con un toque; en iPhone (y cuando el teléfono todavía
+// no la ofrece) muestra los 2 o 3 pasos. No aparece si ya la abriste desde la app instalada.
+const esIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const esTelefono = esIOS || /Android|Mobi/i.test(navigator.userAgent);
+const appInstalada = () => matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+function pintarBotonesApp() {
+  const mostrar = !appInstalada() && (esTelefono || !!window.instalacionApp);
+  for (const b of document.querySelectorAll("[data-instalar]")) b.hidden = !mostrar;
+}
+document.addEventListener("app-instalable", pintarBotonesApp);
+window.addEventListener("appinstalled", () => {
+  window.instalacionApp = null;
+  pintarBotonesApp();
+  aviso("¡Listo! Ya tienes la app de Lobo de Lujo 🐺");
 });
+document.addEventListener("click", async (e) => {
+  if (e.target.closest("[data-cerrar-app]")) { $("#ayuda-app").hidden = true; return; }
+  if (!e.target.closest("[data-instalar]")) return;
+  const instalacion = window.instalacionApp;
+  if (instalacion) {
+    try {
+      instalacion.prompt();
+      const r = await instalacion.userChoice;
+      if (r && r.outcome === "accepted") window.instalacionApp = null;
+    } catch {}
+    pintarBotonesApp();
+    return;
+  }
+  $("#ayuda-app-pasos").innerHTML = esIOS
+    ? `<li>Toca el botón <b>Compartir</b> (el cuadrado con la flecha hacia arriba).</li>
+       <li>Baja y toca <b>Agregar a inicio</b>.</li>
+       <li>Toca <b>Agregar</b>: el lobo queda en tu pantalla como una app.</li>`
+    : `<li>Toca el menú <b>⋮</b> del navegador (arriba a la derecha).</li>
+       <li>Toca <b>Instalar aplicación</b> o <b>Agregar a la pantalla principal</b>.</li>
+       <li>Confirma: el lobo queda en tu pantalla como una app.</li>`;
+  $("#ayuda-app").hidden = false;
+});
+pintarBotonesApp();
 // ---------- Preguntas frecuentes ----------
 // Se escriben en el panel (Datos de la tienda > Preguntas frecuentes). Cada una se abre al tocarla.
 (() => {
