@@ -1,6 +1,30 @@
 {
   "productos": [
     {
+      "perchero": true,
+      "fotoPerchero": "img/productos/20261114-184933-fhi-1.png",
+      "fotoPercheroLado": "img/productos/20261114-184921-p04-lobo-de-lujo.png",
+      "fotoPercheroEspalda": "img/productos/20261114-184939-935-2.png",
+      "precio": 43000,
+      "nombre": "VALLEY",
+      "vitrina": false,
+      "descripcion": ">100% algodón\n>polera sin mangas\n>cuello redondo\n>serigrafia al tacto\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261114-181434-laa-1.jpg",
+        "img/productos/20261114-181440-1b1-whatsapp-image-2026-11-12-at-6-10-59-pm.jpeg",
+        "img/productos/20261114-181445-5lb-3.jpg"
+      ],
+      "colores": [
+        "BEIGE"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "fotoMedidas": "img/productos/20261114-181405-47x-medidas-polera.jpg",
+      "tallas": [
+        "XL"
+      ]
+    },
+    {
       "perchero": false,
       "precio": 46000,
       "nombre": "ROUGH PLAY",
