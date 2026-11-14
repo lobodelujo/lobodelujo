@@ -2430,8 +2430,39 @@ function prepararPerchero() {
 const VITRINA_CATEGORIA = "Accesorios";
 const VITRINA_MAX = 12;
 const VITRINA_MIN = 4; // con menos accesorios el círculo se ve vacío: la sección espera hasta que haya 4 marcados
+// Qué es cada accesorio (por su nombre y descripción), para que dos iguales no queden juntos en el círculo
+const TIPOS_VITRINA = [
+  ["lentes", /lente|anteojo|gafa|uv ?400|cristal|patilla/],
+  ["reloj", /reloj/],
+  ["billetera", /billetera|tarjetero|cartera|monedero/],
+  ["encendedor", /encendedor/],
+  ["llavero", /llavero|mosqueton/],
+  ["gorra", /gorra|jockey|visera/],
+  ["cinturon", /cinturon|correa/],
+  ["bolso", /bolso|banano|mochila|rinonera/],
+  ["joya", /cadena|collar|pulsera|anillo|\baros?\b|arete/],
+];
+const tipoVitrina = (p) => {
+  const t = `${p.nombre} ${p.descripcion}`.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  const tipo = TIPOS_VITRINA.find(([, re]) => re.test(t));
+  return tipo ? tipo[0] : p.categoria;
+};
+// En el orden del panel; si dos del mismo tipo quedan pegados (el círculo da la vuelta: el último toca al primero),
+// se reparten: los tipos que más se repiten van en lugares salteados
+function separarIguales(lista) {
+  const n = lista.length;
+  const pegados = lista.some((p, i) => n > 2 && tipoVitrina(p) === tipoVitrina(lista[(i + 1) % n]));
+  if (!pegados) return lista;
+  const grupos = new Map();
+  for (const p of lista) { const t = tipoVitrina(p); if (!grupos.has(t)) grupos.set(t, []); grupos.get(t).push(p); }
+  const orden = [...grupos.values()].sort((a, b) => b.length - a.length).flat();
+  const lugares = [...Array(n).keys()].filter((i) => i % 2 === 0).concat([...Array(n).keys()].filter((i) => i % 2 === 1));
+  const res = new Array(n);
+  orden.forEach((p, k) => { res[lugares[k]] = p; });
+  return res;
+}
 const vitrinaProductos = () =>
-  PRODUCTOS.filter((p) => p.vitrina && p.disponible && (p.fotoVitrina || p.fotos.length)).slice(0, VITRINA_MAX);
+  separarIguales(PRODUCTOS.filter((p) => p.vitrina && p.disponible && (p.fotoVitrina || p.fotos.length)).slice(0, VITRINA_MAX));
 
 // Colores escritos en el panel → color del puntito (si no se conoce, se muestra solo el nombre)
 const COLORES_CSS = {
@@ -2520,11 +2551,13 @@ function prepararVitrina() {
     movil = W < 700;
     H = Math.round(movil ? limitar(W * 1.25, 460, 600) : limitar(W * 0.5, 520, 640));
     caja.style.height = H + "px";
-    B = movil ? W * 0.5 : Math.min(W * 0.25, 320);
-    // Bien juntos, montados unos sobre otros como en el video; con muchos accesorios el círculo se abre un poco
-    RX = B * (movil ? 0.58 : 0.8) * (1 + Math.max(0, N - 6) * 0.05);
+    // En el celular el de adelante sigue grande, pero los de los lados y los de atrás se ven más chicos y más
+    // arriba (más perspectiva): así cada uno se ve entero mientras gira, sin que el de al lado le tape un pedazo
+    B = movil ? W * 0.46 : Math.min(W * 0.25, 320);
+    // Juntos pero sin taparse; con muchos accesorios el círculo se abre un poco
+    RX = B * (movil ? 0.68 : 0.8) * (1 + Math.max(0, N - 6) * 0.05);
     // Mirada un poco desde arriba: los de atrás quedan bastante más arriba que el de adelante
-    PROF = H * 0.25;
+    PROF = H * (movil ? 0.34 : 0.25);
     PISO = H * (movil ? 0.7 : 0.74);
     caja.style.setProperty("--piso-y", (PISO - PROF * 0.5).toFixed(0) + "px");
     caja.style.setProperty("--piso-w", (RX * 2 + B * 1.3).toFixed(0) + "px");
@@ -2534,7 +2567,8 @@ function prepararVitrina() {
   // de cada uno mide lo que mide acercado: en la vitrina se achica, así al acercarlo se ve nítido.
   function dimensionar(it) {
     const w = it.rec.lienzo.width, h = it.rec.lienzo.height;
-    const k = Math.min((B * 0.82) / Math.sqrt(w * h), (B * 1.25) / w, (B * 1.3) / h);
+    // En el celular los muy anchos (lentes, llaveros) un poco más angostos, para que no se salgan por los lados
+    const k = Math.min((B * 0.82) / Math.sqrt(w * h), (B * (movil ? 1.05 : 1.25)) / w, (B * 1.3) / h);
     it.dw = w * k;
     it.dh = h * k;
     it.Z = Math.max(1, Math.min((movil ? H * 0.42 : H * 0.64) / it.dh, (movil ? W * 0.72 : W * 0.38) / it.dw));
@@ -2553,7 +2587,7 @@ function prepararVitrina() {
     for (const it of items) {
       // Ángulo en el círculo (0 = adelante al centro): los que vienen entran por la izquierda, como en el video
       const a = (distancia(it.i) / N) * Math.PI * 2, prof = (1 + Math.cos(a)) / 2; // prof: 1 adelante, 0 atrás
-      let s = 0.5 + 0.5 * Math.pow(prof, 1.4);
+      let s = movil ? 0.4 + 0.6 * Math.pow(prof, 1.8) : 0.5 + 0.5 * Math.pow(prof, 1.4);
       let x = W / 2 - RX * Math.sin(a);
       let piso = PISO - PROF * (1 - prof);
       // Flota: sube y baja suave, cada uno a su ritmo (la sombra se achica cuando sube)
