@@ -1912,7 +1912,9 @@ function prepararPerchero() {
   // porque agrandar con zoom una imagen chica se ve borrosa en el celular)
   function escalaDe(it, rec) {
     const capa = it.capa || 1;
-    if (rec.percha) return (largoDe(it) * capa) / Math.max(1, rec.lienzo.height - rec.gy);
+    // Si la prenda cuelga de lado en su percha, el frente (aunque sea una foto recortada sin percha) toma el mismo
+    // largo que el lado: si no, al darse vuelta se veía más chica
+    if (rec.percha || (it.recLado && it.recLado.percha)) return (largoDe(it) * capa) / Math.max(1, rec.lienzo.height - (rec.gy || 0));
     const g = H * 0.56 * capa, objetivo = g * (it.pinzas ? 0.62 : 1), largoMax = g * (it.pinzas ? 1.9 : 1.3);
     return Math.min(objetivo / rec.lienzo.width, largoMax / rec.lienzo.height);
   }
