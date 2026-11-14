@@ -3030,6 +3030,51 @@ pintarBolsa();
 pintarContadorFavoritos();
 revisarHash();
 
+// ---------- Siempre al día ----------
+// Cuando el cliente vuelve al catálogo (desde WhatsApp, Instagram, otra app o la app instalada), se revisa si la
+// tienda cambió algo (productos, precios, fotos, datos de la tienda o el diseño). Si cambió, la página se recarga
+// sola y el cliente queda donde estaba: misma categoría, misma altura y la misma prenda abierta (va en el link).
+// El carrito y los favoritos están guardados en el teléfono, así que no se pierden.
+(() => {
+  const ARCHIVOS = ["datos/productos.json", "datos/tienda.json", "app.js", "cargar.js", "estilos.css"];
+  const huella = async (u) => {
+    const r = await fetch(u, { method: "HEAD", cache: "no-store" });
+    return r.headers.get("etag") || r.headers.get("last-modified") || r.headers.get("content-length") || "";
+  };
+  const tomar = async () => { try { return (await Promise.all(ARCHIVOS.map(huella))).join("|"); } catch { return null; } };
+  let huellas = null, revisando = false, ultima = 0;
+  setTimeout(async () => { huellas = await tomar(); }, 3000);
+  async function revisar() {
+    if (!huellas || revisando || Date.now() - ultima < 15000) return;
+    revisando = true;
+    ultima = Date.now();
+    const ahora = await tomar();
+    revisando = false;
+    if (!ahora || ahora === huellas) return;
+    try { sessionStorage.setItem("lobo-volver", JSON.stringify({ y: scrollY, filtro, texto })); } catch {}
+    location.reload();
+  }
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") revisar(); });
+  window.addEventListener("pageshow", (e) => { if (e.persisted) revisar(); });
+  window.addEventListener("focus", revisar);
+
+  // Después de recargar por una actualización: vuelve a la misma categoría y a la misma altura
+  let volver = null;
+  try { volver = JSON.parse(sessionStorage.getItem("lobo-volver")); sessionStorage.removeItem("lobo-volver"); } catch {}
+  if (!volver) return;
+  if (volver.texto) { texto = volver.texto; $("#buscar").value = texto; }
+  if (volver.filtro && volver.filtro !== INICIO && (volver.filtro === TODO || volver.filtro === FAVORITOS || categorias().includes(volver.filtro))) {
+    filtro = volver.filtro;
+    pintarFiltros();
+    pintarTallas();
+  }
+  pintarGrilla();
+  const y = Number(volver.y) || 0;
+  requestAnimationFrame(() => window.scrollTo({ top: y, behavior: "auto" }));
+  setTimeout(() => { if (Math.abs(scrollY - y) > 40) window.scrollTo({ top: y, behavior: "auto" }); }, 600);
+  aviso("Catálogo actualizado 🐺");
+})();
+
 // ---------- Descargar aplicación ----------
 // Botón "📲 Descargar aplicación" (arriba, bajo la frase, y en el pie). Deja el catálogo como app, con el logo del
 // lobo en la pantalla de inicio. En Android abre la instalación con un toque; en iPhone (y cuando el teléfono todavía
