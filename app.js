@@ -568,6 +568,14 @@ function badge(p) {
 }
 const precioHtml = (p) => `${fmt(p.precio)}${p.precioAntes ? `<s>${fmt(p.precioAntes)}</s>` : ""}`;
 
+// Las tallas que hay de cada prenda, bajo su nombre en las tarjetas (así el cliente ve al tiro si está la suya)
+function tallasHtml(p, clase) {
+  const t = (p.tallas || []).filter(Boolean);
+  if (!t.length || !p.disponible) return "";
+  const texto = t.length === 1 && t[0].toLowerCase() === "única" ? "Talla única" : t.join(" · ");
+  return `<span class="${clase}">${esc(texto)}</span>`;
+}
+
 // Inicio: por cada categoría, 1 foto grande + 2 productos chicos (estilo McQueen)
 function tarjetaChica(p) {
   const f = p.fotos || [];
@@ -579,6 +587,7 @@ function tarjetaChica(p) {
     </span>
     <span class="ed-prod-info">
       <span class="ed-prod-nombre">${esc(p.nombre)}</span>
+      ${tallasHtml(p, "tarjeta-tallas")}
       <span class="precio">${precioHtml(p)}</span>
     </span>
   </a>`;
@@ -893,7 +902,7 @@ function pintarGrilla() {
         ${botonFavorito(p)}
         <button class="card-info" data-abrir="${esc(p.id)}">
           <h3>${esc(p.nombre)}</h3>
-          <p class="card-fotos">${f.length} fotos</p>
+          ${tallasHtml(p, "tarjeta-tallas") || (p.disponible ? "" : `<span class="tarjeta-tallas">Agotado</span>`)}
           <p class="precio">${precioHtml(p)}</p>
         </button>
       </article>`;
