@@ -2,6 +2,27 @@
   "productos": [
     {
       "perchero": false,
+      "precio": 43000,
+      "nombre": "BURBERRY",
+      "vitrina": false,
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo cocido sobre la prenda adelante\n>bordado\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261116-204215-nej-1.jpg",
+        "img/productos/20261116-204224-l0v-3.jpg",
+        "img/productos/20261116-204219-p1e-2.jpg"
+      ],
+      "colores": [
+        "NEGRO"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "fotoMedidas": "img/productos/20261116-204128-ngb-medidas-polera.jpg",
+      "tallas": [
+        "L"
+      ]
+    },
+    {
+      "perchero": false,
       "precio": 27000,
       "nombre": "GUCCI",
       "vitrina": false,
