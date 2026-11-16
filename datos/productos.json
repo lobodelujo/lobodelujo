@@ -3,6 +3,26 @@
     {
       "perchero": false,
       "precio": 36000,
+      "nombre": "LOUIS VUITTON",
+      "vitrina": false,
+      "descripcion": ">marco redondo de acetato color plateado\n>lentes degradados\n>patillas plateadas con el logo grabado\n>bisagras metálicas\n>protección UV400\n>cero aumento",
+      "fotos": [
+        "img/productos/20261116-144241-x0z-1.jpg",
+        "img/productos/20261116-144248-hbq-2.jpg",
+        "img/productos/20261116-144253-fr5-3.jpg"
+      ],
+      "colores": [
+        "PLATEADO"
+      ],
+      "categoria": "Accesorios",
+      "disponible": true,
+      "tallas": [
+        "Única"
+      ]
+    },
+    {
+      "perchero": false,
+      "precio": 36000,
       "fotoVitrina": "img/productos/20261114-193515-dvz-lentes-jacob-vitrina.png",
       "nombre": "MARC JACOBS",
       "vitrina": true,
@@ -11,17 +31,17 @@
         "img/productos/20261114-193401-9o7-1.jpg",
         "img/productos/20261114-193406-j6g-2.jpg",
         "img/productos/20261114-193412-419-3.jpg",
-        "img/productos/20261114-193515-dvz-lentes-jacob-vitrina.png"
+        "img/productos/20261116-142533-77b-4.jpg"
       ],
       "colores": [
         "VERDE BOTELLA / CAREY"
       ],
       "categoria": "Accesorios",
       "disponible": true,
+      "etiqueta": "Nuevo",
       "tallas": [
         "Única"
-      ],
-      "etiqueta": "Nuevo"
+      ]
     },
     {
       "perchero": true,
@@ -42,11 +62,11 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
+      "etiqueta": "Nuevo",
       "fotoMedidas": "img/productos/20261114-181405-47x-medidas-polera.jpg",
       "tallas": [
         "XL"
-      ],
-      "etiqueta": "Nuevo"
+      ]
     },
     {
       "perchero": false,
@@ -65,11 +85,11 @@
       ],
       "categoria": "Poleras",
       "disponible": true,
+      "etiqueta": "Nuevo",
       "fotoMedidas": "img/productos/20261113-191905-z23-medidas-polera.jpg",
       "tallas": [
         "XL"
-      ],
-      "etiqueta": "Nuevo"
+      ]
     },
     {
       "perchero": false,
@@ -455,10 +475,10 @@
       ],
       "categoria": "Gorras",
       "disponible": true,
+      "etiqueta": "Nuevo",
       "tallas": [
         "Única"
-      ],
-      "etiqueta": "Nuevo"
+      ]
     },
     {
       "perchero": false,
@@ -477,10 +497,10 @@
       ],
       "categoria": "Gorras",
       "disponible": true,
+      "etiqueta": "Nuevo",
       "tallas": [
         "Única"
-      ],
-      "etiqueta": "Nuevo"
+      ]
     },
     {
       "perchero": false,
