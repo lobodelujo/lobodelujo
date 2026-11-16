@@ -79,7 +79,8 @@
 
   var mostrar = function () {
     poner();
-    var si = enProductos();
+    // Solo cuando ya se ve la lista (no en la pantalla de "Iniciar sesión")
+    var si = enProductos() && filas().length > 0;
     caja.hidden = !si;
     document.body.classList.toggle("con-buscador-panel", si);
     if (si) filtrar();
@@ -94,7 +95,11 @@
   new MutationObserver(function () {
     if (pendiente) return;
     pendiente = true;
-    setTimeout(function () { pendiente = false; if (enProductos()) { if (caja.hidden) mostrar(); else if (texto) filtrar(); } else if (!caja.hidden) mostrar(); }, 150);
+    setTimeout(function () {
+      pendiente = false;
+      if (enProductos()) { if (caja.hidden) mostrar(); else if (texto) filtrar(); else if (!filas().length) mostrar(); }
+      else if (!caja.hidden) mostrar();
+    }, 150);
   }).observe(document.documentElement, { childList: true, subtree: true });
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", mostrar); else mostrar();
