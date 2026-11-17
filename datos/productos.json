@@ -2,6 +2,33 @@
   "productos": [
     {
       "perchero": false,
+      "precio": 46000,
+      "nombre": "ROUGHPLAY",
+      "vitrina": false,
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo en serigrafia /detalles con brillos\n>extensión de polera blanca\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261117-002532-j7d-4.jpg",
+        "img/productos/20261117-002540-l4o-2.jpg",
+        "img/productos/20261117-002552-0ac-3.jpg",
+        "img/productos/20261117-002545-9jl-1.jpg"
+      ],
+      "colores": [
+        "GRIS"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "medidasTallas": [
+        {
+          "talla": "L",
+          "foto": "img/productos/20261117-002434-ank-medidas-polera.jpg"
+        }
+      ],
+      "tallas": [
+        "L"
+      ]
+    },
+    {
+      "perchero": false,
       "precio": 43000,
       "nombre": "BURBERRY",
       "vitrina": false,
