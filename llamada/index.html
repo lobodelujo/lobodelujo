@@ -51,6 +51,10 @@
 
     /* 2 · El video al contestar */
     #contesta { background: #000; }
+    /* Parte 2 cargada detrás (sin reproducirse); se muestra recién cuando ya está sonando */
+    #v-contesta2 { opacity: 0; }
+    #contesta.parte2 #v-contesta { opacity: 0; }
+    #contesta.parte2 #v-contesta2 { opacity: 1; }
     .saltar { position: absolute; z-index: 2; right: 16px; top: max(18px, env(safe-area-inset-top)); padding: 8px 14px; border-radius: 999px; border: 0;
       background: rgba(11,11,12,.6); color: var(--texto); font: 600 13px "Inter", sans-serif; cursor: pointer; }
     .sonido { position: absolute; z-index: 2; left: 16px; top: max(18px, env(safe-area-inset-top)); padding: 8px 14px; border-radius: 999px; border: 0;
@@ -99,6 +103,7 @@
 
   <!-- 2 · Al contestar: el video con sonido -->
   <section class="capa" id="contesta" hidden>
+    <video id="v-contesta2" playsinline preload="auto"></video>
     <video id="v-contesta" playsinline preload="auto"></video>
     <button class="sonido" id="sonido" hidden>🔊 Activar sonido</button>
     <button class="saltar" id="saltar">Saltar ›</button>
@@ -129,12 +134,14 @@
     var POSTER = "/llamada/lobo-poster-3.jpg";
 
     var $ = function (s) { return document.querySelector(s); };
-    // Un solo reproductor: al terminar la parte 1 carga la 2 en el mismo (nunca suenan dos a la vez)
-    var vLlamada = $("#v-llamada"), vContesta = $("#v-contesta"), enParte2 = false;
+    // La parte 2 espera cargada en un segundo reproductor, SIN reproducirse (así nunca suenan dos a la vez).
+    // Al terminar la 1 parte la 2 al instante y se muestra cuando ya está sonando: el cambio no se nota.
+    // Si el teléfono no deja partir la 2 sola, se carga la 2 en el mismo reproductor (respaldo).
+    var vLlamada = $("#v-llamada"), vContesta = $("#v-contesta"), vContesta2 = $("#v-contesta2");
+    var modo = 1; // 1 = parte 1 · 2 = parte 2 en su reproductor · 3 = parte 2 en el reproductor de la 1 (respaldo)
     vLlamada.poster = POSTER; vLlamada.src = VIDEO_LLAMADA;
     vContesta.src = VIDEO_CONTESTA;
-    // La parte 2 se descarga por adelantado (queda en caché) para que el cambio sea inmediato
-    function precargar2() { try { fetch(VIDEO_CONTESTA_2).then(function (r) { return r.blob(); }).catch(function () {}); } catch (e) {} }
+    vContesta2.src = VIDEO_CONTESTA_2;
     var inicio = 0, ctx = null, timbre = null;
 
     // Sonidos hechos en el navegador (sin archivos): el timbre de llamada y el "tu-tu-tu" al colgar
@@ -172,7 +179,10 @@
       $("#llamada").hidden = true;
       $("#contesta").hidden = false;
       inicio = Date.now();
-      if (enParte2) { enParte2 = false; vContesta.src = VIDEO_CONTESTA; }
+      if (modo === 3) vContesta.src = VIDEO_CONTESTA;
+      modo = 1;
+      $("#contesta").classList.remove("parte2");
+      vContesta2.pause(); vContesta2.currentTime = 0;
       vContesta.currentTime = 0;
       vContesta.muted = false;
       var p = vContesta.play();
@@ -180,16 +190,23 @@
         // Si el teléfono no deja partir con sonido, parte en silencio con un botón para activarlo
         vContesta.muted = true; vContesta.play(); $("#sonido").hidden = false;
       });
-      precargar2();
     }
     function parte2() {
-      enParte2 = true;
-      vContesta.src = VIDEO_CONTESTA_2;
-      var q = vContesta.play();
-      if (q && q.catch) q.catch(function () { vContesta.muted = true; vContesta.play(); $("#sonido").hidden = false; });
+      modo = 2;
+      vContesta2.muted = vContesta.muted;
+      var q = vContesta2.play();
+      var mostrar = function () { if (modo === 2) $("#contesta").classList.add("parte2"); };
+      if (q && q.then) q.then(mostrar).catch(function () {
+        // Respaldo: la parte 2 en el mismo reproductor de la 1
+        modo = 3;
+        vContesta.src = VIDEO_CONTESTA_2;
+        var r = vContesta.play();
+        if (r && r.catch) r.catch(function () { vContesta.muted = true; vContesta.play(); $("#sonido").hidden = false; });
+      });
+      else mostrar();
     }
     function terminar() {
-      vContesta.pause();
+      vContesta.pause(); vContesta2.pause();
       var s = Math.max(1, Math.round((Date.now() - inicio) / 1000));
       $("#fin-tiempo").textContent = String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
       $("#contesta").hidden = true;
@@ -204,9 +221,10 @@
       $("#no-acepta").hidden = false;
       setTimeout(function () { $("#no-acepta").hidden = true; contestar(); }, 1800);
     });
-    $("#sonido").addEventListener("click", function () { vContesta.muted = false; $("#sonido").hidden = true; });
+    $("#sonido").addEventListener("click", function () { vContesta.muted = false; vContesta2.muted = false; $("#sonido").hidden = true; });
     $("#saltar").addEventListener("click", terminar);
-    vContesta.addEventListener("ended", function () { if (enParte2) terminar(); else parte2(); });
+    vContesta.addEventListener("ended", function () { if (modo === 1) parte2(); else if (modo === 3) terminar(); });
+    vContesta2.addEventListener("ended", function () { if (modo === 2) terminar(); });
     $("#repetir").addEventListener("click", function () {
       $("#fin").hidden = true; $("#llamada").hidden = false; vLlamada.play();
     });
