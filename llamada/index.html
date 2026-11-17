@@ -51,6 +51,10 @@
 
     /* 2 · El video al contestar */
     #contesta { background: #000; }
+    /* El video va en 2 partes (más calidad con archivos livianos): la 2 espera invisible detrás y aparece al terminar la 1 */
+    #v-contesta2 { opacity: 0; }
+    #contesta.parte2 #v-contesta { opacity: 0; }
+    #contesta.parte2 #v-contesta2 { opacity: 1; }
     .saltar { position: absolute; z-index: 2; right: 16px; top: max(18px, env(safe-area-inset-top)); padding: 8px 14px; border-radius: 999px; border: 0;
       background: rgba(11,11,12,.6); color: var(--texto); font: 600 13px "Inter", sans-serif; cursor: pointer; }
     .sonido { position: absolute; z-index: 2; left: 16px; top: max(18px, env(safe-area-inset-top)); padding: 8px 14px; border-radius: 999px; border: 0;
@@ -99,6 +103,7 @@
 
   <!-- 2 · Al contestar: el video con sonido -->
   <section class="capa" id="contesta" hidden>
+    <video id="v-contesta2" playsinline preload="auto"></video>
     <video id="v-contesta" playsinline preload="auto"></video>
     <button class="sonido" id="sonido" hidden>🔊 Activar sonido</button>
     <button class="saltar" id="saltar">Saltar ›</button>
@@ -121,15 +126,18 @@
   <script>
     // ===== Videos de "La llamada del lobo" (2026-11-16) =====
     // VIDEO_LLAMADA: el lobo asomándose detrás de la columna con el celular (toma 7, la misma de la historia), en bucle y sin sonido
-    // VIDEO_CONTESTA: el reel completo con la voz del lobo, al aceptar (720p liviano del video final)
+    // VIDEO_CONTESTA + VIDEO_CONTESTA_2: el reel completo con la voz del lobo, al aceptar, en 1080p y en 2 partes
+    // (cortado en el seg 20,05, un fundido a negro con audio bajo, para que el cambio no se note)
     var VIDEO_LLAMADA = "/llamada/lobo-llamando-2.mp4";
-    var VIDEO_CONTESTA = "/llamada/lobo-contesta.mp4";
+    var VIDEO_CONTESTA = "/llamada/lobo-contesta-1.mp4";
+    var VIDEO_CONTESTA_2 = "/llamada/lobo-contesta-2.mp4";
     var POSTER = "/llamada/lobo-poster-2.jpg";
 
     var $ = function (s) { return document.querySelector(s); };
-    var vLlamada = $("#v-llamada"), vContesta = $("#v-contesta");
+    var vLlamada = $("#v-llamada"), vContesta = $("#v-contesta"), vContesta2 = $("#v-contesta2");
     vLlamada.poster = POSTER; vLlamada.src = VIDEO_LLAMADA;
     vContesta.src = VIDEO_CONTESTA;
+    vContesta2.src = VIDEO_CONTESTA_2;
     var inicio = 0, ctx = null, timbre = null;
 
     // Sonidos hechos en el navegador (sin archivos): el timbre de llamada y el "tu-tu-tu" al colgar
@@ -167,16 +175,29 @@
       $("#llamada").hidden = true;
       $("#contesta").hidden = false;
       inicio = Date.now();
+      $("#contesta").classList.remove("parte2");
       vContesta.currentTime = 0;
       vContesta.muted = false;
       var p = vContesta.play();
       if (p && p.catch) p.catch(function () {
         // Si el teléfono no deja partir con sonido, parte en silencio con un botón para activarlo
-        vContesta.muted = true; vContesta.play(); $("#sonido").hidden = false;
+        vContesta.muted = true; vContesta2.muted = true; vContesta.play(); $("#sonido").hidden = false;
       });
+      // Dentro del mismo toque se "desbloquea" la parte 2 (el iPhone solo deja sonar videos tocados por la persona)
+      vContesta2.muted = vContesta.muted;
+      var q = vContesta2.play();
+      var detener = function () { vContesta2.pause(); vContesta2.currentTime = 0; };
+      if (q && q.then) q.then(detener).catch(function () {}); else detener();
+    }
+    function parte2() {
+      vContesta2.muted = vContesta.muted;
+      vContesta2.currentTime = 0;
+      var q = vContesta2.play();
+      if (q && q.catch) q.catch(function () { vContesta2.muted = true; vContesta2.play(); $("#sonido").hidden = false; });
+      $("#contesta").classList.add("parte2");
     }
     function terminar() {
-      vContesta.pause();
+      vContesta.pause(); vContesta2.pause();
       var s = Math.max(1, Math.round((Date.now() - inicio) / 1000));
       $("#fin-tiempo").textContent = String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
       $("#contesta").hidden = true;
@@ -191,9 +212,10 @@
       $("#no-acepta").hidden = false;
       setTimeout(function () { $("#no-acepta").hidden = true; contestar(); }, 1800);
     });
-    $("#sonido").addEventListener("click", function () { vContesta.muted = false; $("#sonido").hidden = true; });
+    $("#sonido").addEventListener("click", function () { vContesta.muted = false; vContesta2.muted = false; $("#sonido").hidden = true; });
     $("#saltar").addEventListener("click", terminar);
-    vContesta.addEventListener("ended", terminar);
+    vContesta.addEventListener("ended", parte2);
+    vContesta2.addEventListener("ended", terminar);
     $("#repetir").addEventListener("click", function () {
       $("#fin").hidden = true; $("#llamada").hidden = false; vLlamada.play();
     });
