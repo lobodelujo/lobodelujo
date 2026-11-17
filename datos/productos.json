@@ -3,6 +3,35 @@
     {
       "perchero": false,
       "precio": 46000,
+      "nombre": "LOST INTRICACY",
+      "vitrina": false,
+      "descripcion": ">100% algodón\n>cuello redondo\n>logo en serigrafia adelante y atrás\n>lavar a mano",
+      "fotos": [
+        "img/productos/20261117-151443-y8r-sin-titulo-post-de-instagram-4-5.jpg",
+        "img/productos/20261117-151450-48c-2.jpg",
+        "img/productos/20261117-151459-get-3.jpg",
+        "img/productos/20261117-151454-ljy-1.jpg"
+      ],
+      "colores": [
+        "NEGRO AGRISADO"
+      ],
+      "categoria": "Poleras",
+      "disponible": true,
+      "fotoMedidas": "img/productos/20261117-151110-bs9-medidas-polera.jpg",
+      "medidasTallas": [
+        {
+          "talla": "XL",
+          "foto": "img/productos/20261117-151355-ayt-medidas-polera.jpg"
+        }
+      ],
+      "tallas": [
+        "L",
+        "XL"
+      ]
+    },
+    {
+      "perchero": false,
+      "precio": 46000,
       "nombre": "ROUGH PLAY",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo en serigrafia /detalles con brillos\n>extensión de polera blanca\n>lavar a mano",
