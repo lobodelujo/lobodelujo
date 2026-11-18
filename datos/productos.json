@@ -2,7 +2,7 @@
   "productos": [
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "LOST INTRICACY",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo en serigrafia adelante y atrás\n>lavar a mano",
@@ -31,7 +31,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "ROUGH PLAY",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo en serigrafia /detalles con brillos\n>extensión de polera blanca\n>lavar a mano",
@@ -58,7 +58,7 @@
     },
     {
       "perchero": false,
-      "precio": 43000,
+      "precio": 40000,
       "nombre": "BURBERRY",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo cocido sobre la prenda adelante\n>bordado\n>lavar a mano",
@@ -166,7 +166,7 @@
       "fotoPerchero": "img/productos/20261114-184933-fhi-1.png",
       "fotoPercheroLado": "img/productos/20261114-184921-p04-lobo-de-lujo.png",
       "fotoPercheroEspalda": "img/productos/20261114-184939-935-2.png",
-      "precio": 43000,
+      "precio": 40000,
       "nombre": "VALLEY",
       "vitrina": false,
       "descripcion": ">100% algodón\n>polera sin mangas\n>cuello redondo\n>serigrafia al tacto\n>lavar a mano",
@@ -188,7 +188,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "ROUGH PLAY",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo en serigrafia al tacto adelante y atrás\n>detalles con brillos",
@@ -233,7 +233,7 @@
     },
     {
       "perchero": false,
-      "precio": 43000,
+      "precio": 40000,
       "nombre": "MONCLER",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo en serigrafia adelante\n>detalles bordados\n>lavar a mano",
@@ -254,7 +254,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "OFF WHITE",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>detalles bordados\n>logo en serigrafia atrás\n>detalles con hilo\n>lavar a mano",
@@ -275,7 +275,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "GODSPEED",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo en serigrafia adelante y atrás\n>lavar a mano",
@@ -293,7 +293,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "ETERNAL",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo en alta densidad adelante y atrás\n>lavar a mano",
@@ -315,7 +315,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "ESSENTIALS",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo en serigrafia adelante y atrás\n>lavar a mano",
@@ -337,7 +337,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "ROUGH PLAY",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo en serigrafia adelante y atrás\n>detalles con brillos\n>lavar a mano",
@@ -358,7 +358,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "ESSENTIALS",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo en alta densidad adelante y atrás\n>lavar a mano",
@@ -380,7 +380,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "ESSENTIALS",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo en alta densidad adelante y atrás\n>lavar a mano",
@@ -402,7 +402,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "DOLCE&GABBANA",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo bordado adelante\n>lavar a mano",
@@ -424,7 +424,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "CHROME HEARTS",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo bordado adelante y atrás\n>lavar a mano\n>placa metálica",
@@ -446,7 +446,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "CACTUS JACK",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo en serigrafia adelante y atrás\n>lavar a mano",
@@ -512,7 +512,7 @@
     },
     {
       "perchero": false,
-      "precio": 43000,
+      "precio": 40000,
       "nombre": "DIOR",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo serigrafia al tacto\n>lavar a mano",
@@ -725,7 +725,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "ROUGHPLAY",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo serigrafia al tacto / brillos\n>lavar a mano",
@@ -746,7 +746,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "HELLSTAR",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo alta densidad\n>lavar a mano",
@@ -770,7 +770,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "DOLCE&GABBANA",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo bordado\n>lavar a mano",
@@ -794,7 +794,7 @@
     },
     {
       "perchero": false,
-      "precio": 43000,
+      "precio": 40000,
       "nombre": "CHROME HEARTS",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo serigrafia al tacto\n>lavar a mano",
@@ -816,7 +816,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "DOLCE&GABBANA",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo bordado\n>lavar a mano",
@@ -838,7 +838,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "CHROME HEARTS",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo alta densidad \n>lavar a mano",
@@ -860,7 +860,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "DOLCE&GABBANA",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo bordado\n>lavar a mano",
@@ -882,7 +882,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "BALENCIAGA",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo bordado\n>lavar a mano",
@@ -906,7 +906,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "PALM ANGELS",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo en serigrafia al tacto adelante y atrás\n>lavar a mano",
@@ -1042,7 +1042,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "OFF WHITE",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>estampado serigrafia al tacto\n>lavar a mano",
@@ -1065,7 +1065,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "OFF WHITE",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo serigrafia\n>lavar a mano",
@@ -1114,7 +1114,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "CHROME HEARTS",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo cocido sobre la prenda adelante y atrás\n>bordado \n>lavar a mano",
@@ -1203,7 +1203,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "OFF WHITE",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo serigrafía al tacto\n>lavar a mano",
@@ -1232,7 +1232,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "REPRESENT",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo estampado sobre toda la prenda\n>lavar a mano",
@@ -1255,7 +1255,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "OFF WHITE",
       "vitrina": false,
       "descripcion": ">100% algodón\n>cuello redondo\n>logo bordado sobre la prenda adelante y atrás\n>lavar a mano",
@@ -1279,7 +1279,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "MONCLER",
       "descripcion": ">100% algodón\n>cuello redondo\n>adelante logo bordado sobre la prenda\n>logo bordado en la manga del lado izquierdo\n>lavar a mano",
       "fotos": [
@@ -1300,7 +1300,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "DIOR",
       "descripcion": ">100% algodón\n>cuello redondo\n>logo doble capa alta densidad efecto flock\n>atrás logo del nombre en alta densidad\n>lavar a mano",
       "fotos": [
@@ -1322,7 +1322,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "OFF WHITE",
       "descripcion": ">100% algodón\n>cuello redondo\n>logo al tacto en serigrafía\n>lavar a mano",
       "precioAntes": "",
@@ -1348,7 +1348,7 @@
       "fotoPerchero": "img/productos/20261026-104245-yrc-1.png",
       "fotoPercheroLado": "img/productos/20261026-104301-7yt-3.png",
       "fotoPercheroEspalda": "img/productos/20261026-104317-kek-2.png",
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "GUCCI",
       "descripcion": ">100% algodón\n>cuello redondo\n>logo cifrado en toda la prenda en alta densidad\n>lavar a mano",
       "precioAntes": "",
@@ -1372,7 +1372,7 @@
     },
     {
       "perchero": false,
-      "precio": 43000,
+      "precio": 40000,
       "nombre": "BURBERRY",
       "descripcion": ">100% algodón\n>cuello redondo\n>logo bordado en hilo\n>lavar a mano",
       "fotos": [
@@ -1391,7 +1391,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "OFF WHITE",
       "descripcion": ">100% algodón\n>cuello redondo\n>serigrafia al tacto\n>lavar a mano",
       "fotos": [
@@ -1415,7 +1415,7 @@
       "fotoPerchero": "img/productos/20261114-191314-ens-1.png",
       "fotoPercheroLado": "img/productos/20261114-191308-6sx-3.png",
       "fotoPercheroEspalda": "img/productos/20261114-191319-e82-2.png",
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "SUPREME",
       "descripcion": ">100% algodón\n>cuello redondo\n>logo serigrafia al tacto\n>lavar a mano",
       "fotos": [
@@ -1437,7 +1437,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "SUPREME",
       "descripcion": ">100% algodón\n>cuello redondo\n>serigrafia al tacto \n>lavar a mano",
       "fotos": [
@@ -1459,7 +1459,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "REPRESENT",
       "descripcion": ">100% algodón\n>cuello redondo\n>serigrafia alta densidad\n>lavar a mano",
       "fotos": [
@@ -1481,7 +1481,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "GUCCI",
       "descripcion": ">100% algodón\n>cuello redondo\n>polera en hilo\n>logo bordado\n>lavar a mano",
       "precioAntes": 0,
@@ -1504,7 +1504,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "CHROME HEARTS",
       "descripcion": ">100% algodón\n>cuello redondo\n>logo bordado sobre la prenda adelante y atrás\n>lavar a mano",
       "fotos": [
@@ -1526,7 +1526,7 @@
     },
     {
       "perchero": false,
-      "precio": 43000,
+      "precio": 40000,
       "nombre": "PALM ANGELS",
       "descripcion": ">100% algodón\n>cuello redondo\n>logo bordado sobre la tela\n>lavar a mano",
       "fotos": [
@@ -1547,7 +1547,7 @@
     },
     {
       "perchero": false,
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "CHROME HEARTS",
       "descripcion": ">100% algodón\n>cuello redondo\n>logo bordado sobre la prenda adelante\n>costuras oscuras en la parte frontal\n>lavar a mano",
       "fotos": [
@@ -1569,7 +1569,7 @@
       ]
     },
     {
-      "precio": 43000,
+      "precio": 40000,
       "nombre": "LOUIS VUITTON",
       "descripcion": ">100% algodón\n>cuello redondo\n>logo estampado\n>atrás bordado con hilo\n>lavar a mano",
       "fotos": [
@@ -1591,7 +1591,7 @@
       ]
     },
     {
-      "precio": 43000,
+      "precio": 40000,
       "nombre": "LOUIS VUITTON",
       "descripcion": ">100% algodón\n>cuello redondo\n>logo estampado\n>atrás bordado con hilo\n>lavar a mano",
       "fotos": [
@@ -1612,7 +1612,7 @@
       ]
     },
     {
-      "precio": 43000,
+      "precio": 40000,
       "nombre": "PRADA",
       "descripcion": ">100% algodón\n>cuello redondo\n>logo con costura\n>lavar a mano",
       "fotos": [
@@ -1632,7 +1632,7 @@
       ]
     },
     {
-      "precio": 43000,
+      "precio": 40000,
       "nombre": "DIOR",
       "descripcion": ">100% algodón\n>cuello redondo\n>logo bordado\n>lavar a mano",
       "fotos": [
@@ -1652,7 +1652,7 @@
       ]
     },
     {
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "ESSENTIALS",
       "descripcion": ">100% algodón\n>cuello redondo\n>logo alta densidad \n>lavar a mano",
       "fotos": [
@@ -1672,7 +1672,7 @@
       ]
     },
     {
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "OFF WHITE",
       "descripcion": ">100% algodón\n>cuello redondo\n>logo cocido sobre la prenda adelante y atrás\n>bordado\n>lavar a mano",
       "fotos": [
@@ -1694,7 +1694,7 @@
       ]
     },
     {
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "REPRESENT",
       "descripcion": ">100% algodón\n>cuello redondo\n>logo estampado serigrafia\n>hebilla metálica\n>lavar a mano",
       "fotos": [
@@ -1715,7 +1715,7 @@
       ]
     },
     {
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "LOUIS VUITTON",
       "descripcion": ">100% algodón\n>cuello redondo\n>logo cocido sobre la prenda adelante y atrás\n>bordado\n>lavar a mano",
       "fotos": [
@@ -1736,7 +1736,7 @@
       ]
     },
     {
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "CHROME HEARTS",
       "descripcion": ">100% algodón\n>logo bordado adelante y atrás\n>color negro\n>lavar a mano\n",
       "fotos": [
@@ -1757,7 +1757,7 @@
       ]
     },
     {
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "GUCCI",
       "descripcion": ">100% algodón\n>polera en hilo\n>logo bordado\n>finales de prenda con resorte\n>cuello redondo",
       "fotos": [
@@ -1778,7 +1778,7 @@
       ]
     },
     {
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "BALENCIAGA",
       "descripcion": ">100% algodón\n>cuello redondo\n> diseño adelante y atrás \n>estampado y alto relieve  ",
       "fotos": [
@@ -1799,7 +1799,7 @@
       ]
     },
     {
-      "precio": 46000,
+      "precio": 44000,
       "nombre": "GUCCI",
       "descripcion": ">cuello redondo\n>100% algodón\n>logo en el pecho en alto relieve\n>logo cocido en la espalda",
       "fotos": [
