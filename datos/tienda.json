@@ -9,7 +9,8 @@
     "Polerones"
   ],
   "videoPortada": "img/productos/20261020-141033-3de-video-final-pc.mp4",
-  "fichaInfo": "Envío $6.000 a todo Chile · Gratis en Antofagasta · Cambios por talla hasta 20 días",
+  "fichaInfo": "Envío $5.000 a todo Chile · Gratis en Antofagasta · Cambios por talla hasta 20 días",
+  "costoEnvio": 5000,
   "frase": "Presencia",
   "portadaImagenMovil": "img/portada-movil.jpg",
   "videoPoster": "img/productos/20261026-205548-jpz-justin-dj-vertical-6.jpg",
@@ -24,7 +25,7 @@
     },
     {
       "pregunta": "¿Cuánto cuesta el envío?",
-      "respuesta": "El envío cuesta $6.000 a cualquier región de Chile. Dentro de la ciudad de Antofagasta el delivery es gratis."
+      "respuesta": "El envío cuesta $5.000 por pedido a cualquier región de Chile, sin importar cuántas prendas lleves. Puedes pagarlo junto con tu pedido o al recibir (por pagar). Dentro de la ciudad de Antofagasta el delivery es gratis."
     },
     {
       "pregunta": "¿Puedo recibir mi pedido en persona?",
