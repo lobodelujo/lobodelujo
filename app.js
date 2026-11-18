@@ -1334,6 +1334,26 @@ $("#bolsa-nota").textContent = `Envío ${fmt(COSTO_ENVIO)} por pedido, sin impor
 
 // La orden viaja dentro del link (lobodelujo.cl/orden?d=...): functions/orden.js la dibuja con el formato
 // "NUEVA ORDEN" (fotos, tallas, cantidades, subtotal, envío y total). Lleva el precio que vio el cliente.
+// Link corto (lobodelujo.cl/orden/K6CT0): la orden se guarda en el almacén de Cloudflare (functions/api/orden.js).
+// Si no responde en 3 s o falla, se usa el link largo, que funciona solo: nunca se pierde un pedido.
+async function linkCorto(items, envio) {
+  const largo = linkOrden(items, envio);
+  try {
+    const ctrl = new AbortController();
+    const reloj = setTimeout(() => ctrl.abort(), 3000);
+    const r = await fetch("/api/orden", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ d: largo.split("?d=")[1] }),
+      signal: ctrl.signal,
+    });
+    clearTimeout(reloj);
+    const { codigo } = await r.json();
+    if (r.ok && /^[0-9A-Z]{4,10}$/.test(codigo || "")) return `${location.origin}/orden/${codigo}`;
+  } catch {}
+  return largo;
+}
+
 function linkOrden(items, envio) {
   const datos = {
     v: 1,
@@ -1367,14 +1387,27 @@ function pedirConEnvio(items) {
     </button>`;
   $("#elegir-envio").hidden = false;
 }
-$("#elegir-envio").addEventListener("click", (e) => {
+$("#elegir-envio").addEventListener("click", async (e) => {
   const b = e.target.closest("[data-envio]");
   if (!b && !e.target.closest("[data-cerrar-envio]")) return;
   $("#elegir-envio").hidden = true;
   if (!b || !pedidoPendiente) return;
   const envio = { ahora: "a", recibir: "r", antofagasta: "x" }[b.dataset.envio];
-  enviarWa(`🧾 *NUEVA ORDEN*\n${linkOrden(pedidoPendiente.items, envio)}\n\n¿Me confirmas disponibilidad?`);
+  const items = pedidoPendiente.items;
   pedidoPendiente = null;
+  // La pestaña de WhatsApp se abre al tiro (si se abre después de esperar, el teléfono la bloquea)
+  // y recibe el link cuando la orden ya está guardada
+  let ventana = null;
+  if (NUMEROS.length < 2) {
+    try {
+      ventana = window.open("", "_blank");
+      ventana.document.write('<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><p style="font-family:sans-serif;text-align:center;margin-top:40vh;font-size:18px">Abriendo WhatsApp… 🐺</p>');
+    } catch {}
+  }
+  const texto = `🧾 *NUEVA ORDEN*\n${await linkCorto(items, envio)}\n\n¿Me confirmas disponibilidad?`;
+  if (NUMEROS.length >= 2) enviarWa(texto);
+  else if (ventana && !ventana.closed) ventana.location.href = linkWa(texto);
+  else location.href = linkWa(texto);
 });
 
 // ---------- Avisos, teclado y links directos ----------
