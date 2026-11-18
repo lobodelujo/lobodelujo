@@ -131,6 +131,7 @@ collections:
               - { name: fotoMovil, label: "Foto para celular (vertical 1080×1350, opcional)", widget: image, required: false, choose_url: false }
           - { name: categorias, label: "Orden de las categorías (separadas por coma)", widget: list }
           - { name: fichaInfo, label: "📦 Línea corta de envío y cambios en cada ficha (separa cada dato con ·)", widget: string, required: false }
+          - { name: costoEnvio, label: "💲 Valor del envío por pedido (se suma en el carrito si el cliente elige pagarlo de una vez)", widget: number, value_type: int, min: 0, required: false }
           - name: preguntas
             label: "❓ Preguntas frecuentes (salen al final de la página, antes del pie)"
             label_singular: pregunta
