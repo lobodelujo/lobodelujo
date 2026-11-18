@@ -30,7 +30,7 @@ const tipo = (cat) => {
   return TIPO[c] || c.replace(/es$|s$/, "") || "prenda";
 };
 
-function leerOrden(d) {
+export function leerOrden(d) {
   const b64 = String(d || "").replace(/-/g, "+").replace(/_/g, "/");
   const bin = atob(b64 + "===".slice((b64.length + 3) % 4));
   const bytes = Uint8Array.from(bin, (c) => c.charCodeAt(0));
@@ -85,17 +85,26 @@ const respuesta = (html, estado = 200) =>
     headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "public, max-age=3600", "X-Robots-Tag": "noindex" },
   });
 
+// Página simple con el logo y un mensaje (link malo, orden que todavía no llega…)
+export const paginaAviso = (texto, estado = 400, extraHead = "") =>
+  new Response(`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>Orden · Lobo de Lujo</title>${extraHead}</head>
+<body style="margin:0;min-height:100vh;display:grid;place-items:center;font-family:sans-serif;background:#ececec;text-align:center;padding:20px">
+<div><img src="/img/logo-lobo-128.png" alt="" width="80"><p>${esc(texto)}</p><p><a href="/">Ir al catálogo</a></p></div></body></html>`, {
+    status: estado,
+    headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "X-Robots-Tag": "noindex" },
+  });
+
+// Link largo de antes (/orden?d=...): sigue funcionando, y es el respaldo si el almacén de órdenes falla
 export async function onRequest({ request, env }) {
   const url = new URL(request.url);
-  const origin = url.origin;
+  return pintarOrden(url.searchParams.get("d"), { origin: url.origin, env });
+}
 
+// Dibuja la orden. "codigo" es el código corto (/orden/K6CT0) cuando la orden viene del almacén
+export async function pintarOrden(d, { origin, env, codigo = "" }) {
   let orden;
-  try { orden = leerOrden(url.searchParams.get("d")); }
-  catch {
-    return respuesta(`<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><title>Orden · Lobo de Lujo</title></head>
-<body style="margin:0;min-height:100vh;display:grid;place-items:center;font-family:sans-serif;background:#ececec;text-align:center">
-<div><img src="/img/logo-lobo-128.png" alt="" width="80"><p>Este link de orden no es válido o está incompleto.</p><p><a href="/">Ir al catálogo</a></p></div></body></html>`, 400);
-  }
+  try { orden = leerOrden(d); }
+  catch { return paginaAviso("Este link de orden no es válido o está incompleto."); }
 
   const catalogo = await catalogoPorId(env, origin);
   const subtotal = orden.items.reduce((t, i) => t + i.precio * i.cant, 0);
@@ -109,7 +118,7 @@ export async function onRequest({ request, env }) {
   const fecha = orden.fecha
     ? new Intl.DateTimeFormat("es-CL", { timeZone: "America/Santiago", dateStyle: "short", timeStyle: "short" }).format(new Date(orden.fecha))
     : "";
-  const numero = orden.fecha ? orden.fecha.toString(36).slice(-5).toUpperCase() : "";
+  const numero = codigo || (orden.fecha ? orden.fecha.toString(36).slice(-5).toUpperCase() : "");
 
   const prendas = orden.items.map((i) => {
     const hoy = catalogo.get(i.id);
