@@ -180,6 +180,27 @@ export async function onRequest({ request, env }) {
   .total b { font-size: clamp(26px, 8vw, 38px); font-weight: 800; }
   .total strong { font-size: clamp(24px, 7.4vw, 34px); font-weight: 800; }
   .pie { margin-top: 26px; display: flex; justify-content: space-between; gap: 10px; color: #8a8a8a; font-size: 12px; font-weight: 600; }
+  /* Solo para la tienda: responder "Disponible" al cliente */
+  .tienda { max-width: 560px; margin: 16px auto 0; display: grid; gap: 8px; }
+  .solo { text-align: center; font-size: 12px; font-weight: 700; color: #777; }
+  button { font: inherit; cursor: pointer; }
+  .btn-ok { border: 0; border-radius: 999px; padding: 15px 18px; background: #25d366; color: #06301a; font-size: 16px; font-weight: 800; }
+  .btn-sec { border: 2px solid #111; border-radius: 999px; padding: 12px 18px; background: #fff; color: #111; font-size: 15px; font-weight: 700; }
+  .soy { text-align: center; margin-top: 18px; }
+  .soy button { border: 0; background: none; color: #aaa; font-size: 12px; text-decoration: underline; }
+  .hoja { position: fixed; inset: 0; background: rgba(0, 0, 0, .55); display: grid; place-items: end center; z-index: 10; }
+  .hoja[hidden], .tienda[hidden], .soy[hidden] { display: none; }
+  .hoja-caja { width: min(560px, 100%); max-height: 92vh; overflow-y: auto; background: #fff; border-radius: 20px 20px 0 0; padding: 20px 16px 24px; display: grid; gap: 12px; }
+  .hoja-caja h2 { font-size: 20px; font-weight: 800; text-align: center; }
+  .hoja-caja textarea { width: 100%; font: inherit; font-size: 14px; line-height: 1.45; border: 1.5px solid #ccc; border-radius: 12px; padding: 10px; resize: vertical; }
+  .fila { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+  details { border: 1.5px solid #e2e2e2; border-radius: 12px; padding: 10px 12px; }
+  summary { font-weight: 700; cursor: pointer; }
+  details[open] { display: grid; gap: 8px; }
+  .nota { font-size: 12px; color: #666; }
+  .cerrar { border: 0; background: none; color: #666; text-decoration: underline; font-size: 14px; justify-self: center; }
+  .copiado { text-align: center; font-size: 13px; font-weight: 700; color: #138a3e; min-height: 1em; }
+  @media (min-width: 600px) { .hoja { place-items: center; } .hoja-caja { border-radius: 20px; } }
 </style>
 </head><body>
 <main class="orden">
@@ -194,5 +215,95 @@ export async function onRequest({ request, env }) {
   <div class="total"><b>TOTAL</b><strong>${precio(total)}</strong></div>
   <footer class="pie"><span>${numero ? `Orden #${esc(numero)}` : ""}</span><span>${esc(fecha)}</span><span>lobodelujo.cl</span></footer>
 </main>
+
+<!-- Solo para Lobo de Lujo: aparece en el celular donde se entró al panel (o al tocar "Soy Lobo de Lujo" una vez) -->
+<section class="tienda" id="tienda" hidden>
+  <p class="solo">Solo para Lobo de Lujo 🐺</p>
+  <button class="btn-ok" id="disponible">✅ Disponible · responder al cliente</button>
+</section>
+<p class="soy"><button id="soy">Soy Lobo de Lujo</button></p>
+<div class="hoja" id="hoja" hidden>
+  <div class="hoja-caja" role="dialog" aria-modal="true" aria-labelledby="hoja-titulo">
+    <h2 id="hoja-titulo">Respuesta para el cliente</h2>
+    <textarea id="respuesta" rows="13"></textarea>
+    <div class="fila"><button class="btn-ok" id="enviar">📲 Enviar por WhatsApp</button><button class="btn-sec" id="copiar">📋 Copiar</button></div>
+    <p class="copiado" id="copiado"></p>
+    <details id="caja-datos">
+      <summary>🏦 Tus datos para transferir</summary>
+      <p class="nota">Se guardan solo en este celular (no quedan en la web) y se agregan solos a cada respuesta.</p>
+      <textarea id="datos" rows="6" placeholder="Nombre&#10;RUT&#10;Banco&#10;Tipo de cuenta&#10;Número de cuenta&#10;Correo"></textarea>
+      <button class="btn-sec" id="guardar">Guardar datos</button>
+    </details>
+    <button class="cerrar" id="cerrar">Cerrar</button>
+  </div>
+</div>
+<script type="application/json" id="orden-datos">${JSON.stringify({
+    items: orden.items.map((i) => ({ nombre: i.nombre, talla: i.talla, color: i.color, cant: i.cant, precio: i.precio })),
+    envio: orden.envio, costoEnvio: orden.costoEnvio, subtotal, total, numero,
+  }).replace(/</g, "\\u003c")}</script>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const O = JSON.parse($("orden-datos").textContent);
+  const fmt = (n) => "$" + String(Math.round(Number(n) || 0)).replace(/\\B(?=(\\d{3})+(?!\\d))/g, ".");
+  const leer = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  const guardar = (k, v) => { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } };
+  const CLAVE_DATOS = "lobo-datos-transferencia";
+
+  // En el celular de la tienda (entró al panel en esta web, o tocó "Soy Lobo de Lujo") se ven los botones
+  const mostrar = () => { $("tienda").hidden = false; $("soy").parentNode.hidden = true; };
+  if (leer("lobo-tienda") === "1" || leer("decap-cms-user") || leer("netlify-cms-user")) mostrar();
+  $("soy").onclick = () => { guardar("lobo-tienda", "1"); mostrar(); };
+
+  function respuesta() {
+    const lineas = O.items.map((i) => {
+      const d = [i.talla && "Talla " + i.talla, i.color && "Color " + i.color.toLowerCase()].filter(Boolean).join(" · ");
+      return "• " + i.cant + "x " + i.nombre + (d ? " (" + d + ")" : "") + " – " + fmt(i.precio * i.cant);
+    }).join("\\n");
+    const montos = O.envio === "a"
+      ? "Subtotal: " + fmt(O.subtotal) + "\\nEnvío: " + fmt(O.costoEnvio) + "\\n*Total a pagar: " + fmt(O.total) + "*"
+      : O.envio === "r"
+        ? "*Total a pagar: " + fmt(O.total) + "*\\nEnvío: por pagar al recibir 📦"
+        : "*Total a pagar: " + fmt(O.total) + "*\\nEntrega: delivery gratis en Antofagasta 🛵";
+    const datos = (leer(CLAVE_DATOS) || "").trim();
+    const pago = datos
+      ? "Para confirmar tu compra, transfiere el total a:\\n" + datos
+      : "Para confirmar tu compra, te envío los datos para transferir 👇";
+    const fin = O.envio === "x"
+      ? "Envíame el comprobante y tu dirección para coordinar la entrega 🛵"
+      : "Envíame el comprobante y tus datos de envío: nombre, RUT, teléfono, dirección y comuna 📦";
+    return "¡Hola! 🐺 Sí, tenemos disponible tu pedido ✅\\n\\n" + lineas + "\\n\\n" + montos + "\\n\\n" + pago + "\\n\\n" + fin +
+      (O.numero ? "\\n\\nOrden #" + O.numero : "");
+  }
+
+  const abrir = () => {
+    $("respuesta").value = respuesta();
+    $("datos").value = leer(CLAVE_DATOS) || "";
+    $("caja-datos").open = !$("datos").value;
+    $("copiado").textContent = "";
+    $("hoja").hidden = false;
+  };
+  $("disponible").onclick = abrir;
+  $("cerrar").onclick = () => { $("hoja").hidden = true; };
+  $("hoja").onclick = (e) => { if (e.target === $("hoja")) $("hoja").hidden = true; };
+  $("guardar").onclick = () => {
+    guardar(CLAVE_DATOS, $("datos").value.trim());
+    $("respuesta").value = respuesta();
+    $("caja-datos").open = false;
+    $("copiado").textContent = "Datos guardados en este celular ✅";
+  };
+  // WhatsApp abre la lista de chats: eliges al cliente (sale arriba, porque te acaba de escribir)
+  $("enviar").onclick = () => { window.open("https://wa.me/?text=" + encodeURIComponent($("respuesta").value), "_blank"); };
+  $("copiar").onclick = async () => {
+    const t = $("respuesta").value;
+    let ok = false;
+    try { await navigator.clipboard.writeText(t); ok = true; } catch (e) {
+      $("respuesta").select();
+      try { ok = document.execCommand("copy"); } catch (e2) {}
+    }
+    $("copiado").textContent = ok ? "Copiado ✅ Vuelve al chat del cliente y pégalo" : "Mantén presionado el texto para copiarlo";
+  };
+})();
+</script>
 </body></html>`);
 }
