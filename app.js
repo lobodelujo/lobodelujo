@@ -1118,12 +1118,7 @@ $("#detalle").addEventListener("click", async (e) => {
   const item = { id: actual.id, talla: sel.talla, color: sel.color, cant: sel.cant };
 
   if (accion === "pedir") {
-    const d = descripcionItem(item);
-    pedirConEnvio(
-      `Hola ${TIENDA.nombre} 🐺 Quiero este producto:`,
-      `• ${item.cant}x ${actual.nombre}${d ? ` (${d})` : ""} – ${fmt(actual.precio * item.cant)}\n📸 ${linkProducto(actual)}`,
-      actual.precio * item.cant
-    );
+    pedirConEnvio([item]);
     return;
   }
   agregarABolsa(item);
@@ -1328,12 +1323,7 @@ $("#bolsa-items").addEventListener("click", (e) => {
 });
 $("#enviar-pedido").addEventListener("click", () => {
   if (!bolsa.length) return;
-  const lineas = bolsa.map((i) => {
-    const p = buscarProducto(i.id);
-    const d = descripcionItem(i);
-    return `• ${i.cant}x ${p.nombre}${d ? ` (${d})` : ""} – ${fmt(p.precio * i.cant)}\n📸 ${linkProducto(p)}`;
-  });
-  pedirConEnvio(`Hola ${TIENDA.nombre} 🐺 Quiero hacer este pedido:`, lineas.join("\n\n"), totalBolsa());
+  pedirConEnvio(bolsa.map((i) => ({ ...i })));
 });
 
 // ---------- Envío: antes de abrir WhatsApp el cliente elige cómo lo paga ----------
@@ -1341,8 +1331,30 @@ $("#enviar-pedido").addEventListener("click", () => {
 const COSTO_ENVIO = Number(TIENDA.costoEnvio) > 0 ? Number(TIENDA.costoEnvio) : 5000;
 let pedidoPendiente = null;
 $("#bolsa-nota").textContent = `Envío ${fmt(COSTO_ENVIO)} por pedido, sin importar cuántas prendas. Lo pagas ahora o al recibir.`;
-function pedirConEnvio(saludo, detalle, subtotal) {
-  pedidoPendiente = { saludo, detalle, subtotal };
+
+// La orden viaja dentro del link (lobodelujo.cl/orden?d=...): functions/orden.js la dibuja con el formato
+// "NUEVA ORDEN" (fotos, tallas, cantidades, subtotal, envío y total). Lleva el precio que vio el cliente.
+function linkOrden(items, envio) {
+  const datos = {
+    v: 1,
+    f: Date.now(),
+    e: envio,
+    k: COSTO_ENVIO,
+    i: items.map((i) => {
+      const p = buscarProducto(i.id);
+      return [p.id, p.nombre, p.categoria || "", i.talla || "", i.color || "", i.cant, p.precio, (p.fotos || [])[0] || ""];
+    }),
+  };
+  const bytes = new TextEncoder().encode(JSON.stringify(datos));
+  let bin = "";
+  bytes.forEach((b) => { bin += String.fromCharCode(b); });
+  const d = btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  return `${location.origin}/orden?d=${d}`;
+}
+
+function pedirConEnvio(items) {
+  const subtotal = items.reduce((t, i) => t + buscarProducto(i.id).precio * i.cant, 0);
+  pedidoPendiente = { items, subtotal };
   $("#envio-opciones").innerHTML = `
     <button class="envio-op destacada" data-envio="ahora">
       <b>Sumar el envío de una vez</b><span>Prendas ${fmt(subtotal)} + envío ${fmt(COSTO_ENVIO)}</span><strong>${fmt(subtotal + COSTO_ENVIO)}</strong>
@@ -1360,13 +1372,8 @@ $("#elegir-envio").addEventListener("click", (e) => {
   if (!b && !e.target.closest("[data-cerrar-envio]")) return;
   $("#elegir-envio").hidden = true;
   if (!b || !pedidoPendiente) return;
-  const { saludo, detalle, subtotal } = pedidoPendiente;
-  const cierre = {
-    ahora: `Prendas: ${fmt(subtotal)}\nEnvío: ${fmt(COSTO_ENVIO)}\n*Total a pagar: ${fmt(subtotal + COSTO_ENVIO)}*`,
-    recibir: `*Total prendas: ${fmt(subtotal)}*\nEnvío: lo pago al recibir (por pagar) 📦`,
-    antofagasta: `*Total: ${fmt(subtotal)}*\nEntrega: delivery en Antofagasta (gratis) 🛵`,
-  }[b.dataset.envio];
-  enviarWa(`${saludo}\n\n${detalle}\n\n${cierre}\n\n¿Me confirman disponibilidad?`);
+  const envio = { ahora: "a", recibir: "r", antofagasta: "x" }[b.dataset.envio];
+  enviarWa(`🧾 *NUEVA ORDEN*\n${linkOrden(pedidoPendiente.items, envio)}\n\n¿Me confirmas disponibilidad?`);
   pedidoPendiente = null;
 });
 
