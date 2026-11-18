@@ -776,6 +776,20 @@ img.sin-foto {
 @media (min-width: 600px) { .elegir-caja { border-radius: 18px; } }
 .elegir-caja h3 { font-family: var(--titulo); font-size: 30px; font-weight: 400; letter-spacing: 1px; text-align: center; }
 .wa-opciones { display: grid; gap: 10px; }
+/* Cómo pagar el envío (antes de mandar el pedido) */
+.envio-opciones { display: grid; gap: 10px; }
+.envio-op {
+  display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 3px 14px;
+  width: 100%; padding: 14px 16px; border-radius: 14px; text-align: left;
+  font: inherit; color: var(--texto); background: var(--gris); border: 1.5px solid var(--linea);
+  cursor: pointer; transition: transform .15s, border-color .15s;
+}
+.envio-op b { font-size: 16px; }
+.envio-op span { grid-column: 1; font-size: 13px; color: var(--suave); line-height: 1.35; }
+.envio-op strong { grid-column: 2; grid-row: 1 / span 2; font-size: 19px; color: var(--oro); white-space: nowrap; }
+.envio-op.destacada { border-color: var(--oro); background: rgba(250, 208, 44, .08); }
+.envio-op:hover { border-color: var(--oro); }
+.envio-op:active { transform: scale(.97); }
 
 .toast {
   position: fixed; left: 50%; top: 84px; transform: translateX(-50%); z-index: 50;

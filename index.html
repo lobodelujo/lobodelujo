@@ -170,10 +170,20 @@
     <div class="bolsa-items" id="bolsa-items"></div>
     <div class="bolsa-pie">
       <div class="bolsa-total"><span>Total</span><strong id="bolsa-total">$0</strong></div>
-      <p class="bolsa-nota">El envío se cotiza por WhatsApp según tu ciudad.</p>
+      <p class="bolsa-nota" id="bolsa-nota">Envío $5.000 por pedido, sin importar cuántas prendas. Lo pagas ahora o al recibir.</p>
       <button class="btn btn-wa" id="enviar-pedido">Enviar pedido por WhatsApp</button>
     </div>
   </aside>
+
+  <!-- Antes de mandar el pedido por WhatsApp: el cliente elige cómo paga el envío -->
+  <div class="elegir-wa" id="elegir-envio" hidden>
+    <div class="modal-fondo" data-cerrar-envio></div>
+    <div class="elegir-caja" role="dialog" aria-modal="true" aria-labelledby="envio-titulo">
+      <h3 id="envio-titulo">¿Cómo pagas el envío? 📦</h3>
+      <div id="envio-opciones" class="envio-opciones"></div>
+      <button class="compartir" data-cerrar-envio>Cancelar</button>
+    </div>
+  </div>
 
   <!-- Elegir número de WhatsApp (solo aparece si hay más de uno) -->
   <div class="elegir-wa" id="elegir-wa" hidden>
@@ -199,5 +209,5 @@
   <div class="toast" id="toast" hidden></div>
 
   <script src="cargar.js"></script>
-</body>
+<!-- Cloudflare Pages Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b4b5536f438649ada8ec60212f7ac102"}'></script><!-- Cloudflare Pages Analytics --></body>
 </html>

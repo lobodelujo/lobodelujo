@@ -1119,8 +1119,10 @@ $("#detalle").addEventListener("click", async (e) => {
 
   if (accion === "pedir") {
     const d = descripcionItem(item);
-    enviarWa(
-      `Hola ${TIENDA.nombre} 🐺 Quiero este producto:\n\n• ${item.cant}x ${actual.nombre}${d ? ` (${d})` : ""} – ${fmt(actual.precio * item.cant)}\n📸 ${linkProducto(actual)}\n\n¿Me confirman disponibilidad?`
+    pedirConEnvio(
+      `Hola ${TIENDA.nombre} 🐺 Quiero este producto:`,
+      `• ${item.cant}x ${actual.nombre}${d ? ` (${d})` : ""} – ${fmt(actual.precio * item.cant)}\n📸 ${linkProducto(actual)}`,
+      actual.precio * item.cant
     );
     return;
   }
@@ -1331,9 +1333,41 @@ $("#enviar-pedido").addEventListener("click", () => {
     const d = descripcionItem(i);
     return `• ${i.cant}x ${p.nombre}${d ? ` (${d})` : ""} – ${fmt(p.precio * i.cant)}\n📸 ${linkProducto(p)}`;
   });
-  enviarWa(
-    `Hola ${TIENDA.nombre} 🐺 Quiero hacer este pedido:\n\n${lineas.join("\n\n")}\n\nTotal: ${fmt(totalBolsa())}\n\n¿Me confirman disponibilidad?`
-  );
+  pedirConEnvio(`Hola ${TIENDA.nombre} 🐺 Quiero hacer este pedido:`, lineas.join("\n\n"), totalBolsa());
+});
+
+// ---------- Envío: antes de abrir WhatsApp el cliente elige cómo lo paga ----------
+// Valor único por pedido (da lo mismo si son 1 o 10 prendas). Se cambia en el panel: Datos de la tienda > Valor del envío
+const COSTO_ENVIO = Number(TIENDA.costoEnvio) > 0 ? Number(TIENDA.costoEnvio) : 5000;
+let pedidoPendiente = null;
+$("#bolsa-nota").textContent = `Envío ${fmt(COSTO_ENVIO)} por pedido, sin importar cuántas prendas. Lo pagas ahora o al recibir.`;
+function pedirConEnvio(saludo, detalle, subtotal) {
+  pedidoPendiente = { saludo, detalle, subtotal };
+  $("#envio-opciones").innerHTML = `
+    <button class="envio-op destacada" data-envio="ahora">
+      <b>Sumar el envío de una vez</b><span>Prendas ${fmt(subtotal)} + envío ${fmt(COSTO_ENVIO)}</span><strong>${fmt(subtotal + COSTO_ENVIO)}</strong>
+    </button>
+    <button class="envio-op" data-envio="recibir">
+      <b>Pagar solo las prendas</b><span>El envío lo pagas cuando recibes (por pagar)</span><strong>${fmt(subtotal)}</strong>
+    </button>
+    <button class="envio-op" data-envio="antofagasta">
+      <b>Estoy en Antofagasta</b><span>Delivery gratis dentro de la ciudad</span><strong>${fmt(subtotal)}</strong>
+    </button>`;
+  $("#elegir-envio").hidden = false;
+}
+$("#elegir-envio").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-envio]");
+  if (!b && !e.target.closest("[data-cerrar-envio]")) return;
+  $("#elegir-envio").hidden = true;
+  if (!b || !pedidoPendiente) return;
+  const { saludo, detalle, subtotal } = pedidoPendiente;
+  const cierre = {
+    ahora: `Prendas: ${fmt(subtotal)}\nEnvío: ${fmt(COSTO_ENVIO)}\n*Total a pagar: ${fmt(subtotal + COSTO_ENVIO)}*`,
+    recibir: `*Total prendas: ${fmt(subtotal)}*\nEnvío: lo pago al recibir (por pagar) 📦`,
+    antofagasta: `*Total: ${fmt(subtotal)}*\nEntrega: delivery en Antofagasta (gratis) 🛵`,
+  }[b.dataset.envio];
+  enviarWa(`${saludo}\n\n${detalle}\n\n${cierre}\n\n¿Me confirman disponibilidad?`);
+  pedidoPendiente = null;
 });
 
 // ---------- Avisos, teclado y links directos ----------
