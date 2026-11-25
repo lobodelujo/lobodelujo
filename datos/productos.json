@@ -3,6 +3,27 @@
     {
       "perchero": false,
       "precio": 27000,
+      "nombre": "HELLSTAR",
+      "vitrina": false,
+      "descripcion": ">material 100% algodón\n>visera curva\n>logo bordado / bordado en relieve\n>detalles botón arriba\n>ajustable / broche",
+      "fotos": [
+        "img/productos/20261125-183428-ipv-1.jpg",
+        "img/productos/20261125-183434-bac-2.jpg",
+        "img/productos/20261125-183439-nva-3.jpg",
+        "img/productos/20261125-183444-2y0-4.jpg"
+      ],
+      "colores": [
+        "NEGRA"
+      ],
+      "categoria": "Gorras",
+      "disponible": true,
+      "tallas": [
+        "Única"
+      ]
+    },
+    {
+      "perchero": false,
+      "precio": 27000,
       "nombre": "SUPPREME SUEDE VISOR CAMP",
       "vitrina": false,
       "descripcion": ">material 100% algodón\n>visera curva\n>logo bordado / bordado en relieve\n>detalles botón arriba\n>ajustable / broche",
