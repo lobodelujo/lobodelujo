@@ -2,6 +2,26 @@
   "productos": [
     {
       "perchero": false,
+      "precio": 15000,
+      "nombre": "RHUDE",
+      "vitrina": false,
+      "descripcion": ">material 100% algodón\n>visera curva\n>logo en alto relieve\n>detalles botón arriba\n>ajustable / botones",
+      "fotos": [
+        "img/productos/20261125-184514-4oy-1.jpg",
+        "img/productos/20261125-184519-1ea-2.jpg",
+        "img/productos/20261125-184524-1g8-3.jpg"
+      ],
+      "colores": [
+        "AZUL"
+      ],
+      "categoria": "Gorras",
+      "disponible": true,
+      "tallas": [
+        "Única"
+      ]
+    },
+    {
+      "perchero": false,
       "precio": 27000,
       "nombre": "HELLSTAR",
       "vitrina": false,
