@@ -723,6 +723,10 @@ img.sin-foto {
 .detalle .precio { font-size: 22px; margin-top: 0; }
 /* Código de la prenda (GO-007): chico y gris, a la derecha del precio */
 .precio-fila { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+/* Descuento por fecha (Black Friday): barra de arriba negra con letras doradas y etiqueta en la ficha */
+.aviso.aviso-descuento { background: #0b0b0c; color: var(--oro); letter-spacing: .5px; font-weight: 700; border-bottom: 1px solid rgba(250, 208, 44, .35); }
+@media (max-width: 420px) { .aviso.aviso-descuento { font-size: 12px; padding: 8px 10px; } }
+.ficha-descuento { align-self: flex-start; margin-bottom: -8px; padding: 5px 10px; border-radius: 6px; background: #c0392b; color: #fff; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; }
 .cod-prenda { flex: none; color: var(--suave); font-size: 12px; font-weight: 500; letter-spacing: 1px; opacity: .8; }
 .detalle .desc { color: var(--suave); }
 .opcion h4 { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--suave); display: flex; align-items: center; justify-content: space-between; gap: 12px; }

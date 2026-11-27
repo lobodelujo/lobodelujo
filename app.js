@@ -108,6 +108,26 @@ $("#abrir-favoritos").addEventListener("click", () => {
 // ---------- Textos de la tienda ----------
 $("#aviso-envio").textContent = TIENDA.envio;
 $("#pie-envio").textContent = TIENDA.envio;
+// Mientras hay un descuento activo, la barra amarilla de arriba lo anuncia en vez del texto de envíos
+// (si hay varios a la vez, ej. 15% gorras y 20% polerones, salen todos en la misma barra)
+(function anunciarDescuento() {
+  const activos = window.DESCUENTOS_ACTIVOS || [];
+  if (!activos.length) return;
+  const partes = activos.map((d) => {
+    const cats = (Array.isArray(d.categorias) ? d.categorias : String(d.categorias || "").split(","))
+      .map((c) => String(c).trim().toLowerCase()).filter(Boolean);
+    const unir = cats.length > 1 ? cats.slice(0, -1).join(", ") + " y " + cats[cats.length - 1] : cats[0] || "prendas seleccionadas";
+    return `${d.porcentaje}% en ${unir}`;
+  });
+  const d = activos[0];
+  const hasta = String(d.hasta || "").trim().replace("T", " ");
+  const manana = new Date(Date.now() + 864e5);
+  const soloHoy = hasta.slice(0, 10) === horaChile().slice(0, 10) || (hasta.slice(0, 10) === horaChile(manana).slice(0, 10) && hasta.slice(11, 16) === "00:00");
+  const nombre = String(d.nombre || "").trim().toUpperCase();
+  const barra = $("#aviso-envio").parentElement;
+  barra.classList.add("aviso-descuento");
+  barra.textContent = `🖤 ${nombre ? nombre + (soloHoy ? " HOY" : "") + " · " : ""}${partes.join(" · ")}${soloHoy && !nombre ? " · solo hoy" : ""}`;
+})();
 $("#hero-frase").textContent = TIENDA.frase;
 $("#hero-abajo").textContent = TIENDA.fraseAbajo || "";
 $("#hero-abajo").hidden = !TIENDA.fraseAbajo;
@@ -562,6 +582,7 @@ const conNuevo = new Set(PRODUCTOS.filter((p) => p.etiqueta === "Nuevo").slice(0
 
 function badge(p) {
   if (!p.disponible) return `<span class="badge gris">Agotado</span>`;
+  if (p.descuento) return `<span class="badge rojo">-${p.descuento.porcentaje}%</span>`;
   if (!p.etiqueta || (p.etiqueta === "Nuevo" && !conNuevo.has(p.id))) return "";
   const clase = p.etiqueta === "Oferta" ? "rojo" : "";
   return `<span class="badge ${clase}">${esc(p.etiqueta)}</span>`;
@@ -1068,6 +1089,7 @@ function pintarDetalle() {
   $("#detalle").innerHTML = `
     <div class="cat-fila"><p class="cat">${esc(p.categoria)}</p>${botonFavorito(p, "fav-ficha")}</div>
     <h2 id="m-nombre">${esc(p.nombre)}</h2>
+    ${p.descuento ? `<p class="ficha-descuento">-${p.descuento.porcentaje}%${p.descuento.nombre ? " · " + esc(p.descuento.nombre.toUpperCase()) : ""}</p>` : ""}
     <div class="precio-fila"><p class="precio">${precioHtml(p)}</p>${p.codigo ? `<span class="cod-prenda">Cód. ${esc(p.codigo)}</span>` : ""}</div>
     ${descripcionHtml(p.descripcion)}
     ${p.tallas.length ? grupoOpciones("Talla", "talla", p.tallas, botonMedidas(p)) : fotosMedidas(p).length ? `<div class="opcion">${botonMedidas(p)}</div>` : ""}

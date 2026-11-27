@@ -56,6 +56,52 @@ const unico = (usados, base) => {
   return s;
 };
 
+// Descuentos por fecha (Black Friday, etc.): "⚙️ Datos de la tienda > Descuentos" en el panel (datos/tienda.json).
+// Cada uno tiene categorías, porcentaje y desde/hasta en hora de Chile ("2026-11-27 00:00"; "hasta" no se incluye).
+// Solo cambia el precio que se ve: el de antes queda tachado. No toca productos.json, así que al terminar
+// todo vuelve solo a los precios normales. functions/orden.js usa la misma regla para revisar las órdenes.
+const horaChile = (d = new Date()) =>
+  new Intl.DateTimeFormat("sv-SE", { timeZone: "America/Santiago", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
+    .format(d).replace("T", " ");
+const fechaDesc = (s) => String(s || "").trim().replace("T", " ").slice(0, 16);
+function descuentosActivos(ahora = horaChile()) {
+  return (window.TIENDA.descuentos || []).filter((d) => {
+    const pct = Number(d && d.porcentaje);
+    return pct > 0 && pct < 100 && fechaDesc(d.desde) <= ahora && ahora < fechaDesc(d.hasta);
+  });
+}
+function aplicarDescuentos() {
+  const activos = descuentosActivos();
+  window.DESCUENTOS_ACTIVOS = activos;
+  for (const p of window.PRODUCTOS) {
+    const d = activos.find((x) => lista(x.categorias).some((c) => c.toLowerCase() === p.categoria.toLowerCase()));
+    if (!d || !p.precio) continue;
+    const pct = Number(d.porcentaje);
+    p.precioAntes = Math.max(p.precioAntes || 0, p.precio);
+    p.precio = Math.round((p.precio * (100 - pct)) / 100 / 10) * 10;
+    p.descuento = { porcentaje: pct, nombre: String(d.nombre || "").trim() };
+  }
+  // Cuando un descuento empieza o termina, la página se recarga sola (o apenas el cliente vuelve a ella)
+  const ahora = Date.now();
+  const cambios = (window.TIENDA.descuentos || []).flatMap((d) => [d.desde, d.hasta]).map((s) => {
+    const f = fechaDesc(s);
+    if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(f)) return 0;
+    // Hora de Chile -> momento exacto (se prueba con -3 y -4 h, según horario de verano o invierno)
+    for (const off of ["-03:00", "-04:00"]) {
+      const t = Date.parse(f.replace(" ", "T") + ":00" + off);
+      if (horaChile(new Date(t)) === f) return t;
+    }
+    return 0;
+  }).filter((t) => t > ahora && t - ahora < 2 * 864e5);
+  if (cambios.length) {
+    const espera = Math.min(...cambios) - ahora + 1500;
+    setTimeout(() => {
+      if (!document.hidden) location.reload();
+      else document.addEventListener("visibilitychange", () => location.reload(), { once: true });
+    }, espera);
+  }
+}
+
 (async () => {
   try {
     const leer = (url) => fetch(url, { cache: "no-store" }).then((r) => {
@@ -109,6 +155,7 @@ const unico = (usados, base) => {
           fotos: lista(p.fotos),
         };
       });
+    aplicarDescuentos();
   } catch (e) {
     console.error(e);
     document.getElementById("editorial").innerHTML =
