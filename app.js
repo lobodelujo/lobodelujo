@@ -113,11 +113,22 @@ $("#pie-envio").textContent = TIENDA.envio;
 (function anunciarDescuento() {
   const activos = window.DESCUENTOS_ACTIVOS || [];
   if (!activos.length) return;
-  const partes = activos.map((d) => {
-    const cats = (Array.isArray(d.categorias) ? d.categorias : String(d.categorias || "").split(","))
-      .map((c) => String(c).trim().toLowerCase()).filter(Boolean);
-    const unir = cats.length > 1 ? cats.slice(0, -1).join(", ") + " y " + cats[cats.length - 1] : cats[0] || "prendas seleccionadas";
-    return `${d.porcentaje}% en ${unir}`;
+  // Se agrupa por porcentaje: "15% en gorras y accesorios · 20% en polerones y poleras seleccionadas"
+  const porPct = new Map();
+  for (const d of activos) {
+    if (!d._cats || !d._cats.size) continue; // descuento sin prendas que calcen
+    const m = porPct.get(d.porcentaje) || new Map();
+    for (const [cat, entera] of d._cats) m.set(cat, m.get(cat) || entera);
+    porPct.set(d.porcentaje, m);
+  }
+  if (!porPct.size) return;
+  const orden = (TIENDA.categorias || []).map((c) => String(c).toLowerCase());
+  const partes = [...porPct.entries()].sort((a, b) => a[0] - b[0]).map(([pct, m]) => {
+    const cats = [...m.entries()]
+      .sort((a, b) => (b[1] - a[1]) || (orden.indexOf(a[0].toLowerCase()) - orden.indexOf(b[0].toLowerCase())))
+      .map(([cat, entera]) => cat.toLowerCase() + (entera ? "" : " seleccionadas"));
+    const unir = cats.length > 1 ? cats.slice(0, -1).join(", ") + " y " + cats[cats.length - 1] : cats[0];
+    return `${pct}% en ${unir}`;
   });
   const d = activos[0];
   const hasta = String(d.hasta || "").trim().replace("T", " ");

@@ -73,13 +73,20 @@ function descuentosActivos(ahora = horaChile()) {
 function aplicarDescuentos() {
   const activos = descuentosActivos();
   window.DESCUENTOS_ACTIVOS = activos;
+  // Un descuento vale para sus categorías completas y/o para prendas sueltas por su código (PL-014)
+  const aplica = (x, p) =>
+    lista(x.categorias).some((c) => c.toLowerCase() === p.categoria.toLowerCase()) ||
+    (!!p.codigo && lista(x.codigos).some((c) => c.toUpperCase() === p.codigo));
   for (const p of window.PRODUCTOS) {
-    const d = activos.find((x) => lista(x.categorias).some((c) => c.toLowerCase() === p.categoria.toLowerCase()));
+    // Si una prenda calza con dos descuentos, gana el mayor
+    const d = activos.filter((x) => aplica(x, p)).sort((a, b) => b.porcentaje - a.porcentaje)[0];
     if (!d || !p.precio) continue;
     const pct = Number(d.porcentaje);
     p.precioAntes = Math.max(p.precioAntes || 0, p.precio);
     p.precio = Math.round((p.precio * (100 - pct)) / 100 / 10) * 10;
     p.descuento = { porcentaje: pct, nombre: String(d.nombre || "").trim() };
+    // Para la barra de arriba: en qué categorías cayó cada descuento y si fue la categoría entera o algunas prendas
+    (d._cats = d._cats || new Map()).set(p.categoria, d._cats.get(p.categoria) || lista(d.categorias).some((c) => c.toLowerCase() === p.categoria.toLowerCase()));
   }
   // Cuando un descuento empieza o termina, la página se recarga sola (o apenas el cliente vuelve a ella)
   const ahora = Date.now();
