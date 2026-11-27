@@ -89,5 +89,26 @@
   ],
   "portadaTitulo": "Disponible ya",
   "portadaSubtitulo": "Nueva colección",
-  "fraseAbajo": "primero que todo"
+  "fraseAbajo": "primero que todo",
+  "descuentos": [
+    {
+      "nombre": "Black Friday",
+      "porcentaje": 15,
+      "categorias": [
+        "Gorras",
+        "Accesorios"
+      ],
+      "desde": "2026-11-27 00:00",
+      "hasta": "2026-11-28 00:00"
+    },
+    {
+      "nombre": "Black Friday",
+      "porcentaje": 20,
+      "categorias": [
+        "Polerones"
+      ],
+      "desde": "2026-11-27 00:00",
+      "hasta": "2026-11-28 00:00"
+    }
+  ]
 }
