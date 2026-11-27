@@ -72,15 +72,17 @@ const horaChile = (d) =>
   new Intl.DateTimeFormat("sv-SE", { timeZone: "America/Santiago", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
     .format(d).replace("T", " ");
 const fechaDesc = (s) => String(s || "").trim().replace("T", " ").slice(0, 16);
-function precioEnFecha(x, descuentos, fechaMs) {
+function precioEnFecha(x, descuentos, fechaMs, cods) {
   const base = Math.round(Number(x.precio) || 0);
   if (!fechaMs || !base) return base;
   const h = horaChile(new Date(fechaMs));
-  const d = descuentos.find((d) => {
+  const cod = codigoDe(cods, x.fotos);
+  const d = descuentos.filter((d) => {
     const pct = Number(d && d.porcentaje);
     return pct > 0 && pct < 100 && fechaDesc(d.desde) <= h && h < fechaDesc(d.hasta) &&
-      lista(d.categorias).some((c) => c.toLowerCase() === String(x.categoria || "").toLowerCase());
-  });
+      (lista(d.categorias).some((c) => c.toLowerCase() === String(x.categoria || "").toLowerCase()) ||
+        (!!cod && lista(d.codigos).some((c) => c.toUpperCase() === cod)));
+  }).sort((a, b) => Number(b.porcentaje) - Number(a.porcentaje))[0];
   return d ? Math.round((base * (100 - Number(d.porcentaje))) / 100 / 10) * 10 : base;
 }
 const codigoDe = (cods, fotos) => lista(fotos).map((f) => cods[String(f).replace(/^\//, "")]).find(Boolean) || "";
@@ -156,7 +158,7 @@ export async function pintarOrden(d, { origin, env, codigo = "" }) {
     const hoy = catalogo.get(i.id);
     let aviso = "";
     if (!hoy) aviso = "Esta prenda ya no está en el catálogo";
-    else if (precioEnFecha(hoy, descuentos, orden.fecha) !== i.precio) aviso = `Precio en el catálogo: ${precio(precioEnFecha(hoy, descuentos, orden.fecha))}`;
+    else if (precioEnFecha(hoy, descuentos, orden.fecha, cods) !== i.precio) aviso = `Precio en el catálogo: ${precio(precioEnFecha(hoy, descuentos, orden.fecha, cods))}`;
     const detalles = [i.talla && `TALLA ${i.talla}`, i.color && `Color ${i.color.toLowerCase()}`].filter(Boolean);
     // El código de la orden manda; si no trae (orden de antes), se busca por las fotos de la prenda
     const cod = i.codigo || (hoy ? codigoDe(cods, hoy.fotos) : "") || cods[String(i.foto).replace(/^\//, "")] || "";
