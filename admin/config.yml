@@ -132,6 +132,23 @@ collections:
           - { name: categorias, label: "Orden de las categorías (separadas por coma)", widget: list }
           - { name: fichaInfo, label: "📦 Línea corta de envío y cambios en cada ficha (separa cada dato con ·)", widget: string, required: false }
           - { name: costoEnvio, label: "💲 Valor del envío por pedido (se suma en el carrito si el cliente elige pagarlo de una vez)", widget: number, value_type: int, min: 0, required: false }
+          - name: descuentos
+            label: "🏷️ Descuentos por fecha (empiezan y terminan solos)"
+            label_singular: descuento
+            widget: list
+            required: false
+            collapsed: true
+            summary: "{{fields.nombre}} · {{fields.porcentaje}}% · {{fields.desde}} → {{fields.hasta}}"
+            fields:
+              - { name: nombre, label: "Nombre (sale en la barra de arriba, ej: Black Friday)", widget: string, required: false }
+              - { name: porcentaje, label: "Porcentaje de descuento (solo el número, ej: 15)", widget: number, value_type: int, min: 1, max: 90 }
+              - name: categorias
+                label: Categorías con descuento
+                widget: select
+                multiple: true
+                options: [Poleras, Gorras, Accesorios, Shorts, Lentes, Pantalones, Polerones]
+              - { name: desde, label: "Empieza (hora de Chile, así: 2026-11-27 00:00)", widget: string, pattern: ['^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$', "Escríbelo así: 2026-11-27 00:00"] }
+              - { name: hasta, label: "Termina (hora de Chile, así: 2026-11-28 00:00 = termina el viernes a medianoche)", widget: string, pattern: ['^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$', "Escríbelo así: 2026-11-28 00:00"] }
           - name: preguntas
             label: "❓ Preguntas frecuentes (salen al final de la página, antes del pie)"
             label_singular: pregunta
