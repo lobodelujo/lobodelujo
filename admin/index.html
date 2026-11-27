@@ -175,6 +175,8 @@
   <style>
     .lobo-mini { display: inline-block; width: 56px; height: 70px; margin-right: 12px; border-radius: 6px;
       object-fit: cover; vertical-align: middle; background: #e8e6e1; }
+    .lobo-cod { display: inline-block; margin-right: 10px; padding: 3px 8px; border-radius: 6px; background: #0b0b0c; color: #fad02c;
+      font: 700 12px system-ui, sans-serif; letter-spacing: 1px; vertical-align: middle; }
   </style>
   <script>
     (function () {
@@ -215,8 +217,36 @@
             if (src) mini.src = src;
             else mini.removeAttribute("src");
           }
+          // Todas las fotos de la prenda, para encontrar su código (GO-007)
+          mini.dataset.fotos = (m[1].match(/[^"\[\],\s]+\.(?:jpe?g|png|webp|gif)/gi) || []).join("|");
+        });
+        ponerCodigos();
+      };
+      // Código de cada prenda al lado de su foto. datos/codigos.json lo escribe el robot de GitHub
+      // (.github/codigos.cjs) 1 o 2 minutos después de publicar; se vuelve a leer cada minuto.
+      var codigos = {};
+      var leerCodigos = function () {
+        fetch("/datos/codigos.json?t=" + Date.now(), { cache: "no-store" })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) { if (d && d.codigos) { codigos = d.codigos; ponerCodigos(); } })
+          .catch(function () {});
+      };
+      var ponerCodigos = function () {
+        Array.prototype.forEach.call(document.querySelectorAll("img.lobo-mini[data-fotos]"), function (mini) {
+          var cod = "";
+          mini.dataset.fotos.split("|").some(function (f) { cod = codigos[f.replace(/^\//, "")] || ""; return cod; });
+          var et = mini.nextSibling && mini.nextSibling.className === "lobo-cod" ? mini.nextSibling : null;
+          if (!cod) { if (et) et.parentNode.removeChild(et); return; }
+          if (!et) {
+            et = document.createElement("span");
+            et.className = "lobo-cod";
+            mini.parentNode.insertBefore(et, mini.nextSibling);
+          }
+          if (et.textContent !== cod + " ") et.textContent = cod + " ";
         });
       };
+      leerCodigos();
+      setInterval(leerCodigos, 60000);
       var pendiente = false;
       new MutationObserver(function () {
         if (pendiente) return;
