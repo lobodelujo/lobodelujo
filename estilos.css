@@ -721,6 +721,9 @@ img.sin-foto {
 .detalle .cat { color: var(--oro); text-transform: uppercase; letter-spacing: 2px; font-size: 12px; font-weight: 600; }
 .detalle h2 { font-family: var(--titulo); font-size: 40px; line-height: 1; letter-spacing: 1px; font-weight: 400; }
 .detalle .precio { font-size: 22px; margin-top: 0; }
+/* Código de la prenda (GO-007): chico y gris, a la derecha del precio */
+.precio-fila { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.cod-prenda { flex: none; color: var(--suave); font-size: 12px; font-weight: 500; letter-spacing: 1px; opacity: .8; }
 .detalle .desc { color: var(--suave); }
 .opcion h4 { font-size: 13px; font-weight: 600; margin-bottom: 8px; color: var(--suave); display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .opcion h4 b { color: var(--texto); }

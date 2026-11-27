@@ -62,12 +62,16 @@ const unico = (usados, base) => {
       if (!r.ok) throw new Error(`${url}: ${r.status}`);
       return r.json();
     });
-    const [tienda, datos, minis] = await Promise.all([
+    const [tienda, datos, minis, cods] = await Promise.all([
       leer("datos/tienda.json"),
       leer("datos/productos.json"),
       leer("datos/minis.json").catch(() => null), // si todavía no existe, se usan las fotos originales
+      leer("datos/codigos.json").catch(() => null), // código de cada prenda (lo pone el robot, .github/codigos.cjs)
     ]);
     if (minis) { MINIS = new Set(minis.m || []); GRANDES = new Set(minis.g || []); }
+    const CODIGOS = (cods && cods.codigos) || {};
+    // Prenda recién subida: no tiene código hasta que el robot termina (1 o 2 minutos) y en la ficha no sale nada
+    const codigoDe = (p) => lista(p.fotos).map((f) => CODIGOS[f.replace(/^\//, "")]).find(Boolean) || "";
 
     window.TIENDA = { ...tienda, whatsapp: (tienda.whatsapp || []).filter((n) => n && n.numero) };
     const crudos = (datos.productos || []).filter((p) => p && p.nombre);
@@ -81,6 +85,7 @@ const unico = (usados, base) => {
           id: unico(usados, veces[base] > 1 ? [base, codigoFoto(p)].filter(Boolean).join("-") : base),
           idViejo: unico(viejos, base),
           nombre: p.nombre,
+          codigo: codigoDe(p),
           categoria: p.categoria || "Otros",
           precio: Number(p.precio) || 0,
           precioAntes: Number(p.precioAntes) > 0 ? Number(p.precioAntes) : null,

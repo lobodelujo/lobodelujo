@@ -1068,7 +1068,7 @@ function pintarDetalle() {
   $("#detalle").innerHTML = `
     <div class="cat-fila"><p class="cat">${esc(p.categoria)}</p>${botonFavorito(p, "fav-ficha")}</div>
     <h2 id="m-nombre">${esc(p.nombre)}</h2>
-    <p class="precio">${precioHtml(p)}</p>
+    <div class="precio-fila"><p class="precio">${precioHtml(p)}</p>${p.codigo ? `<span class="cod-prenda">Cód. ${esc(p.codigo)}</span>` : ""}</div>
     ${descripcionHtml(p.descripcion)}
     ${p.tallas.length ? grupoOpciones("Talla", "talla", p.tallas, botonMedidas(p)) : fotosMedidas(p).length ? `<div class="opcion">${botonMedidas(p)}</div>` : ""}
     ${grupoOpciones("Color", "color", p.colores)}
@@ -1362,7 +1362,7 @@ function linkOrden(items, envio) {
     k: COSTO_ENVIO,
     i: items.map((i) => {
       const p = buscarProducto(i.id);
-      return [p.id, p.nombre, p.categoria || "", i.talla || "", i.color || "", i.cant, p.precio, (p.fotos || [])[0] || ""];
+      return [p.id, p.nombre, p.categoria || "", i.talla || "", i.color || "", i.cant, p.precio, (p.fotos || [])[0] || "", p.codigo || ""];
     }),
   };
   const bytes = new TextEncoder().encode(JSON.stringify(datos));
