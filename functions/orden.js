@@ -49,9 +49,19 @@ export function leerOrden(d) {
       cant: Math.min(99, Math.max(1, Math.round(Number(x[5]) || 1))),
       precio: Math.max(0, Math.round(Number(x[6]) || 0)),
       foto: String(x[7] || ""),
+      codigo: String(x[8] || "").slice(0, 12), // las órdenes de antes no lo traen
     })),
   };
 }
+
+// Código de cada prenda (GO-007…), por sus fotos: datos/codigos.json lo escribe el robot (.github/codigos.cjs)
+async function codigosPorFoto(env, origin) {
+  try {
+    const r = await env.ASSETS.fetch(new URL("/datos/codigos.json", origin));
+    return (await r.json()).codigos || {};
+  } catch { return {}; }
+}
+const codigoDe = (cods, fotos) => lista(fotos).map((f) => cods[String(f).replace(/^\//, "")]).find(Boolean) || "";
 
 // Prendas del catálogo de hoy, por su link, para avisar si el precio cambió o si ya no está
 async function catalogoPorId(env, origin) {
@@ -106,7 +116,7 @@ export async function pintarOrden(d, { origin, env, codigo = "" }) {
   try { orden = leerOrden(d); }
   catch { return paginaAviso("Este link de orden no es válido o está incompleto."); }
 
-  const catalogo = await catalogoPorId(env, origin);
+  const [catalogo, cods] = await Promise.all([catalogoPorId(env, origin), codigosPorFoto(env, origin)]);
   const subtotal = orden.items.reduce((t, i) => t + i.precio * i.cant, 0);
   const total = subtotal + (orden.envio === "a" ? orden.costoEnvio : 0);
   const unidades = orden.items.reduce((t, i) => t + i.cant, 0);
@@ -126,10 +136,13 @@ export async function pintarOrden(d, { origin, env, codigo = "" }) {
     if (!hoy) aviso = "Esta prenda ya no está en el catálogo";
     else if (Math.round(Number(hoy.precio) || 0) !== i.precio) aviso = `Precio actual en el catálogo: ${precio(hoy.precio)}`;
     const detalles = [i.talla && `TALLA ${i.talla}`, i.color && `Color ${i.color.toLowerCase()}`].filter(Boolean);
+    // El código de la orden manda; si no trae (orden de antes), se busca por las fotos de la prenda
+    const cod = i.codigo || (hoy ? codigoDe(cods, hoy.fotos) : "") || cods[String(i.foto).replace(/^\//, "")] || "";
     return `<div class="prenda">
       <div class="foto-col">
         <div class="foto"><img src="${esc(fotoUrl(i.foto, origin))}" alt="${esc(i.nombre)}" loading="lazy"></div>
         <div class="marca">${esc(i.nombre)}</div>
+        ${cod ? `<div class="cod">Cód. ${esc(cod)}</div>` : ""}
       </div>
       <div class="info">
         <ul>${detalles.map((t) => `<li>${esc(t)}</li>`).join("")}${i.cant > 1 ? `<li>${i.cant} unidades</li>` : ""}</ul>
@@ -174,6 +187,7 @@ export async function pintarOrden(d, { origin, env, codigo = "" }) {
   .foto { background: #e9e9eb; aspect-ratio: 9 / 10; display: grid; place-items: center; overflow: hidden; }
   .foto img { width: 100%; height: 100%; object-fit: contain; }
   .marca { border: 1.5px solid #d6d2c8; padding: 8px 6px; text-align: center; font-weight: 800; font-size: clamp(14px, 4.4vw, 22px); text-transform: uppercase; line-height: 1.15; word-break: break-word; }
+  .cod { margin-top: 6px; text-align: center; font-weight: 800; font-size: clamp(13px, 3.8vw, 17px); letter-spacing: 1.5px; color: #8a5a10; }
   .info ul { list-style: none; display: grid; gap: 6px; }
   .info li { font-weight: 700; font-size: clamp(16px, 4.8vw, 24px); position: relative; padding-left: 20px; }
   .info li::before { content: ""; position: absolute; left: 2px; top: .55em; width: 9px; height: 9px; border-radius: 50%; background: #111; }
