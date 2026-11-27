@@ -61,6 +61,28 @@ async function codigosPorFoto(env, origin) {
     return (await r.json()).codigos || {};
   } catch { return {}; }
 }
+// Descuentos por fecha (Black Friday…), igual que cargar.js: el precio esperado es el que había cuando se hizo la orden
+async function leerDescuentos(env, origin) {
+  try {
+    const r = await env.ASSETS.fetch(new URL("/datos/tienda.json", origin));
+    return (await r.json()).descuentos || [];
+  } catch { return []; }
+}
+const horaChile = (d) =>
+  new Intl.DateTimeFormat("sv-SE", { timeZone: "America/Santiago", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
+    .format(d).replace("T", " ");
+const fechaDesc = (s) => String(s || "").trim().replace("T", " ").slice(0, 16);
+function precioEnFecha(x, descuentos, fechaMs) {
+  const base = Math.round(Number(x.precio) || 0);
+  if (!fechaMs || !base) return base;
+  const h = horaChile(new Date(fechaMs));
+  const d = descuentos.find((d) => {
+    const pct = Number(d && d.porcentaje);
+    return pct > 0 && pct < 100 && fechaDesc(d.desde) <= h && h < fechaDesc(d.hasta) &&
+      lista(d.categorias).some((c) => c.toLowerCase() === String(x.categoria || "").toLowerCase());
+  });
+  return d ? Math.round((base * (100 - Number(d.porcentaje))) / 100 / 10) * 10 : base;
+}
 const codigoDe = (cods, fotos) => lista(fotos).map((f) => cods[String(f).replace(/^\//, "")]).find(Boolean) || "";
 
 // Prendas del catálogo de hoy, por su link, para avisar si el precio cambió o si ya no está
@@ -116,7 +138,7 @@ export async function pintarOrden(d, { origin, env, codigo = "" }) {
   try { orden = leerOrden(d); }
   catch { return paginaAviso("Este link de orden no es válido o está incompleto."); }
 
-  const [catalogo, cods] = await Promise.all([catalogoPorId(env, origin), codigosPorFoto(env, origin)]);
+  const [catalogo, cods, descuentos] = await Promise.all([catalogoPorId(env, origin), codigosPorFoto(env, origin), leerDescuentos(env, origin)]);
   const subtotal = orden.items.reduce((t, i) => t + i.precio * i.cant, 0);
   const total = subtotal + (orden.envio === "a" ? orden.costoEnvio : 0);
   const unidades = orden.items.reduce((t, i) => t + i.cant, 0);
@@ -134,7 +156,7 @@ export async function pintarOrden(d, { origin, env, codigo = "" }) {
     const hoy = catalogo.get(i.id);
     let aviso = "";
     if (!hoy) aviso = "Esta prenda ya no está en el catálogo";
-    else if (Math.round(Number(hoy.precio) || 0) !== i.precio) aviso = `Precio actual en el catálogo: ${precio(hoy.precio)}`;
+    else if (precioEnFecha(hoy, descuentos, orden.fecha) !== i.precio) aviso = `Precio en el catálogo: ${precio(precioEnFecha(hoy, descuentos, orden.fecha))}`;
     const detalles = [i.talla && `TALLA ${i.talla}`, i.color && `Color ${i.color.toLowerCase()}`].filter(Boolean);
     // El código de la orden manda; si no trae (orden de antes), se busca por las fotos de la prenda
     const cod = i.codigo || (hoy ? codigoDe(cods, hoy.fotos) : "") || cods[String(i.foto).replace(/^\//, "")] || "";
